@@ -9,7 +9,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/u3t-client" />
-            <option value="$PROJECT_DIR$/u3t-core" />
+            <option value="$PROJECT_DIR$/u3t-net-core" />
             <option value="$PROJECT_DIR$/u3t-server" />
           </set>
         </option>

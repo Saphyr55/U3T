@@ -10,19 +10,20 @@ public class Main {
 
 
     public static void main(String[] args) {
+
         ApplicationConfiguration configuration = ApplicationConfiguration.ofProperties();
         Application application = Application.ofServer(configuration);
 
         application.handler(Main::treatment);
 
-        ApplicationLauncher.ofApplication(application).launch();
+        application.start();
     }
 
     static void treatment(Client client) {
-        try {
+        try (var in = client.reader(); var out = client.writer()) {
             String inputLine;
-            while ((inputLine = client.reader().readLine()) != null) {
-                client.writer().println(inputLine);
+            while ((inputLine = in.readLine()) != null) {
+                out.println(inputLine);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
