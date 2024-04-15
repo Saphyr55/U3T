@@ -5,7 +5,6 @@ import utours.ultimate.core.*;
 import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class NetServerApplication implements Application {
 
@@ -17,11 +16,11 @@ public class NetServerApplication implements Application {
     public NetServerApplication(ApplicationConfiguration configuration) throws IOException {
         this.configuration = configuration;
         this.handlers = new LinkedList<>();
-        this.server = new NetServerSocketImpl(configuration);
+        this.server = new NetServerSocket(configuration);
     }
 
     @Override
-    public CompletableFuture<Void> start() {
+    public void start() {
         while (!stopped) {
             handlers.forEach(clientHandler -> {
                 Thread.ofPlatform().start(() -> {

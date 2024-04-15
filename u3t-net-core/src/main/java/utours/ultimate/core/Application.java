@@ -14,7 +14,7 @@ public interface Application {
         }
     }
 
-    CompletableFuture<Void> start();
+    void start();
 
     void stop();
 

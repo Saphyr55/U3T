@@ -5,11 +5,11 @@ import utours.ultimate.core.*;
 import java.io.*;
 import java.net.ServerSocket;
 
-public class NetServerSocketImpl implements NetServer {
+public class NetServerSocket implements NetServer {
 
     private final ServerSocket serverSocket;
 
-    public NetServerSocketImpl(ApplicationConfiguration configuration) {
+    public NetServerSocket(ApplicationConfiguration configuration) {
         this.serverSocket = createServerSocket(configuration);
     }
 

@@ -1,10 +1,6 @@
-package utours.ultimate;
+package utours.ultimate.core;
 
 import org.junit.jupiter.api.*;
-import utours.ultimate.core.Application;
-import utours.ultimate.core.ApplicationConfiguration;
-import utours.ultimate.core.ApplicationLauncher;
-import utours.ultimate.core.Client;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,10 +19,11 @@ public class ClientSideTest {
     }
 
     static void treatment(Client client) {
-        try (var in = client.reader(); var out = client.writer()) {
+        try (var in = client.reader(); var out = client.output()) {
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
-                out.println(inputLine);
+                out.writeObject(inputLine);
+                out.flush();
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -64,7 +61,7 @@ public class ClientSideTest {
     }
 
     @AfterAll
-    public static void stop() {
+    public static void tearDown() {
         // application.stop();
     }
 

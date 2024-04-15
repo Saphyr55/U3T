@@ -2,7 +2,6 @@ package utours.ultimate;
 
 import utours.ultimate.core.Application;
 import utours.ultimate.core.ApplicationConfiguration;
-import utours.ultimate.core.ApplicationLauncher;
 import utours.ultimate.core.Client;
 
 
@@ -17,13 +16,15 @@ public class Main {
         application.handler(Main::treatment);
 
         application.start();
+
     }
 
     static void treatment(Client client) {
-        try (var in = client.reader(); var out = client.writer()) {
+        try (var in = client.reader(); var out = client.output()) {
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
-                out.println(inputLine);
+                out.writeObject(inputLine);
+                out.flush();
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

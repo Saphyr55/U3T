@@ -1,12 +1,8 @@
 package utours.ultimate.core.base;
 
 import utours.ultimate.core.Client;
-import utours.ultimate.core.Handler;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 
 public class ClientSocket implements Client {
@@ -15,12 +11,12 @@ public class ClientSocket implements Client {
     private static final boolean IS_FLUSH = true;
 
     private final Socket clientSocket;
-    private final PrintWriter out;
+    private final ObjectOutputStream out;
     private final BufferedReader in;
 
     public ClientSocket(Socket clientSocket) throws IOException {
         this.clientSocket = clientSocket;
-        this.out = new PrintWriter(clientSocket.getOutputStream(), IS_FLUSH);
+        this.out = new ObjectOutputStream(clientSocket.getOutputStream());
         this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
     }
 
@@ -29,9 +25,10 @@ public class ClientSocket implements Client {
     }
 
     @Override
-    public String sendMessage(String message) {
+    public String sendMessage(Object message) {
         try {
-            out.println(message);
+            out.writeObject(message);
+            out.flush();
             return in.readLine();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -60,7 +57,7 @@ public class ClientSocket implements Client {
     }
 
     @Override
-    public PrintWriter writer() {
+    public ObjectOutputStream output() {
         return out;
     }
 
