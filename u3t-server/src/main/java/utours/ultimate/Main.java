@@ -10,10 +10,7 @@ public class Main {
 
 
     public static void main(String[] args) {
-
-        ApplicationConfiguration configuration =
-                ApplicationConfiguration.of("127.0.0.1", 6666);
-
+        ApplicationConfiguration configuration = ApplicationConfiguration.ofProperties();
         Application application = Application.ofServer(configuration);
 
         application.handler(Main::treatment);
@@ -25,10 +22,6 @@ public class Main {
         try {
             String inputLine;
             while ((inputLine = client.reader().readLine()) != null) {
-                if (".".equals(inputLine)) {
-                    client.writer().println("bye");
-                    break;
-                }
                 client.writer().println(inputLine);
             }
         } catch (Exception e) {

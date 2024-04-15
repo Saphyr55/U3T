@@ -4,32 +4,47 @@ import utours.ultimate.core.ApplicationConfiguration;
 import utours.ultimate.core.common.ClassPathResource;
 
 import java.io.*;
-import java.net.URL;
-import java.util.stream.Collectors;
+import java.util.Properties;
 
 public class ApplicationConfigFileProperties implements ApplicationConfiguration {
 
+    public static final String KEY_SERVER_HOST_ADDRESS = "server.host-address";
+    public static final String VALUE_SERVER_HOST_ADDRESS = "127.0.0.1";
+
+    public static final String KEY_SERVER_PORT = "server.port";
+    public static final int VALUE_SERVER_PORT = 6667;
+
     public static final String PROPERTIES_FILENAME = "application.properties";
 
-    private final String content;
+    private final Properties properties;
+    private final String address;
+    private final int port;
+
+    public ApplicationConfigFileProperties(String filepath) {
+        this.properties = getAndLoadProperties(filepath);
+        this.address = (String) properties.getOrDefault(KEY_SERVER_HOST_ADDRESS, VALUE_SERVER_HOST_ADDRESS);
+        this.port = Integer.parseInt((String) properties.getOrDefault(KEY_SERVER_PORT, VALUE_SERVER_PORT));
+    }
 
     public ApplicationConfigFileProperties() {
-        this.content = readPropertiesFile();
+        this(PROPERTIES_FILENAME);
     }
 
     @Override
     public String address() {
-        return "";
+        return address;
     }
 
     @Override
     public int port() {
-        return 0;
+        return port;
     }
 
-    private String readPropertiesFile() {
+    private Properties getAndLoadProperties(String filepath) {
         try {
-            return ClassPathResource.readAllLines(PROPERTIES_FILENAME);
+            var properties = new Properties();
+            properties.load(ClassPathResource.getResourceAsStream(filepath));
+            return properties;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

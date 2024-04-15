@@ -11,13 +11,16 @@ import java.net.Socket;
 
 public class ClientSocket implements Client {
 
+    // Must always be true.
+    private static final boolean IS_FLUSH = true;
+
     private final Socket clientSocket;
     private final PrintWriter out;
     private final BufferedReader in;
 
     public ClientSocket(Socket clientSocket) throws IOException {
         this.clientSocket = clientSocket;
-        this.out = new PrintWriter(clientSocket.getOutputStream(), true);
+        this.out = new PrintWriter(clientSocket.getOutputStream(), IS_FLUSH);
         this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
     }
 
