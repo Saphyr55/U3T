@@ -1,0 +1,5 @@
+rootProject.name = 'U3T'
+include 'u3t-core'
+include 'u3t-server'
+include 'u3t-client'
+

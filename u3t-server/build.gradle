@@ -1,0 +1,27 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'utours.ultimate'
+version = 'unspecified'
+
+application {
+    mainClass = group + '.Main'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    implementation project(':u3t-core')
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}

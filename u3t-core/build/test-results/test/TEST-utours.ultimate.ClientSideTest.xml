@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="utours.ultimate.ClientSideTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2024-04-15T11:59:33" hostname="ANDY" time="0.065">
+  <properties/>
+  <testcase name="check_if_server_respond_correctly()" classname="utours.ultimate.ClientSideTest" time="0.049"/>
+  <testcase name="check_multiple_client()" classname="utours.ultimate.ClientSideTest" time="0.005"/>
+  <testcase name="check_if_port_and_address_are_equal()" classname="utours.ultimate.ClientSideTest" time="0.004"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
