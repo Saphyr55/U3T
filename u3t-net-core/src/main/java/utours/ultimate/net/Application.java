@@ -1,8 +1,6 @@
-package utours.ultimate.core;
+package utours.ultimate.net;
 
-import utours.ultimate.core.base.NetServerApplication;
-
-import java.util.concurrent.CompletableFuture;
+import utours.ultimate.net.internal.NetServerApplication;
 
 public interface Application {
 

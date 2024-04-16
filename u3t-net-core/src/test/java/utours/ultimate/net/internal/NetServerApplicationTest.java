@@ -1,9 +1,9 @@
-package utours.ultimate.core.base;
+package utours.ultimate.net.internal;
 
 import org.junit.jupiter.api.BeforeAll;
-import utours.ultimate.core.Application;
-import utours.ultimate.core.ApplicationConfiguration;
-import utours.ultimate.core.Context;
+import utours.ultimate.net.Application;
+import utours.ultimate.net.ApplicationConfiguration;
+import utours.ultimate.net.Context;
 
 import java.io.IOException;
 

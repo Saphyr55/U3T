@@ -1,4 +1,4 @@
-package utours.ultimate.core.common;
+package utours.ultimate.net.common;
 
 import org.junit.jupiter.api.Test;
 

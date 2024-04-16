@@ -1,7 +1,7 @@
-package utours.ultimate.core;
+package utours.ultimate.net;
 
-import utours.ultimate.core.base.ApplicationConfigFileProperties;
-import utours.ultimate.core.data.ApplicationConfigurationData;
+import utours.ultimate.net.internal.ApplicationConfigFileProperties;
+import utours.ultimate.net.data.ApplicationConfigurationData;
 
 public interface ApplicationConfiguration {
     

@@ -1,6 +1,5 @@
-package utours.ultimate.core.common;
+package utours.ultimate.net.common;
 
-import javax.swing.*;
 import java.io.*;
 import java.nio.file.FileSystems;
 import java.util.stream.Collectors;

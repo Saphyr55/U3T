@@ -1,7 +1,7 @@
-package utours.ultimate.core.base;
+package utours.ultimate.net.internal;
 
-import utours.ultimate.core.*;
-import utours.ultimate.core.data.ContextData;
+import utours.ultimate.net.*;
+import utours.ultimate.net.data.ContextData;
 
 import java.util.HashMap;
 import java.util.LinkedList;

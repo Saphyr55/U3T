@@ -1,8 +1,8 @@
-package utours.ultimate.core.base;
+package utours.ultimate.net.internal;
 
-import utours.ultimate.core.Client;
-import utours.ultimate.core.Message;
-import utours.ultimate.core.data.MessageData;
+import utours.ultimate.net.Client;
+import utours.ultimate.net.Message;
+import utours.ultimate.net.data.MessageData;
 
 import java.io.*;
 import java.net.Socket;

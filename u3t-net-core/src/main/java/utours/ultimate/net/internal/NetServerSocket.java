@@ -1,6 +1,6 @@
-package utours.ultimate.core.base;
+package utours.ultimate.net.internal;
 
-import utours.ultimate.core.*;
+import utours.ultimate.net.*;
 
 import javax.net.ServerSocketFactory;
 import java.io.*;

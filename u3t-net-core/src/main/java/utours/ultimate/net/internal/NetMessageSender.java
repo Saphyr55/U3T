@@ -1,7 +1,7 @@
-package utours.ultimate.core.base;
+package utours.ultimate.net.internal;
 
-import utours.ultimate.core.*;
-import utours.ultimate.core.data.MessageData;
+import utours.ultimate.net.*;
+import utours.ultimate.net.data.MessageData;
 
 import java.util.concurrent.CompletableFuture;
 

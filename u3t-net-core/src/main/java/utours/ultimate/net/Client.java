@@ -1,6 +1,6 @@
-package utours.ultimate.core;
+package utours.ultimate.net;
 
-import utours.ultimate.core.base.ClientSocket;
+import utours.ultimate.net.internal.ClientSocket;
 
 import java.io.*;
 
@@ -66,7 +66,7 @@ public interface Client {
     String hostAddress();
 
     /**
-     * Instantiate utility method.
+     * Instantiate Message Sender, utility factory method.
      *
      * @return A message sender.
      */

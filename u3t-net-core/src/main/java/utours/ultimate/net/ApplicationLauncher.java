@@ -1,6 +1,6 @@
-package utours.ultimate.core;
+package utours.ultimate.net;
 
-import utours.ultimate.core.base.ApplicationLauncherImpl;
+import utours.ultimate.net.internal.ApplicationLauncherImpl;
 
 public interface ApplicationLauncher {
 

@@ -1,7 +1,7 @@
-package utours.ultimate.core;
+package utours.ultimate.net;
 
 import org.junit.jupiter.api.Test;
-import utours.ultimate.core.base.NetServerApplicationTest;
+import utours.ultimate.net.internal.NetServerApplicationTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -1,4 +1,4 @@
-package utours.ultimate.core;
+package utours.ultimate.net;
 
 public interface Message {
 

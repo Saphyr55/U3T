@@ -1,6 +1,6 @@
-package utours.ultimate.core;
+package utours.ultimate.net;
 
-import utours.ultimate.core.base.NetMessageSender;
+import utours.ultimate.net.internal.NetMessageSender;
 
 public interface MessageSender {
 

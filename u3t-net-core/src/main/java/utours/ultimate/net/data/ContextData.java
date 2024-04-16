@@ -1,7 +1,7 @@
-package utours.ultimate.core.data;
+package utours.ultimate.net.data;
 
-import utours.ultimate.core.Client;
-import utours.ultimate.core.Context;
+import utours.ultimate.net.Client;
+import utours.ultimate.net.Context;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;

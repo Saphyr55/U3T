@@ -1,6 +1,6 @@
-package utours.ultimate.core.data;
+package utours.ultimate.net.data;
 
-import utours.ultimate.core.ApplicationConfiguration;
+import utours.ultimate.net.ApplicationConfiguration;
 
 public record ApplicationConfigurationData(
         String address,

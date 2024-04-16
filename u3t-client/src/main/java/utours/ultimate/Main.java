@@ -1,8 +1,6 @@
 package utours.ultimate;
 
-import utours.ultimate.core.Application;
-import utours.ultimate.core.ApplicationConfiguration;
-import utours.ultimate.core.ApplicationLauncher;
+import utours.ultimate.net.Application;
 
 public class Main {
 

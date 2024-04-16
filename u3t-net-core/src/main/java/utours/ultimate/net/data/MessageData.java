@@ -1,6 +1,6 @@
-package utours.ultimate.core.data;
+package utours.ultimate.net.data;
 
-import utours.ultimate.core.Message;
+import utours.ultimate.net.Message;
 
 import java.io.Serializable;
 
