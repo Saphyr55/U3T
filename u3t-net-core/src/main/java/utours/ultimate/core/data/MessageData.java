@@ -6,7 +6,8 @@ import java.io.Serializable;
 
 public record MessageData(
         String address,
-        Object content
+        Object content,
+        boolean isSuccess
 ) implements Message, Serializable {
 
 }

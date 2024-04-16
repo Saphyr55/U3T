@@ -5,5 +5,7 @@ public interface Message {
     Object content();
 
     String address();
+    
+    boolean isSuccess();
 
 }

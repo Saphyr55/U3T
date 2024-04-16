@@ -27,14 +27,14 @@ public class ClientSocket implements Client {
     @SuppressWarnings("unchecked")
     public <T> T sendMessage(String address, Object message, Class<T> tClass) {
         try {
-
-            Message messageWrapper = new MessageData(address, message);
+            Message messageWrapper = new MessageData(address, message, true);
             out.writeObject(messageWrapper);
             out.flush();
-
             Message receiveMessage = (Message) in.readObject();
-            return (T) receiveMessage.content();
-
+            if (receiveMessage.address().equals(address)) {
+                return (T) receiveMessage.content();
+            }
+            return null;
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }

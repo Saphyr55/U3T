@@ -15,21 +15,21 @@ public class NetServerApplicationTest {
             ApplicationConfiguration.of(HOST_ADDRESS, PORT);
 
     protected static Application application;
-    
+
     // TODO: Find a better method to start only one time.
-    protected static boolean isSetup = false;
+    private static boolean isSetup = false;
 
     @BeforeAll
     static void setup() {
         if (!isSetup) {
             isSetup = true;
             application = Application.ofServer(configuration);
-            application.handler("any.address", NetServerApplicationTest::treatment);
+            application.handler("an.address", NetServerApplicationTest::defaultTreatment);
             Thread.ofPlatform().start(application::start);
         }
     }
 
-    static void treatment(Context context) throws IOException {
+    static void defaultTreatment(Context context) throws IOException {
         var out = context.writer();
         out.writeObject(context.message());
         out.flush();

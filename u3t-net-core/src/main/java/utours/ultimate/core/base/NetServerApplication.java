@@ -11,12 +11,10 @@ import java.util.Map;
 public class NetServerApplication implements Application {
 
     private final Map<String, List<Handler<Context>>> handlers;
-    private final ApplicationConfiguration configuration;
     private final NetServer server;
     private boolean stopped = true;
 
     public NetServerApplication(ApplicationConfiguration configuration) {
-        this.configuration = configuration;
         this.handlers = new HashMap<>();
         this.server = new NetServerSocket(configuration);
     }
@@ -25,17 +23,16 @@ public class NetServerApplication implements Application {
     public void start() {
         stopped = false;
         while (!stopped) {
-            handlers.forEach((address, handlers) -> Thread.ofPlatform()
-                    .start(() -> processHandlers(handlers)));
+            handlers.forEach((address, handlers) ->
+                    Thread.ofPlatform().start(() -> processHandlers(address, handlers)));
         }
     }
 
-    private void processHandlers(List<Handler<Context>> handlers) {
+    private void processHandlers(String address, List<Handler<Context>> handlers) {
         try {
-            handlers.forEach(contextHandler -> handleContext(server.client(), contextHandler));
+            handlers.forEach(contextHandler -> handleContext(address, server.client(), contextHandler));
         } catch (Exception e) {
             throw new RuntimeException(e);
-
         }
     }
 
@@ -56,7 +53,7 @@ public class NetServerApplication implements Application {
                 .add(handler);
     }
 
-    private void handleContext(Client client, Handler<Context> contextHandler) {
+    private void handleContext(String address, Client client, Handler<Context> contextHandler) {
         try (var in = client.input(); var out = client.output()) {
             Object object;
             while ((object = in.readObject()) != null) {

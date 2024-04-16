@@ -33,8 +33,8 @@ public class ClientSideTest extends NetServerApplicationTest {
 
         Client client = Client.of(HOST_ADDRESS, PORT);
 
-        String msg1 = client.sendMessage("any.address", "hello", String.class);
-        String msg2 = client.sendMessage("any.address","world", String.class);
+        String msg1 = client.sendMessage("an.address", "hello", String.class);
+        String msg2 = client.sendMessage("an.address","world", String.class);
 
         client.close();
 

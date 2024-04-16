@@ -3,6 +3,8 @@ package utours.ultimate.core.base;
 import utours.ultimate.core.*;
 import utours.ultimate.core.data.MessageData;
 
+import java.util.concurrent.CompletableFuture;
+
 public class NetMessageSender implements MessageSender {
 
     private final Client client;
@@ -13,13 +15,16 @@ public class NetMessageSender implements MessageSender {
 
     @Override
     public MessageSender send(String address, Object message, Handler<Message> onReceive) {
-        try {
-            Object messageReceive = client.sendMessage(address, message, Object.class);
-            onReceive.handle(new MessageData(address, messageReceive));
-            return this;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        CompletableFuture
+                .supplyAsync(() -> client.sendMessage(address, message, Object.class))
+                .thenAccept(object -> {
+                    try {
+                        onReceive.handle(new MessageData(address, object, true));
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+        return this;
     }
 
 
