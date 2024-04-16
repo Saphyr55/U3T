@@ -1,6 +1,8 @@
 package utours.ultimate.core.base;
 
 import utours.ultimate.core.Client;
+import utours.ultimate.core.Message;
+import utours.ultimate.core.data.MessageData;
 
 import java.io.*;
 import java.net.Socket;
@@ -23,13 +25,16 @@ public class ClientSocket implements Client {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T sendMessage(Object message, Class<T> tClass) {
+    public <T> T sendMessage(String address, Object message, Class<T> tClass) {
         try {
-            out.writeObject(message);
+
+            Message messageWrapper = new MessageData(address, message);
+            out.writeObject(messageWrapper);
             out.flush();
 
+            Message receiveMessage = (Message) in.readObject();
+            return (T) receiveMessage.content();
 
-            return (T) in.readObject();
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -62,7 +67,7 @@ public class ClientSocket implements Client {
     }
 
     @Override
-    public ObjectInputStream reader() {
+    public ObjectInputStream input() {
         return in;
     }
 

@@ -36,15 +36,15 @@ public interface Client {
      *
      * @return A reader from the client.
      */
-    ObjectInputStream reader();
+    ObjectInputStream input();
 
     /**
-     * Send a message, and return a response from the server.
+     * Send a message to an address, and return a response from the server.
      *
      * @param message An object corresponding to a message that will be sent to the server.
      * @return The response from the server.
      */
-    <T> T sendMessage(Object message, Class<T> tClass);
+    <T> T sendMessage(String address, Object message, Class<T> tClass);
 
     /**
      * Close the client.
@@ -64,5 +64,14 @@ public interface Client {
      * @return Server host address.
      */
     String hostAddress();
+
+    /**
+     * Instantiate utility method.
+     *
+     * @return A message sender.
+     */
+    default MessageSender messageSender() {
+        return MessageSender.ofClient(this);
+    }
 
 }

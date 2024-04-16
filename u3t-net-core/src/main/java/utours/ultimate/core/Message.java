@@ -1,7 +1,9 @@
 package utours.ultimate.core;
 
-public interface    Message {
+public interface Message {
 
-    String getMessage();
+    Object content();
+
+    String address();
 
 }

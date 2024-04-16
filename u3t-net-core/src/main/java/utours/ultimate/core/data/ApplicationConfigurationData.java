@@ -1,4 +1,4 @@
-package utours.ultimate.core.base;
+package utours.ultimate.core.data;
 
 import utours.ultimate.core.ApplicationConfiguration;
 

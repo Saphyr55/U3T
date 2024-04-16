@@ -1,7 +1,7 @@
 package utours.ultimate.core;
 
 import utours.ultimate.core.base.ApplicationConfigFileProperties;
-import utours.ultimate.core.base.ApplicationConfigurationData;
+import utours.ultimate.core.data.ApplicationConfigurationData;
 
 public interface ApplicationConfiguration {
     

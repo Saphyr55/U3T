@@ -1,12 +1,16 @@
 package utours.ultimate.core;
 
-import java.io.BufferedReader;
-import java.io.PrintWriter;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 public interface Context {
-    
-    PrintWriter writer();
 
-    BufferedReader reader();
+    ObjectOutputStream writer();
+
+    ObjectInputStream reader();
+
+    Object message();
+
+    Client client();
 
 }

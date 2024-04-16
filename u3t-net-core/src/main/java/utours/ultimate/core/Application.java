@@ -18,6 +18,6 @@ public interface Application {
 
     void stop();
 
-    void handler(Handler<Client> handler);
+    void handler(String address, Handler<Context> handler);
 
 }
