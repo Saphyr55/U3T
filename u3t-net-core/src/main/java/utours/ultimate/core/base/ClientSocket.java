@@ -7,17 +7,14 @@ import java.net.Socket;
 
 public class ClientSocket implements Client {
 
-    // Must always be true.
-    private static final boolean IS_FLUSH = true;
-
     private final Socket clientSocket;
     private final ObjectOutputStream out;
-    private final BufferedReader in;
+    private final ObjectInputStream in;
 
     public ClientSocket(Socket clientSocket) throws IOException {
         this.clientSocket = clientSocket;
         this.out = new ObjectOutputStream(clientSocket.getOutputStream());
-        this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        this.in = new ObjectInputStream(clientSocket.getInputStream());
     }
 
     public ClientSocket(String address, int port) throws IOException {
@@ -25,12 +22,15 @@ public class ClientSocket implements Client {
     }
 
     @Override
-    public String sendMessage(Object message) {
+    @SuppressWarnings("unchecked")
+    public <T> T sendMessage(Object message, Class<T> tClass) {
         try {
             out.writeObject(message);
             out.flush();
-            return in.readLine();
-        } catch (IOException e) {
+
+
+            return (T) in.readObject();
+        } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
@@ -62,7 +62,7 @@ public class ClientSocket implements Client {
     }
 
     @Override
-    public BufferedReader reader() {
+    public ObjectInputStream reader() {
         return in;
     }
 

@@ -2,9 +2,7 @@ package utours.ultimate.core;
 
 import utours.ultimate.core.base.ClientSocket;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 
 /**
  *
@@ -38,15 +36,15 @@ public interface Client {
      *
      * @return A reader from the client.
      */
-    BufferedReader reader();
+    ObjectInputStream reader();
 
     /**
      * Send a message, and return a response from the server.
      *
-     * @param message A string corresponding to a message that will be sent to the server.
+     * @param message An object corresponding to a message that will be sent to the server.
      * @return The response from the server.
      */
-    String sendMessage(Object message);
+    <T> T sendMessage(Object message, Class<T> tClass);
 
     /**
      * Close the client.

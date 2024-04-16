@@ -2,6 +2,7 @@ package utours.ultimate.core.base;
 
 import utours.ultimate.core.*;
 
+import javax.net.ServerSocketFactory;
 import java.io.*;
 import java.net.ServerSocket;
 
@@ -33,7 +34,9 @@ public class NetServerSocket implements NetServer {
 
     private ServerSocket createServerSocket(ApplicationConfiguration configuration) {
         try {
-            return new ServerSocket(configuration.port());
+            return ServerSocketFactory
+                    .getDefault()
+                    .createServerSocket(configuration.port());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

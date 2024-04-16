@@ -2,6 +2,9 @@ plugins {
     id 'java'
 }
 
+sourceCompatibility = '21'
+targetCompatibility = '21'
+
 group = 'utours.ultimate'
 version = '1.0'
 

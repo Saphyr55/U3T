@@ -21,6 +21,7 @@ public class NetServerApplication implements Application {
 
     @Override
     public void start() {
+        stopped = false;
         while (!stopped) {
             handlers.forEach(clientHandler -> {
                 Thread.ofPlatform().start(() -> {

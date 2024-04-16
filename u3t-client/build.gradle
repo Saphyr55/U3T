@@ -3,6 +3,9 @@ plugins {
     id 'application'
 }
 
+sourceCompatibility = '21'
+targetCompatibility = '21'
+
 group = 'utours.ultimate'
 version = 'unspecified'
 
