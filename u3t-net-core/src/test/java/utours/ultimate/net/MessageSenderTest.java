@@ -15,6 +15,7 @@ class MessageSenderTest extends NetServerApplicationTest {
                 .send("an.address", "hello", m -> assertEquals("hello", m.content()))
                 .send("an.address", "word",  m -> assertEquals("word", m.content()))
                 .send("not.an.address", "word", m -> assertFalse(m.isSuccess()))
+                .send("foo.address", "bar", m -> assertEquals("<foo>bar</foo>", m.content()))
         ;
     }
 

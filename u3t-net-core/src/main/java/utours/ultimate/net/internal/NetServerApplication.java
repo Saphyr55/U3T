@@ -25,13 +25,15 @@ public class NetServerApplication implements Application {
     public void start() {
         stopped = false;
         while (!stopped) {
-            handlers.forEach((address, handlers) ->
-                    new Thread((() -> processHandlers(address, handlers))).start());
+            Client client = server.client();
+            Thread.ofPlatform().start(() -> handlers.forEach((address, handlers) -> {
+                processHandlers(client, address, handlers);
+            }));
         }
     }
 
-    private void processHandlers(String address, List<Handler<Context>> handlers) {
-        handlers.forEach(contextHandler -> handleContext(address, server.client(), contextHandler));
+    private void processHandlers(Client client, String address, List<Handler<Context>> handlers) {
+        handlers.forEach(contextHandler -> handleContext(address, client, contextHandler));
     }
 
     @Override
@@ -52,10 +54,9 @@ public class NetServerApplication implements Application {
     }
 
     private void handleContext(String address, Client client, Handler<Context> contextHandler) {
-
-        try (var in = client.input(); var out = client.output()) {
-
+        try {
             Message message;
+            var in = client.input(); var out = client.output();
             while ((message = (Message) in.readObject()) != null) {
 
                 if (!handlers.containsKey(message.address())) {
@@ -67,8 +68,7 @@ public class NetServerApplication implements Application {
                     contextHandler.handle(context);
                 }
             }
-        } catch (EOFException e) {
-            e.printStackTrace();
+        } catch (EOFException ignored) {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

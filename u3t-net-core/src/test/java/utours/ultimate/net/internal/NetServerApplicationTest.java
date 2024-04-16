@@ -30,11 +30,9 @@ public class NetServerApplicationTest {
         application = Application.ofServer(configuration);
 
         application.handler("an.address", NetServerApplicationTest::defaultTreatment);
-        
         application.handler("foo.address", NetServerApplicationTest::fooTreatment);
 
         Thread.ofPlatform().start(application::start);
-
     }
 
     static void fooTreatment(Context context) throws IOException {
