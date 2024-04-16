@@ -2,7 +2,9 @@ package utours.ultimate.net.internal;
 
 import utours.ultimate.net.*;
 import utours.ultimate.net.data.ContextData;
+import utours.ultimate.net.data.MessageData;
 
+import java.io.EOFException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,16 +26,12 @@ public class NetServerApplication implements Application {
         stopped = false;
         while (!stopped) {
             handlers.forEach((address, handlers) ->
-                    Thread.ofPlatform().start(() -> processHandlers(address, handlers)));
+                    new Thread((() -> processHandlers(address, handlers))).start());
         }
     }
 
     private void processHandlers(String address, List<Handler<Context>> handlers) {
-        try {
-            handlers.forEach(contextHandler -> handleContext(address, server.client(), contextHandler));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        handlers.forEach(contextHandler -> handleContext(address, server.client(), contextHandler));
     }
 
     @Override
@@ -54,13 +52,26 @@ public class NetServerApplication implements Application {
     }
 
     private void handleContext(String address, Client client, Handler<Context> contextHandler) {
+
         try (var in = client.input(); var out = client.output()) {
-            Object object;
-            while ((object = in.readObject()) != null) {
-                Context context = new ContextData(out, in, object, client);
-                contextHandler.handle(context);
+
+            Message message;
+            while ((message = (Message) in.readObject()) != null) {
+
+                if (!handlers.containsKey(message.address())) {
+                    message = new MessageData(address, message.content(), false);
+                }
+
+                if (message.address().equals(address)) {
+                    Context context = new ContextData(out, in, message, client, address);
+                    contextHandler.handle(context);
+                }
             }
-        } catch (Exception ignored) { }
+        } catch (EOFException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

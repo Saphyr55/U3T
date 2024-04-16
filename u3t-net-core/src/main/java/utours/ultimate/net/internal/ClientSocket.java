@@ -24,17 +24,12 @@ public class ClientSocket implements Client {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <T> T sendMessage(String address, Object message, Class<T> tClass) {
+    public Message sendMessage(String address, Object content) {
         try {
-            Message messageWrapper = new MessageData(address, message, true);
+            Message messageWrapper = new MessageData(address, content, true);
             out.writeObject(messageWrapper);
             out.flush();
-            Message receiveMessage = (Message) in.readObject();
-            if (receiveMessage.address().equals(address)) {
-                return (T) receiveMessage.content();
-            }
-            return null;
+            return (Message) in.readObject();
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }

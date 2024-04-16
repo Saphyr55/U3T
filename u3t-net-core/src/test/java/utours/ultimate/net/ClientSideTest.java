@@ -27,17 +27,20 @@ public class ClientSideTest extends NetServerApplicationTest {
 
     @Test
     void check_if_server_respond_correctly() {
-
         Client client = Client.of(HOST_ADDRESS, PORT);
 
-        String msg1 = client.sendMessage("an.address", "hello", String.class);
-        String msg2 = client.sendMessage("an.address","world", String.class);
+        Message msg1 = client.sendMessage("an.address", "hello");
+        Message msg2 = client.sendMessage("an.address","world");
+
+        assertTrue(msg1.isSuccess());
+        assertTrue(msg2.isSuccess());
+
+        assertEquals("hello", msg1.content());
+        assertEquals("world", msg2.content());
 
         client.close();
-
-        assertEquals("hello", msg1);
-        assertEquals("world", msg2);
     }
+
 
 
 }

@@ -41,10 +41,10 @@ public interface Client {
     /**
      * Send a message to an address, and return a response from the server.
      *
-     * @param message An object corresponding to a message that will be sent to the server.
+     * @param content An object corresponding to a message that will be sent to the server.
      * @return The response from the server.
      */
-    <T> T sendMessage(String address, Object message, Class<T> tClass);
+    Message sendMessage(String address, Object content);
 
     /**
      * Close the client.

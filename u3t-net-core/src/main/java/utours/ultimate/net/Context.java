@@ -9,8 +9,9 @@ public interface Context {
 
     ObjectInputStream reader();
 
-    Object message();
+    Message message();
 
     Client client();
 
+    String address();
 }
