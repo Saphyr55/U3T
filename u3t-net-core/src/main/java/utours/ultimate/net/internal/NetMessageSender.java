@@ -15,14 +15,16 @@ public class NetMessageSender implements MessageSender {
 
     @Override
     public MessageSender send(String address, Object content, Handler<Message> onReceive) {
-        try {
-            Message response = client.sendMessage(address, content);
-            onReceive.handle(new MessageData(address,
-                    response.content(),
-                    response.isSuccess()));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        CompletableFuture.runAsync(() -> {
+            try {
+                Message response = client.sendMessage(address, content);
+                onReceive.handle(new MessageData(address,
+                        response.content(),
+                        response.isSuccess()));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
         return this;
     }
 

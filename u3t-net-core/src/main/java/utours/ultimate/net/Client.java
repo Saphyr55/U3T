@@ -66,6 +66,15 @@ public interface Client {
     String hostAddress();
 
     /**
+     * Subscribes the client to the server at a specific address.
+     * Attaches a message handler for the server's response.
+     *
+     * @param address Address.
+     * @param handler Message handler.
+     */
+    void onReceiveMessage(String address, Handler<Message> handler);
+
+    /**
      * Instantiate Message Sender, utility factory method.
      *
      * @return A message sender.
@@ -73,5 +82,7 @@ public interface Client {
     default MessageSender messageSender() {
         return MessageSender.ofClient(this);
     }
+
+
 
 }

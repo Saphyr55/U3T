@@ -11,7 +11,6 @@ class MessageSenderTest extends NetServerApplicationTest {
     void send() {
 
         Client client = Client.of(HOST_ADDRESS, PORT);
-
         client.messageSender()
                 .send("an.address", "word",  m -> assertEquals("word", m.content()))
                 .send("foo.address", "bar", m -> assertEquals("<foo>bar</foo>", m.content()))

@@ -8,6 +8,4 @@ public record MessageData(
         String address,
         Object content,
         boolean isSuccess
-) implements Message, Serializable {
-
-}
+) implements Message, Serializable { }

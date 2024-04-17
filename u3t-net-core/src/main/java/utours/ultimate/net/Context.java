@@ -14,4 +14,7 @@ public interface Context {
     Client client();
 
     String address();
+
+    void respond(Object... content);
+
 }

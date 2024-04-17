@@ -5,26 +5,42 @@ import utours.ultimate.net.data.ContextData;
 import utours.ultimate.net.data.MessageData;
 
 import java.io.EOFException;
+import java.io.IOException;
 import java.util.*;
 
 public class NetServerApplication implements Application {
 
     private final Map<String, List<Handler<Context>>> handlers;
+    private final Map<String, List<Client>> subscribers;
     private final NetServer server;
     private boolean stopped = true;
 
     public NetServerApplication(ApplicationConfiguration configuration) {
         this.handlers = new HashMap<>();
         this.server = new NetServerSocket(configuration);
+        this.subscribers = new HashMap<>();
     }
 
     @Override
     public void start() {
         stopped = false;
+        handler(Message.SUBSCRIBE_ADDRESS, this::onClientSubscribe);
         while (!stopped) {
             Client client = server.client();
-            processClient(client);
+            Thread.ofPlatform().start(() -> processClient(client));
         }
+    }
+
+    private void onClientSubscribe(Context context) throws IOException {
+
+        String subAddress = (String) context.message().content();
+
+        subscribers
+                .computeIfAbsent(subAddress, s -> new ArrayList<>())
+                .add(context.client());
+
+        context.writer().writeObject(new MessageData(context.address(), true, true));
+        context.writer();
     }
 
     private void processClient(Client client) {
@@ -67,8 +83,21 @@ public class NetServerApplication implements Application {
 
     @Override
     public void handler(String address, Handler<Context> handler) {
-        handlers.computeIfAbsent(address, a -> new LinkedList<>())
-                .add(handler);
+        handlers.computeIfAbsent(address, a -> new LinkedList<>()).add(handler);
+    }
+
+    @Override
+    public void sendMessage(String address, Object content) {
+        try {
+            if (!subscribers.containsKey(address)) return;
+            for (Client client : subscribers.get(address)) {
+                client.output().writeObject(new MessageData(address, content, true));
+                client.output().flush();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 
     boolean hasAddress(String address) {

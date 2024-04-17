@@ -17,5 +17,7 @@ public interface Application {
     void stop();
 
     void handler(String address, Handler<Context> handler);
+    
+    void sendMessage(String address, Object content);
 
 }
