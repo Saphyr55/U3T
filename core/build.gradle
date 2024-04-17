@@ -2,20 +2,14 @@ plugins {
     id 'java'
 }
 
-sourceCompatibility = '21'
-targetCompatibility = '21'
-
 group = 'utours.ultimate'
-version = '1.0'
+version = 'unspecified'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-
-    implementation project(':u3t-core')
-
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }

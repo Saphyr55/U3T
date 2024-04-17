@@ -19,6 +19,7 @@ repositories {
 
 dependencies {
 
+    implementation project(':u3t-core')
     implementation project(':u3t-net-core')
 
     testImplementation platform('org.junit:junit-bom:5.10.0')

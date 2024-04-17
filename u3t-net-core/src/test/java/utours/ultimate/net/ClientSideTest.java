@@ -30,12 +30,10 @@ public class ClientSideTest extends NetServerApplicationTest {
         Client client = Client.of(HOST_ADDRESS, PORT);
 
         Message msg1 = client.sendMessage("an.address", "hello");
-
         assertTrue(msg1.isSuccess());
         assertEquals("hello", msg1.content());
 
         Message msg2 = client.sendMessage("an.address","world");
-
         assertTrue(msg2.isSuccess());
         assertEquals("world", msg2.content());
 

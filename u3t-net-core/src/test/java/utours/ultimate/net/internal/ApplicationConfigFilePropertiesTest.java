@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ApplicationConfigFilePropertiesTest {
 
-
     String FILEPATH = "test.properties";
 
     ApplicationConfigFileProperties appConfigFileProperties;

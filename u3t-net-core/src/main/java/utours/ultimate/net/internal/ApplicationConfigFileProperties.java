@@ -1,7 +1,7 @@
 package utours.ultimate.net.internal;
 
+import utours.ultimate.core.ClassPathResource;
 import utours.ultimate.net.ApplicationConfiguration;
-import utours.ultimate.net.common.ClassPathResource;
 
 import java.io.*;
 import java.util.Properties;
