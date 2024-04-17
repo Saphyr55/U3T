@@ -5,10 +5,8 @@ import utours.ultimate.net.data.ContextData;
 import utours.ultimate.net.data.MessageData;
 
 import java.io.EOFException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
 public class NetServerApplication implements Application {
 
@@ -26,14 +24,33 @@ public class NetServerApplication implements Application {
         stopped = false;
         while (!stopped) {
             Client client = server.client();
-            Thread.ofPlatform().start(() -> handlers.forEach((address, handlers) -> {
-                processHandlers(client, address, handlers);
-            }));
+            processClient(client);
         }
     }
 
-    private void processHandlers(Client client, String address, List<Handler<Context>> handlers) {
-        handlers.forEach(contextHandler -> handleContext(address, client, contextHandler));
+    private void processClient(Client client) {
+        try {
+            var message = getClientMessage(client).orElseThrow(RuntimeException::new);
+
+            var in = client.input();
+            var out = client.output();
+            var address = message.address();
+
+            if (hasAddress(address)) {
+                for (Handler<Context> contextHandler : handlers.get(address)) {
+                    Context context = new ContextData(out, in, message, client, address);
+                    contextHandler.handle(context);
+                }
+            }
+            else {
+                var failedMessage = new MessageData(message.address(), null, false);
+                out.writeObject(failedMessage);
+                out.flush();
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -53,25 +70,17 @@ public class NetServerApplication implements Application {
                 .add(handler);
     }
 
-    private void handleContext(String address, Client client, Handler<Context> contextHandler) {
-        try {
-            Message message;
-            var in = client.input(); var out = client.output();
-            while ((message = (Message) in.readObject()) != null) {
-
-                if (!handlers.containsKey(message.address())) {
-                    message = new MessageData(address, message.content(), false);
-                }
-
-                if (message.address().equals(address)) {
-                    Context context = new ContextData(out, in, message, client, address);
-                    contextHandler.handle(context);
-                }
-            }
-        } catch (EOFException ignored) {
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+    private Optional<Message> getClientMessage(Client client) throws IOException, ClassNotFoundException {
+        Message message = null;
+        var in = client.input();
+        while ((message = (Message) in.readObject()) != null) {
+            System.out.println(message);
         }
+        return Optional.ofNullable(message);
+    }
+
+    boolean hasAddress(String address) {
+        return handlers.containsKey(address);
     }
 
 }

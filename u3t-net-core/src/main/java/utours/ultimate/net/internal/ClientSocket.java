@@ -30,7 +30,7 @@ public class ClientSocket implements Client {
             out.writeObject(messageWrapper);
             out.flush();
             return (Message) in.readObject();
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

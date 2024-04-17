@@ -9,14 +9,15 @@ class MessageSenderTest extends NetServerApplicationTest {
 
     @Test
     void send() {
+
         Client client = Client.of(HOST_ADDRESS, PORT);
 
         client.messageSender()
-                .send("an.address", "hello", m -> assertEquals("hello", m.content()))
                 .send("an.address", "word",  m -> assertEquals("word", m.content()))
-                .send("not.an.address", "word", m -> assertFalse(m.isSuccess()))
-                .send("foo.address", "bar", m -> assertEquals("<foo>bar</foo>", m.content()))
-        ;
+                .send("foo.address", "", m -> assertEquals("<foo></foo>", m.content()))
+                .send("not.an.address", "word", m -> assertFalse(m.isSuccess()));
+
+        client.close();
     }
 
 

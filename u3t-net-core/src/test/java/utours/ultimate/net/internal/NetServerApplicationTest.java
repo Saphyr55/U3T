@@ -24,6 +24,7 @@ public class NetServerApplicationTest {
 
     @BeforeAll
     static void setup() {
+
         if (isSetup) return;
 
         isSetup = true;
