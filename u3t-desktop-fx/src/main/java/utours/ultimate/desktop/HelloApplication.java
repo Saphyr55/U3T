@@ -43,7 +43,7 @@ public class HelloApplication extends Application {
         BorderPane border = new BorderPane();
         border.setCenter(grid);
 
-        Scene scene = new Scene(grid, 500, 600);
+        Scene scene = new Scene(border, 500, 600);
         stage.setTitle("Hello!");
         stage.setScene(scene);
         stage.show();

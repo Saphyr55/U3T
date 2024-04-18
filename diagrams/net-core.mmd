@@ -1,0 +1,20 @@
+---
+title: Network Core
+---
+classDiagram
+
+    class Handler~T~{
+        <<interface>>
+        handle(t: T)
+    }
+
+    class NetApplication{
+        <<interface>>
+        +start(server: NetServer)
+        +stop()
+    }
+
+    NetServerSocketApplication <-- NetServerSocket
+
+    NetApplication <|-- NetServerSocketApplication
+    NetServer <|-- NetServerSocket
