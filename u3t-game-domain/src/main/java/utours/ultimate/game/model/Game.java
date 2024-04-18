@@ -3,9 +3,9 @@ package utours.ultimate.game.model;
 public class Game {
 
     private int gameID;
-    private Player crossPlayer;
-    private Player roundPlayer;
-    private Board board;
+    private Player crossPlayer = new Player();
+    private Player roundPlayer = new Player();
+    private Board board = new Board();
 
 
     public int getGameID() {

@@ -8,6 +8,14 @@ public interface MessageSender {
         return new NetMessageSender(client);
     }
 
+    /**
+     *
+     *
+     * @param address
+     * @param message
+     * @param handler
+     * @return
+     */
     MessageSender send(String address, Object message, Handler<Message> handler);
 
 }

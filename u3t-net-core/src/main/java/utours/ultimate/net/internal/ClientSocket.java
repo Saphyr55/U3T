@@ -12,7 +12,6 @@ import java.util.concurrent.CompletableFuture;
 
 public class ClientSocket implements Client {
 
-    private final String identifier;
     private final Socket clientSocket;
     private final ObjectOutputStream out;
     private final ObjectInputStream in;
@@ -21,7 +20,6 @@ public class ClientSocket implements Client {
         this.clientSocket = clientSocket;
         this.out = new ObjectOutputStream(clientSocket.getOutputStream());
         this.in = new ObjectInputStream(clientSocket.getInputStream());
-        this.identifier = UUID.randomUUID().toString();
     }
 
     public ClientSocket(String address, int port) throws IOException {
