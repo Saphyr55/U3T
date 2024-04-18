@@ -3,6 +3,7 @@ package utours.ultimate.core.internal;
 import utours.ultimate.core.ClassPathResource;
 
 import java.io.*;
+import java.net.URL;
 import java.nio.file.FileSystems;
 import java.util.stream.Collectors;
 
@@ -20,7 +21,7 @@ public class ClassPathResourceInternal {
 
     public static String readAllLines(String path) throws IOException {
 
-        var applicationPropertiesInput = ClassPathResource.class
+        var applicationPropertiesInput = ClassPathResourceInternal.class
                 .getClassLoader()
                 .getResourceAsStream(path);
 
@@ -37,5 +38,10 @@ public class ClassPathResourceInternal {
         return content;
     }
 
+    public static URL getResource(String path) throws IOException {
+        return Thread.currentThread()
+                .getContextClassLoader()
+                .getResource(path);
+    }
 
 }

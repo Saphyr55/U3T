@@ -4,9 +4,14 @@ import utours.ultimate.core.internal.ClassPathResourceInternal;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 
 public class ClassPathResource {
+
+    public static URL getResource(String path) throws IOException {
+        return ClassPathResourceInternal.getResource(path);
+    }
 
     /**
      *

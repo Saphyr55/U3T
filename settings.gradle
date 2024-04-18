@@ -1,6 +1,9 @@
 rootProject.name = 'U3T'
-include 'u3t-net-core'
-include 'u3t-server'
-include 'u3t-client'
+
 include 'u3t-core'
+include 'u3t-net-core'
+
+include 'u3t-server'
+include 'u3t-game-domain'
+include 'u3t-desktop-fx'
 

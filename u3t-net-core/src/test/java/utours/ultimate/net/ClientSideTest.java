@@ -60,6 +60,8 @@ public class ClientSideTest extends NetServerApplicationTest {
 
         Client client = Client.of(HOST_ADDRESS, PORT);
 
+        client.sendMessage("an.address", "hello");
+
         client.onReceiveMessage("baz.server.address", msg -> {
             assertEquals("baz", msg.content());
             client.close();

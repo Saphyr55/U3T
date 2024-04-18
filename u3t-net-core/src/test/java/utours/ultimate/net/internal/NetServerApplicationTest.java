@@ -12,8 +12,7 @@ public class NetServerApplicationTest {
 
     protected static final String HOST_ADDRESS = "127.0.0.1";
     protected static final int PORT = 7776;
-    protected static final ApplicationConfiguration configuration =
-            ApplicationConfiguration.of(HOST_ADDRESS, PORT);
+    protected static final ApplicationConfiguration configuration = ApplicationConfiguration.of(HOST_ADDRESS, PORT);
 
     protected static Application application;
 
@@ -22,7 +21,6 @@ public class NetServerApplicationTest {
 
     @BeforeAll
     static void setup() {
-
         if (isSetup) return;
 
         isSetup = true;
@@ -34,7 +32,7 @@ public class NetServerApplicationTest {
         Thread.ofPlatform().start(application::start);
     }
 
-    static void fooTreatment(Context context) throws IOException {
+    static void fooTreatment(Context context) {
         context.respond("<foo>" + context.message().content() + "</foo>");
     }
 
