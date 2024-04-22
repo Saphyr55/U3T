@@ -1,4 +1,4 @@
-package utours.ultimate;
+package utours.ultimate.server;
 
 import utours.ultimate.net.Application;
 import utours.ultimate.net.ApplicationConfiguration;

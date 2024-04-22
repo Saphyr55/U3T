@@ -1,42 +1,58 @@
 package utours.ultimate.game.model;
 
-public class Game {
+public record Game(Long gameID,
+                   Player crossPlayer,
+                   Player roundPlayer,
+                   Board board
+) {
 
-    private int gameID;
-    private Player crossPlayer = new Player();
-    private Player roundPlayer = new Player();
-    private Board board = new Board();
+    private static long lastGameID = 0;
 
+    public static class Builder {
 
-    public int getGameID() {
-        return gameID;
+        private long gameID;
+        private Player crossPlayer;
+        private Player roundPlayer;
+        private Board board;
+
+        public static Builder copyOf(Game game) {
+            Builder builder = new Builder();
+            builder.gameID = game.gameID;
+            return builder
+                    .board(game.board)
+                    .roundPlayer(game.roundPlayer)
+                    .crossPlayer(game.crossPlayer);
+        }
+
+        public static Builder newBuilder() {
+            Builder builder = new Builder();
+            builder.gameID = lastGameID++;
+            return builder;
+        }
+
+        private Builder() {
+
+        }
+
+        public Builder crossPlayer(Player crossPlayer) {
+            this.crossPlayer = crossPlayer;
+            return this;
+        }
+
+        public Builder roundPlayer(Player roundPlayer) {
+            this.roundPlayer = roundPlayer;
+            return this;
+        }
+
+        public Builder board(Board board) {
+            this.board = board;
+            return this;
+        }
+
+        public Game build() {
+            return new Game(gameID, crossPlayer, roundPlayer, board);
+        }
+
     }
 
-    public void setGameID(int gameID) {
-        this.gameID = gameID;
-    }
-
-    public Player getCrossPlayer() {
-        return crossPlayer;
-    }
-
-    public void setCrossPlayer(Player crossPlayer) {
-        this.crossPlayer = crossPlayer;
-    }
-
-    public Player getRoundPlayer() {
-        return roundPlayer;
-    }
-
-    public void setRoundPlayer(Player roundPlayer) {
-        this.roundPlayer = roundPlayer;
-    }
-
-    public Board getBoard() {
-        return board;
-    }
-
-    public void setBoard(Board board) {
-        this.board = board;
-    }
 }

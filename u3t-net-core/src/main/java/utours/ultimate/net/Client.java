@@ -83,6 +83,6 @@ public interface Client {
         return MessageSender.ofClient(this);
     }
 
-
+    default MessageReceiver messageReceiver() { return MessageReceiver.ofClient(this); }
 
 }

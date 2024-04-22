@@ -9,6 +9,12 @@ import java.net.URL;
 
 public class ClassPathResource {
 
+    /**
+     *
+     * @param path
+     * @return
+     * @throws IOException
+     */
     public static URL getResource(String path) throws IOException {
         return ClassPathResourceInternal.getResource(path);
     }

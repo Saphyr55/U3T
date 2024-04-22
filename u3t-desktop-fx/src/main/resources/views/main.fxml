@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.GridPane?>
+<?import java.lang.Integer?>
+
+<GridPane xmlns:fx="http://javafx.com/fxml"
+          fx:id="root"
+          fx:controller="utours.ultimate.desktop.controller.MainController" >
+
+  <fx:define>
+    <Integer fx:id="NavigationWidth" fx:value="122" />
+    <Integer fx:id="PartiesWidth" fx:value="400" />
+  </fx:define>
+
+
+  <fx:include source="navigation.fxml"
+              prefHeight="${root.height}"
+              prefWidth="$NavigationWidth"
+              GridPane.columnIndex="0"
+              GridPane.rowIndex="0" />
+
+  <fx:include source="parties.fxml"
+              prefHeight="${root.height}"
+              prefWidth="$PartiesWidth"
+              GridPane.columnIndex="1"
+              GridPane.rowIndex="0"/>
+
+  <fx:include source="game.fxml"
+              GridPane.columnIndex="2"
+              GridPane.rowIndex="0"  />
+
+</GridPane>

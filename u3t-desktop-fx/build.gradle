@@ -23,7 +23,7 @@ tasks.withType(JavaCompile) {
 }
 
 application {
-  mainClass = 'utours.ultimate.desktop.HelloApplication'
+  mainClass = 'utours.ultimate.desktop.MainApplication'
 }
 
 javafx {
