@@ -12,7 +12,6 @@
     <Integer fx:id="PartiesWidth" fx:value="400" />
   </fx:define>
 
-
   <fx:include source="navigation.fxml"
               prefHeight="${root.height}"
               prefWidth="$NavigationWidth"
@@ -26,6 +25,8 @@
               GridPane.rowIndex="0"/>
 
   <fx:include source="game.fxml"
+              prefHeight="${root.height}"
+              prefWidth="${root.width - PartiesWidth - NavigationWidth}"
               GridPane.columnIndex="2"
               GridPane.rowIndex="0"  />
 

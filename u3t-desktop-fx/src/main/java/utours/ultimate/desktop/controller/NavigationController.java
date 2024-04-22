@@ -30,17 +30,18 @@ public class NavigationController implements Initializable {
         container.setPadding(new Insets(24));
         container.setAlignment(Pos.CENTER);
 
-        NavButton u3tButton = new NavButton(0, container);
-        NavButton chat = new NavButton(1, container);
-        NavButton quit = new NavButton(2, container);
 
-        u3tButton.setText("U3T");
-        chat.setText("Chat");
-        quit.setText("Quit");
+        NavButton partiesButton = new NavButton(0, container);
+        NavButton chatButton = new NavButton(1, container);
+        NavButton quitButton = new NavButton(2, container);
 
-        navButtons.put("U3T", u3tButton);
-        navButtons.put("Chat", chat);
-        navButtons.put("Quit", quit);
+        partiesButton.setText("Parties");
+        chatButton.setText("Chat");
+        quitButton.setText("Quit");
+
+        navButtons.put("U3T", partiesButton);
+        navButtons.put("Chat", chatButton);
+        navButtons.put("Quit", quitButton);
 
         nav.setContent(container);
     }

@@ -2,10 +2,11 @@
 
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="utours.ultimate.desktop.controller.GameController" >
+<Pane xmlns="http://javafx.com/javafx"
+      fx:id="gamePane"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="utours.ultimate.desktop.controller.GameController" >
 
 
 
-</BorderPane>
+</Pane>

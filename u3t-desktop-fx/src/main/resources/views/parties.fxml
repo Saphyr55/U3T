@@ -3,16 +3,23 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
+<?import java.lang.Integer?>
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:id="partiesAnchorPane"
             fx:controller="utours.ultimate.desktop.controller.PartiesController">
 
-    <ScrollPane
-        prefWidth="${partiesAnchorPane.width}"
-        prefHeight="${partiesAnchorPane.height}" >
+    <fx:define>
+        <Integer fx:value="2" fx:id="PADDING_SIZE"/>
+    </fx:define>
 
-        <VBox fx:id="container" />
+    <ScrollPane
+            prefWidth="${partiesAnchorPane.width}"
+            prefHeight="${partiesAnchorPane.height}">
+
+        <VBox fx:id="container"
+              prefWidth="${partiesAnchorPane.width - PADDING_SIZE}"
+              prefHeight="${partiesAnchorPane.height - PADDING_SIZE}"/>
 
     </ScrollPane>
 
