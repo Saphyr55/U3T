@@ -3,7 +3,8 @@ package utours.ultimate.game.model;
 public record U3TGame(Long gameID,
                       Player crossPlayer,
                       Player roundPlayer,
-                      Board board
+                      Board board,
+                      U3TGameState state
 ) {
 
     private static long lastGameID = 0;
@@ -13,13 +14,15 @@ public record U3TGame(Long gameID,
         private long gameID;
         private Player crossPlayer;
         private Player roundPlayer;
-        private Board board;
+        private Board board = Board.newEmptyBoard();
+        private U3TGameState state = U3TGameState.Ready;
 
         public static Builder copyOf(U3TGame game) {
             Builder builder = new Builder();
             builder.gameID = game.gameID;
             return builder
                     .board(game.board)
+                    .state(game.state)
                     .roundPlayer(game.roundPlayer)
                     .crossPlayer(game.crossPlayer);
         }
@@ -30,9 +33,7 @@ public record U3TGame(Long gameID,
             return builder;
         }
 
-        private Builder() {
-
-        }
+        private Builder() { }
 
         public Builder crossPlayer(Player crossPlayer) {
             this.crossPlayer = crossPlayer;
@@ -49,8 +50,13 @@ public record U3TGame(Long gameID,
             return this;
         }
 
+        public Builder state(U3TGameState state) {
+            this.state = state;
+            return this;
+        }
+
         public U3TGame build() {
-            return new U3TGame(gameID, crossPlayer, roundPlayer, board);
+            return new U3TGame(gameID, crossPlayer, roundPlayer, board, state);
         }
 
     }

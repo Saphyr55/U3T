@@ -1,27 +1,40 @@
 package utours.ultimate.game.model;
 
 public record Player(
-    String name,
-    Integer score
+        String id,
+        String name,
+        Integer score
 ) {
+
+    @Override
+    public boolean equals(Object obj) {
+        return id != null && id.equals(((Player) obj).id());
+    }
 
     public static class Builder {
 
+        private String id;
         private String name;
         private Integer score = 0;
 
         public static Builder copyOf(Player player) {
-            return newBuilder(player.name)
+            return newBuilder(player.id, player.name)
                     .score(player.score);
         }
 
-        public static Builder newBuilder(String name) {
+        public static Builder newBuilder(String id, String name) {
             Builder builder = new Builder();
+            builder.id = id;
             builder.name = name;
             return builder;
         }
 
         private Builder() { }
+
+        public Builder id(String id) {
+            this.id = id;
+            return this;
+        }
 
         public Builder name(String name) {
             this.name = name;
@@ -33,8 +46,9 @@ public record Player(
             return this;
         }
 
+
         public Player build() {
-            return new Player(name, score);
+            return new Player(id, name, score);
         }
 
     }

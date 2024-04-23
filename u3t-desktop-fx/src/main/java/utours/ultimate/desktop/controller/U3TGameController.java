@@ -2,11 +2,12 @@ package utours.ultimate.desktop.controller;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.input.MouseEvent;
+import javafx.geometry.Pos;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import utours.ultimate.desktop.view.u3t.PrimitiveTile;
 import utours.ultimate.game.feature.U3TGameService;
+import utours.ultimate.game.model.Cell;
+import utours.ultimate.game.model.Player;
 import utours.ultimate.game.model.U3TGame;
 
 import java.net.URL;
@@ -16,6 +17,7 @@ public class U3TGameController implements Initializable {
 
     private U3TGameService gameService;
     private U3TGame game;
+    private Player currentPlayer;
 
     @FXML
     private GridPane u3tGrid;
@@ -36,22 +38,27 @@ public class U3TGameController implements Initializable {
             }
         }
 
-        initBoard(gridPanes, game);
-
+        initBoard(gridPanes);
     }
 
-    private void onPressedTile(MouseEvent mouseEvent, PrimitiveTile tile) {
-
+    private void onPressedTile(PrimitiveTile tile) {
+        if (gameService.isPlayableCell(tile.getCell())) {
+            game = gameService.placeMark(game, currentPlayer, tile.getPosOut(), tile.getPosIn());
+            currentPlayer = gameService.oppositePlayer(game, currentPlayer);
+            Cell cell = gameService.cellAt(game, tile.getPosOut(), tile.getPosIn());
+            tile.setCell(cell);
+        }
     }
 
-    private void initBoard(GridPane[][] gridPanes, U3TGame game) {
-        for (GridPane[] pane : gridPanes) {
-            for (GridPane gridPane : pane) {
-
+    private void initBoard(GridPane[][] gridPanes) {
+        for (int i = 0; i < gridPanes.length; i++) {
+            GridPane[] pane = gridPanes[i];
+            for (int j = 0; j < pane.length; j++) {
+                GridPane gridPane = pane[j];
                 for (int k = 0; k < 3; k++) {
                     for (int l = 0; l < 3; l++) {
-                        var tile = PrimitiveTile.newEmptyTile(u3tGrid);
-                        tile.setOnMouseClicked(mouseEvent -> onPressedTile(mouseEvent, tile));
+                        var tile = PrimitiveTile.newEmptyTile(u3tGrid, Cell.pos(i, j), Cell.pos(k, l));
+                        tile.setOnMouseClicked(e -> onPressedTile(tile));
                         gridPane.add(tile, k, l);
                     }
                 }
@@ -62,6 +69,7 @@ public class U3TGameController implements Initializable {
 
     public void setGame(U3TGame game) {
         this.game = game;
+        this.currentPlayer = game.crossPlayer();
     }
 
     public void setGameService(U3TGameService gameService) {
