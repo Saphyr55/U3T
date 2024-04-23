@@ -21,6 +21,7 @@ public class GameController implements Initializable {
         gamePane.getChildren().add(pane);
 
         pane.prefWidthProperty().bind(gamePane.widthProperty());
+
         pane.prefHeightProperty().bind(gamePane.heightProperty());
     }
 

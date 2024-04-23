@@ -1,9 +1,9 @@
 package utours.ultimate.game.model;
 
-public record Game(Long gameID,
-                   Player crossPlayer,
-                   Player roundPlayer,
-                   Board board
+public record U3TGame(Long gameID,
+                      Player crossPlayer,
+                      Player roundPlayer,
+                      Board board
 ) {
 
     private static long lastGameID = 0;
@@ -15,7 +15,7 @@ public record Game(Long gameID,
         private Player roundPlayer;
         private Board board;
 
-        public static Builder copyOf(Game game) {
+        public static Builder copyOf(U3TGame game) {
             Builder builder = new Builder();
             builder.gameID = game.gameID;
             return builder
@@ -49,8 +49,8 @@ public record Game(Long gameID,
             return this;
         }
 
-        public Game build() {
-            return new Game(gameID, crossPlayer, roundPlayer, board);
+        public U3TGame build() {
+            return new U3TGame(gameID, crossPlayer, roundPlayer, board);
         }
 
     }
