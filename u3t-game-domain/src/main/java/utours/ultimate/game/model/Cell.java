@@ -10,6 +10,7 @@ public sealed interface Cell {
 
     record Round() implements Cell { }
 
+
     record Pos(int x, int y) { }
 
     static Pos pos(int x, int y) {

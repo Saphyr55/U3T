@@ -1,11 +1,25 @@
 package utours.ultimate.game.model;
 
+import java.util.Optional;
+
 public record U3TGame(Long gameID,
                       Player crossPlayer,
                       Player roundPlayer,
                       Board board,
-                      U3TGameState state
+                      U3TGameState state,
+                      Action lastAction,
+                      int size
 ) {
+
+    public U3TGame lastAction(Action action) {
+        return U3TGame.Builder.copyOf(this)
+                .lastAction(action)
+                .build();
+    }
+
+    public Optional<Action> lastActionOpt() {
+        return Optional.ofNullable(lastAction);
+    }
 
     private static long lastGameID = 0;
 
@@ -14,8 +28,10 @@ public record U3TGame(Long gameID,
         private long gameID;
         private Player crossPlayer;
         private Player roundPlayer;
+        private Action lastAction;
         private Board board = Board.newEmptyBoard();
         private U3TGameState state = U3TGameState.Ready;
+        private int size = 3;
 
         public static Builder copyOf(U3TGame game) {
             Builder builder = new Builder();
@@ -45,6 +61,11 @@ public record U3TGame(Long gameID,
             return this;
         }
 
+        public Builder lastAction(Action lastAction) {
+            this.lastAction = lastAction;
+            return this;
+        }
+
         public Builder board(Board board) {
             this.board = board;
             return this;
@@ -55,8 +76,13 @@ public record U3TGame(Long gameID,
             return this;
         }
 
+        public Builder size(int size) {
+            this.size = size;
+            return this;
+        }
+
         public U3TGame build() {
-            return new U3TGame(gameID, crossPlayer, roundPlayer, board, state);
+            return new U3TGame(gameID, crossPlayer, roundPlayer, board, state, lastAction, size);
         }
 
     }

@@ -1,21 +1,36 @@
 package utours.ultimate.game.feature.internal;
 
 import utours.ultimate.game.feature.U3TGameService;
-import utours.ultimate.game.model.Board;
-import utours.ultimate.game.model.Cell;
-import utours.ultimate.game.model.Player;
-import utours.ultimate.game.model.U3TGame;
+import utours.ultimate.game.feature.WinnerChecker;
+import utours.ultimate.game.model.*;
 
 public class U3TGameServiceInternal implements U3TGameService {
 
     @Override
+    public boolean isPlayableAction(U3TGame game, Action action) {
+
+        if (game.lastActionOpt().isEmpty()) return true;
+
+        Action lastAction = game.lastAction();
+
+        Cell cellOut = cellAt(game, action.posOut());
+        Cell cellLastOut = cellAt(game, lastAction.posIn());
+
+        if (cellOut instanceof Cell.Board(Cell[][] cellsIn)) {
+            var isCellPlayable = isPlayableCell(cellsIn[action.posIn().x()][action.posIn().y()]);
+            var isWonCell = cellLastOut instanceof Cell.Cross || cellLastOut instanceof Cell.Round;
+            if (!action.posOut().equals(lastAction.posIn()) && isWonCell) {
+                return isCellPlayable;
+            }
+            return isCellPlayable && action.posOut().equals(lastAction.posIn());
+        }
+
+        return false;
+    }
+
+    @Override
     public boolean isPlayableCell(Cell cell) {
-        return switch (cell) {
-            case Cell.Board board -> false;
-            case Cell.Cross cross -> false;
-            case Cell.Empty empty -> true;
-            case Cell.Round round -> false;
-        };
+        return cell instanceof Cell.Empty;
     }
 
     @Override
@@ -29,10 +44,15 @@ public class U3TGameServiceInternal implements U3TGameService {
     }
 
     @Override
+    public Cell cellAt(U3TGame game, Cell.Pos posOut) {
+        Cell[][] cellsOut = game.board().cells();
+        return cellsOut[posOut.x()][posOut.y()];
+    }
+
+    @Override
     public Cell cellAt(U3TGame game, Cell.Pos posOut, Cell.Pos posIn) {
 
-        Cell[][] cellsOut = game.board().cells();
-        Cell cellOut = cellsOut[posOut.x()][posOut.y()];
+        Cell cellOut = cellAt(game, posOut);
 
         if (cellOut instanceof Cell.Board board) {
             Cell[][] cellsIn = board.cells();
@@ -53,22 +73,33 @@ public class U3TGameServiceInternal implements U3TGameService {
     }
 
     @Override
-    public U3TGame placeMark(U3TGame game, Player currentPlayer, Cell.Pos posOut, Cell.Pos posIn) {
+    public U3TGame placeMark(U3TGame game, Action action) {
 
         Cell[][] cellsOut = game.board().cells();
-        Cell cellOut = cellsOut[posOut.x()][posOut.y()];
+        Cell cellOut = cellAt(game, action.posOut());
 
         if (cellOut instanceof Cell.Board board) {
             Cell[][] cellsIn = board.cells();
-            Cell cellIn = cellsIn[posIn.x()][posIn.y()];
+            Cell cellIn = cellsIn[action.posIn().x()][action.posIn().y()];
             if (isPlayableCell(cellIn)) {
-                cellsIn[posIn.x()][posIn.y()] = newCell(game, currentPlayer);
+                cellsIn[action.posIn().x()][action.posIn().y()] = newCell(game, action.player());
             }
         }
 
         return U3TGame.Builder.copyOf(game)
                 .board(new Board(cellsOut))
                 .build();
+    }
+
+    @Override
+    public WinGame checkInnerWinner(U3TGame game, Action action) {
+        WinnerChecker checker = new WinnerCheckerImpl();
+        boolean isWin = checker.checkInnerWinner(game, action.posOut(), action.posIn());
+        if (isWin) {
+            Cell[][] cellsOut = game.board().cells();
+            cellsOut[action.posOut().x()][action.posOut().y()] = newCell(game, action.player());
+        }
+        return new WinGame(game, isWin);
     }
 
 }

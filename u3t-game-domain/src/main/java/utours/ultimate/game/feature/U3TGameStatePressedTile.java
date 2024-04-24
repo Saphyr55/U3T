@@ -2,7 +2,6 @@ package utours.ultimate.game.feature;
 
 import utours.ultimate.game.model.U3TGame;
 import utours.ultimate.game.model.U3TGameState;
-import utours.ultimate.game.port.U3TGameStateHandler;
 
 public class U3TGameStatePressedTile implements U3TGameStateHandler {
 

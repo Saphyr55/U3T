@@ -1,4 +1,4 @@
-package utours.ultimate.game.port;
+package utours.ultimate.game.feature;
 
 import utours.ultimate.game.model.U3TGameState;
 
