@@ -1,26 +1,33 @@
 package utours.ultimate.game.feature.internal;
 
-import utours.ultimate.game.model.Board;
+import utours.ultimate.game.feature.U3TGameService;
 import utours.ultimate.game.model.Cell;
 import utours.ultimate.game.model.U3TGame;
 import utours.ultimate.game.feature.WinnerChecker;
 
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 public class WinnerCheckerImpl implements WinnerChecker {
 
+
     private enum MarkType {
-        CROSS, ROUND, EMPTY;
+        CROSS, ROUND, EMPTY, BOARD;
 
         static MarkType fromCell(Cell cell) {
             return switch (cell) {
                 case Cell.Cross ignored -> MarkType.CROSS;
                 case Cell.Round ignored -> MarkType.ROUND;
-                case Cell.Empty ignored ->  MarkType.EMPTY;
-                default -> throw new IllegalStateException("Unexpected value: " + cell);
+                case Cell.Empty ignored -> MarkType.EMPTY;
+                case Cell.Board ignored -> MarkType.BOARD;
             };
+        }
+
+        static MarkType fromGame(U3TGame game, Cell.Pos posOut) {
+            Cell[][] cellsOut = game.board().cells();
+            Cell cell = cellsOut[posOut.x()][posOut.y()];
+            return fromCell(cell);
         }
 
         static MarkType fromGame(U3TGame game, Cell.Pos posOut, Cell.Pos posIn) {
@@ -30,23 +37,28 @@ public class WinnerCheckerImpl implements WinnerChecker {
                 cell = cells[posIn.x()][posIn.y()];
                 return fromCell(cell);
             }
-            throw new IllegalStateException("Unexpected value: " + cell);
+            return fromCell(cell);
         }
 
     }
 
+    private final U3TGameService gameService;
     private Map<Integer, Set<Cell.Pos>> leftDiagonalCache = new HashMap<>();
     private Map<Integer, Set<Cell.Pos>> rightDiagonalCache = new HashMap<>();
+
+
+    public WinnerCheckerImpl(U3TGameService gameService) {
+        this.gameService = gameService;
+    }
 
     @Override
     public boolean checkInnerWinner(U3TGame game, Cell.Pos posOut, Cell.Pos posIn) {
 
-        Cell[][] cellsOut = game.board().cells();
-        Cell cellOut = cellsOut[posOut.x()][posOut.y()];
+        Cell cellOut = gameService.cellAt(game, posOut);
 
-        if (cellOut instanceof Cell.Board board) {
-            Cell[][] cellsIn = board.cells();
-            Cell cellIn = cellsIn[posIn.x()][posIn.y()];
+        if (cellOut instanceof Cell.Board) {
+
+            Cell cellIn = gameService.cellAt(game, posOut, posIn);
 
             MarkType m = MarkType.fromCell(cellIn);
 
@@ -90,11 +102,74 @@ public class WinnerCheckerImpl implements WinnerChecker {
         return false;
     }
 
+    @Override
+    public boolean checkWinner(U3TGame game, Cell.Pos pos) {
+
+        Cell cell = gameService.cellAt(game, pos);
+
+        if (cell instanceof Cell.Board) {
+            return false;
+        }
+
+        MarkType m = MarkType.fromCell(cell);
+
+        Set<Cell.Pos> leftDiagonal = leftDiagonal(game.size());
+        Set<Cell.Pos> rightDiagonal = rightDiagonal(game.size());
+
+        List<Cell.Pos> column = IntStream.range(0, game.size())
+                .boxed()
+                .map(i -> Cell.pos(pos.x(), i))
+                .toList();
+
+        List<Cell.Pos> line = IntStream.range(0, game.size())
+                .boxed()
+                .map(i -> Cell.pos(i, pos.y()))
+                .toList();
+
+        if (checkDiagonal(game, pos, m, leftDiagonal)) return true;
+
+        if (checkDiagonal(game, pos, m, rightDiagonal)) return true;
+
+        int i = 0;
+        for (Cell.Pos posD : line) {
+            if (MarkType.fromGame(game, posD, pos).equals(m)) {
+                i++;
+            }
+        }
+        if (i == game.size()) {
+            return true;
+        }
+
+        i = 0;
+        for (Cell.Pos posD : column) {
+            if (MarkType.fromGame(game, posD, pos).equals(m)) {
+                i++;
+            }
+        }
+
+        return i == game.size();
+    }
+
     private boolean checkDiagonal(U3TGame game, Cell.Pos posOut, Cell.Pos posIn, MarkType m, Set<Cell.Pos> leftDiagonal) {
         if (leftDiagonal.contains(posIn)) {
             int i = 0;
             for (Cell.Pos pos : leftDiagonal) {
-                if (MarkType.fromGame(game, posOut, pos).equals(m)) {
+                MarkType mark = MarkType.fromGame(game, posOut, pos);
+                if (mark.equals(m)) {
+                    i++;
+                }
+            }
+            return i == game.size();
+        }
+        return false;
+    }
+
+    private boolean checkDiagonal(U3TGame game, Cell.Pos posOut, MarkType m, Set<Cell.Pos> leftDiagonal) {
+        if (leftDiagonal.contains(posOut)) {
+            int i = 0;
+            for (Cell.Pos pos : leftDiagonal) {
+                MarkType mark = MarkType.fromGame(game, pos);
+                if (mark.equals(m)) {
                     i++;
                 }
             }

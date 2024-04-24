@@ -8,11 +8,10 @@
 
 <Pane xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:id="root"
-      fx:controller="utours.ultimate.desktop.controller.U3TGameController" >
+      fx:id="root" >
 
     <GridPane fx:id="u3tGrid"
-              prefWidth="${root.width}"
-              prefHeight="${root.height}"/>
+              prefWidth="${root.width / 1.2}"
+              prefHeight="${root.height / 1.2}"/>
 
 </Pane>

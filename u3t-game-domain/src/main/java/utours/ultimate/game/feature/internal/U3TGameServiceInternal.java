@@ -92,14 +92,20 @@ public class U3TGameServiceInternal implements U3TGameService {
     }
 
     @Override
-    public WinGame checkInnerWinner(U3TGame game, Action action) {
-        WinnerChecker checker = new WinnerCheckerImpl();
+    public IsWinGame checkInnerWinner(U3TGame game, Action action) {
+        WinnerChecker checker = new WinnerCheckerImpl(this);
         boolean isWin = checker.checkInnerWinner(game, action.posOut(), action.posIn());
         if (isWin) {
             Cell[][] cellsOut = game.board().cells();
             cellsOut[action.posOut().x()][action.posOut().y()] = newCell(game, action.player());
         }
-        return new WinGame(game, isWin);
+        return new IsWinGame(game, isWin);
+    }
+
+    @Override
+    public boolean checkOuterWinner(U3TGame game, Cell.Pos lastPos) {
+        WinnerChecker checker = new WinnerCheckerImpl(this);
+        return checker.checkWinner(game, lastPos);
     }
 
 }

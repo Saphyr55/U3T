@@ -1,7 +1,6 @@
 package utours.ultimate.desktop.view.u3t;
 
 import javafx.beans.binding.Bindings;
-import javafx.geometry.Pos;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -12,7 +11,7 @@ import utours.ultimate.game.model.Cell;
 
 public class Tile extends StackPane {
 
-    public static final String PRIMITIVE_TILE_CLASS = "primitive-tile";
+    public static final int CIRCLE_DEFAULT_SIZE_STROKE = 4;
 
     protected Cell.Pos posOut;
     protected Rectangle rectangle;
@@ -22,16 +21,10 @@ public class Tile extends StackPane {
 
     protected Tile(Cell cell, Cell.Pos posOut) {
         this.posOut = posOut;
-        setCell(cell);
-        setAlignment(Pos.CENTER);
-
         this.circle = newCircle();
-        this.cross = newTextX();
+        this.cross = newTextX(0.7);
         this.rectangle = newRectangle();
-
-        getChildren().add(this.rectangle);
-
-        getStyleClass().add(PRIMITIVE_TILE_CLASS);
+        setCell(cell);
     }
 
     public void setCell(Cell cell) {
@@ -69,13 +62,14 @@ public class Tile extends StackPane {
         var circleRadius = widthProperty().divide(3);
         var circle = new Circle(getPrefWidth() / 2, getPrefHeight() / 2, circleRadius.get());
         circle.radiusProperty().bind(circleRadius);
-        circle.setFill(Color.WHITE);
+        circle.setFill(Color.TRANSPARENT);
+        circle.setStrokeWidth(CIRCLE_DEFAULT_SIZE_STROKE);
         circle.setStroke(Color.BLUE);
         return circle;
     }
 
-    protected Text newTextX() {
-        var prop = prefWidthProperty().divide(2).asString();
+    protected Text newTextX(double size) {
+        var prop = prefWidthProperty().divide(size).asString();
         var text = new Text("X");
         text.setFill(Color.RED);
         text.styleProperty().bind(Bindings.concat("-fx-font-size: ", prop));
@@ -87,17 +81,8 @@ public class Tile extends StackPane {
     }
 
     public static Tile newTile(GridPane gridPane, Cell cell, Cell.Pos posOut) {
-
         Tile tile = newTile(cell, posOut);
-
-        tile.prefWidthProperty().bind(gridPane.widthProperty().divide(10));
-        tile.prefHeightProperty().bind(tile.prefWidthProperty());
-
-        tile.setStyle("""
-                -fx-border-color: black;
-                -fx-border-width: 1;
-                """);
-
+        setupDefaultTile(gridPane, tile);
         return tile;
     }
 
@@ -106,9 +91,12 @@ public class Tile extends StackPane {
     }
 
     public static PrimitiveTile newEmptyPrimitiveTile(GridPane gridPane, Cell.Pos posOut, Cell.Pos posIn) {
-
         PrimitiveTile tile = newPrimitiveTile(new Cell.Empty(), posOut, posIn);
+        setupDefaultTile(gridPane, tile);
+        return tile;
+    }
 
+    public static void setupDefaultTile(GridPane gridPane, Tile tile) {
         tile.prefWidthProperty().bind(gridPane.widthProperty().divide(10));
         tile.prefHeightProperty().bind(tile.prefWidthProperty());
 
@@ -117,7 +105,6 @@ public class Tile extends StackPane {
                 -fx-border-width: 1;
                 """);
 
-        return tile;
     }
 
 }

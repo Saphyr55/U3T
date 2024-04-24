@@ -18,6 +18,8 @@ public interface U3TGameService {
 
     U3TGame placeMark(U3TGame game, Action action);
 
-    WinGame checkInnerWinner(U3TGame game, Action action);
+    IsWinGame checkInnerWinner(U3TGame game, Action action);
+
+    boolean checkOuterWinner(U3TGame game, Cell.Pos lastPos);
 
 }
