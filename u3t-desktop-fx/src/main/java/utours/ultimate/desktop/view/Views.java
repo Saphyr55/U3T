@@ -3,7 +3,6 @@ package utours.ultimate.desktop.view;
 import javafx.fxml.FXMLLoader;
 
 import utours.ultimate.desktop.controller.U3TGameController;
-import utours.ultimate.game.feature.U3TGameProvider;
 import utours.ultimate.game.feature.internal.U3TGameServiceInternal;
 import utours.ultimate.game.model.Player;
 import utours.ultimate.game.model.U3TGame;

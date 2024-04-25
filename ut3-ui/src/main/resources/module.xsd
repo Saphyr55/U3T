@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  
+  <xs:attributeGroup name="component-attributes">
+    <xs:attribute name="id" type="xs:string" />
+    <xs:attribute name="class" type="xs:string" />
+  </xs:attributeGroup>
+
+  <xs:complexType name="arg-type">
+    <xs:attribute name="name" type="xs:string" />
+    <xs:attribute name="type" type="xs:string" />
+    <xs:attribute name="value" type="xs:string" />
+  </xs:complexType>
+
+  <xs:complexType name="constructor-args-type">
+    <xs:sequence>
+      <xs:element name="arg" minOccurs="0" maxOccurs="unbounded" type="arg-type" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="component-type">
+    <xs:sequence>
+      <xs:element type="constructor-args-type" minOccurs="0" maxOccurs="unbounded" name="constructor-args"/>
+    </xs:sequence>
+    <xs:attributeGroup ref="component-attributes"/>
+  </xs:complexType>
+
+  <xs:complexType name="ref-component-type">
+    <xs:attribute name="ref" type="xs:string" />
+  </xs:complexType>
+
+  <xs:complexType name="add-component-type">
+    <xs:sequence>
+      <xs:element name="component" type="component-type" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="ref-component" type="ref-component-type" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="class" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:element name="module">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="name" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="component" type="component-type" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="add-component" type="add-component-type" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

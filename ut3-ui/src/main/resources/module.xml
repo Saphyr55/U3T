@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="module.xsd">
+
+    <component classname="utours.ultimate.ui.AComponentInterface"
+               id="Ui.AComponentInterface" />
+
+</module>

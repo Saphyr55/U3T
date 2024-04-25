@@ -6,7 +6,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
-import utours.ultimate.desktop.view.NavButton;
+import utours.ultimate.desktop.view.NavButtonImpl;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -20,7 +20,7 @@ public class NavigationController implements Initializable {
 
     private VBox container;
 
-    private Map<String, NavButton> navButtons = new HashMap<>();
+    private Map<String, NavButtonImpl> navButtons = new HashMap<>();
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -30,10 +30,10 @@ public class NavigationController implements Initializable {
         container.setPadding(new Insets(24));
         container.setAlignment(Pos.CENTER);
 
-        var partiesButton = new NavButton(container);
-        var chatButton = new NavButton(container);
-        var historyButton = new NavButton(container);
-        var quitButton = new NavButton(container);
+        var partiesButton = new NavButtonImpl(container);
+        var chatButton = new NavButtonImpl(container);
+        var historyButton = new NavButtonImpl(container);
+        var quitButton = new NavButtonImpl(container);
 
         historyButton.setText("History");
         partiesButton.setText("Parties");

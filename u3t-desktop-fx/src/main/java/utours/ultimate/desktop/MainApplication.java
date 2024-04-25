@@ -5,6 +5,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import utours.ultimate.core.ApplicationContext;
+import utours.ultimate.core.ModularApplicationContext;
+import utours.ultimate.core.internal.ContainerImpl;
 import utours.ultimate.desktop.view.Views;
 
 public class MainApplication extends Application {
@@ -27,6 +30,12 @@ public class MainApplication extends Application {
     }
 
     public static void main(String[] args) {
+
+        ApplicationContext applicationContext = new ModularApplicationContext();
+
+        ContainerImpl registry = applicationContext.getContainerReadOnly();
+
+
         launch();
     }
 

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="module.xsd">
+
+    <component id="Sample.AComponent" class="utours.ultimate.ioc.AComponent" />
+
+    <component class="utours.ultimate.ioc.BComponent" id="Sample.BComponent">
+
+        <constructor-args>
+
+            <arg name="wrapped"
+                 value="Desktop.Fx.OnClick.NavButtonImpl"
+                 type="utours.ultimate.ui.AComponentInterface" />
+
+        </constructor-args>
+
+    </component>
+
+    <add-component class="utours.ultimate.ui.AComponentInterface">
+
+        <component id="Desktop.Fx.OnClick.NavButtonImpl"
+                   class="utours.ultimate.desktop.actions.NavButtonAction" />
+
+    </add-component>
+
+    <add-component class="utours.ultimate.ui.NavButton">
+        <ref-component ref="Desktop.Fx.NavButton" />
+    </add-component>
+
+</module>

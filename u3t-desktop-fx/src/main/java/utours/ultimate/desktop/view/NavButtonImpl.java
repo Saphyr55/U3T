@@ -2,16 +2,17 @@ package utours.ultimate.desktop.view;
 
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
+import utours.ultimate.ui.NavButton;
 
 import java.util.Optional;
 
-public class NavButton extends Button {
+public class NavButtonImpl extends Button implements NavButton {
 
     public static final int SIZE = 70;
 
     private final VBox container;
 
-    public NavButton(Integer index, VBox container) {
+    public NavButtonImpl(Integer index, VBox container) {
         this.container = container;
         setPrefWidth(SIZE);
         setPrefHeight(SIZE);
@@ -24,8 +25,7 @@ public class NavButton extends Button {
 
     }
 
-
-    public NavButton(VBox container) {
+    public NavButtonImpl(VBox container) {
         this(null, container);
     }
 

@@ -1,7 +1,7 @@
 package core;
 
 import org.junit.jupiter.api.BeforeAll;
-import utours.ultimate.core.internal.ComponentRegistry;
+import utours.ultimate.core.internal.ContainerImpl;
 
 public class EntryPointTest {
 
@@ -11,10 +11,6 @@ public class EntryPointTest {
 
     @BeforeAll
     static void setup() {
-        ComponentRegistry registry = null;
-        registry
-                .register(AComponent.class)
-                .register(AnotherComponent.class);
 
     }
 

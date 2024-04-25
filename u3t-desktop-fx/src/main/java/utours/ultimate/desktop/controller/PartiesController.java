@@ -5,14 +5,12 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.VBox;
-import utours.ultimate.desktop.view.NavButton;
 import utours.ultimate.desktop.view.PartyButton;
 
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.stream.IntStream;
 
 public class PartiesController implements Initializable {
 
