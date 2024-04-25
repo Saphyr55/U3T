@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group = 'utours.ultimate.ui'
+group = 'utours.ultimate'
 version = 'unspecified'
 
 repositories {
@@ -10,9 +10,6 @@ repositories {
 }
 
 dependencies {
-
-    implementation project(':u3t-core')
-
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }

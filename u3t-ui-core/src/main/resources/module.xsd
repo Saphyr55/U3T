@@ -1,26 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
-
-  <xs:simpleType name="component-strategy-type">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="derived" />
-      <xs:enumeration value="interface" />
-    </xs:restriction>
-  </xs:simpleType>
-
-  <xs:simpleType name="component-type-type">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="additional" />
-      <xs:enumeration value="maybe" />
-      <xs:enumeration value="unique" />
-    </xs:restriction>
-  </xs:simpleType>
-
+  
   <xs:attributeGroup name="component-attributes">
     <xs:attribute name="id" type="xs:string" />
     <xs:attribute name="class" type="xs:string" />
-    <xs:attribute name="strategy" type="component-strategy-type" />
-    <xs:attribute name="type" type="component-type-type" />
   </xs:attributeGroup>
 
   <xs:complexType name="arg-type">

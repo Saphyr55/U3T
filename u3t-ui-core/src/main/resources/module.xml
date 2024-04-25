@@ -2,7 +2,6 @@
 <module xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="module.xsd">
 
-    <component classname="utours.ultimate.ui.AComponentInterface"
-               id="Ui.AComponentInterface" />
+  <component class="utours.ultimate.ui.ComponentInterface" />
 
 </module>

@@ -1,9 +1,12 @@
 package utours.ultimate.ioc;
 
-import utours.ultimate.ui.AComponentInterface;
+import utours.ultimate.ui.ComponentInterface;
 
-public class AComponent implements AComponentInterface {
+public class AComponent implements ComponentInterface {
 
+    public AComponent() {
+
+    }
 
     @Override
     public void service() {

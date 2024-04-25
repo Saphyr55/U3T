@@ -1,12 +1,12 @@
 package utours.ultimate.ioc;
 
-import utours.ultimate.ui.AComponentInterface;
+import utours.ultimate.ui.ComponentInterface;
 
-public class BComponent implements AComponentInterface {
+public class BComponent implements ComponentInterface {
 
-    private AComponentInterface wrapped;
+    private ComponentInterface wrapped;
 
-    public BComponent(AComponentInterface wrapped) {
+    public BComponent(ComponentInterface wrapped) {
         this.wrapped = wrapped;
     }
 

@@ -1,5 +1,10 @@
 plugins {
     id 'java'
+    id 'application'
+}
+
+application {
+    mainClass = 'utours.ultimate.ioc.Main'
 }
 
 group = 'utours.ultimate'
@@ -11,6 +16,7 @@ repositories {
 
 dependencies {
 
+    implementation project(':u3t-ui-core')
     implementation project(':u3t-core')
 
     testImplementation platform('org.junit:junit-bom:5.10.0')
