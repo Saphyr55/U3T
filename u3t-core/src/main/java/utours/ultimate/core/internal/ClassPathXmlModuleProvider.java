@@ -139,7 +139,12 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
 
     private Module.RefComponent processRefComponent(Node item) {
 
-        return null;
+        String ref = item.getAttributes().getNamedItem("ref").getNodeValue();
+
+        Module.RefComponent refComponent = new Module.RefComponent();
+        refComponent.setRef(ref);
+
+        return refComponent;
     }
 
     @Override

@@ -6,16 +6,39 @@ import utours.ultimate.core.Module;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ModuleEvaluator {
 
     private final Map<String, ComponentWrapper> componentsById = new HashMap<>();
+    private final Map<Class<?>, List<ComponentWrapper>> additionalComponents = new HashMap<>();
 
     public void evaluate(Module module) throws Throwable {
+
         for (Module.Component component : module.getComponents()) {
             evaluate(component);
+        }
+
+        for (Module.AdditionalComponent additionalComponent : module.getAdditionalComponents()) {
+            evaluate(additionalComponent);
+        }
+
+    }
+
+    public void evaluate(Module.AdditionalComponent additionalComponent) throws Throwable {
+        Class<?> clazz = Class.forName(additionalComponent.getClassName());
+        for (Module.Component component : additionalComponent.getComponents()) {
+            evaluate(component);
+            ComponentWrapper componentWrapper = componentsById.get(component.getId());
+            additionalComponents
+                    .computeIfAbsent(clazz, aClass -> new LinkedList<>())
+                    .add(componentWrapper);
+        }
+        for (Module.RefComponent refComponent : additionalComponent.getRefComponents()) {
+            ComponentWrapper componentWrapper = componentsById.get(refComponent.getRef());
+            additionalComponents
+                    .computeIfAbsent(clazz, aClass -> new LinkedList<>())
+                    .add(componentWrapper);
         }
     }
 
@@ -67,5 +90,10 @@ public class ModuleEvaluator {
     public Map<String, ComponentWrapper> getComponents() {
         return componentsById;
     }
+
+    public Map<Class<?>, List<ComponentWrapper>> getAdditionalComponents() {
+        return additionalComponents;
+    }
+
 
 }

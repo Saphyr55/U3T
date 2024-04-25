@@ -19,6 +19,12 @@ public class Main {
                 .getAdditionalComponent(ComponentInterface.class)
                 .forEach(ComponentInterface::service);
 
+        System.out.println(" ------- ");
+
+        applicationContext.getContainerReadOnly()
+                .getComponent(BComponent.class)
+                .service();
+
     }
 
 

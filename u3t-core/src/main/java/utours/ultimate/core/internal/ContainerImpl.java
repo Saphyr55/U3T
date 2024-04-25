@@ -1,32 +1,27 @@
 package utours.ultimate.core.internal;
 
-import utours.ultimate.core.ComponentFactory;
 import utours.ultimate.core.Container;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ContainerImpl implements Container {
 
-    private final ComponentFactory componentFactory;
+    private final Map<Class<?>, List<Object>> additionalComponents;
+    private final Map<Class<?>, Object> components;
 
-    private Map<Class<?>, List<Object>> additionalComponents;
-    private Map<Class<?>, Object> components;
-
-    public ContainerImpl(ComponentFactory componentFactory) {
-        this.componentFactory = componentFactory;
-    }
-
-    public void register(Class<?> componentClass) {
-        components.put(componentClass, componentFactory.createComponent(this, componentClass));
+    public ContainerImpl() {
+        this.additionalComponents = new HashMap<>();
+        this.components = new HashMap<>();
     }
 
     @Override
     public <T> List<T> getAdditionalComponent(Class<T> componentClass) {
-        return List.of();
+        return additionalComponents.computeIfAbsent(componentClass, this::listSupplier).stream()
+                .map(componentClass::cast)
+                .toList();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> T getComponent(Class<T> componentClass) {
         return (T) components.get(componentClass);
@@ -45,13 +40,17 @@ public class ContainerImpl implements Container {
     @Override
     public <T> void storeAdditionalComponent(Class<T> tClass, T component) {
         additionalComponents
-                .computeIfAbsent(tClass, k -> new ArrayList<>())
+                .computeIfAbsent(tClass, this::listSupplier)
                 .add(component);
     }
 
     @Override
     public <T> void removeAdditionalComponents(Class<T> tClass) {
         additionalComponents.remove(tClass);
+    }
+
+    private <T> List<Object> listSupplier(Class<T> componentClass) {
+        return new LinkedList<>();
     }
 
 }

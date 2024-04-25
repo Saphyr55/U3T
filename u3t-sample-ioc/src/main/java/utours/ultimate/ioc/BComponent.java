@@ -4,7 +4,7 @@ import utours.ultimate.ui.ComponentInterface;
 
 public class BComponent implements ComponentInterface {
 
-    private ComponentInterface wrapped;
+    private final ComponentInterface wrapped;
 
     public BComponent(ComponentInterface wrapped) {
         this.wrapped = wrapped;

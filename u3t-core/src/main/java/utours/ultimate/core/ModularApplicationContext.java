@@ -12,7 +12,7 @@ public class ModularApplicationContext implements ApplicationContext {
 
     public ModularApplicationContext(ModuleProvider moduleProvider) {
         this.moduleProvider = moduleProvider;
-        this.container = new ContainerImpl(null);
+        this.container = new ContainerImpl();
     }
 
     @Override
@@ -24,10 +24,14 @@ public class ModularApplicationContext implements ApplicationContext {
             ModuleEvaluator evaluator = new ModuleEvaluator();
 
             evaluator.evaluate(module);
-            for (Map.Entry<String, ComponentWrapper> el : evaluator.getComponents().entrySet()) {
-                ComponentWrapper cw = el.getValue();
-                container.storeComponent(cw.getComponentClass(), cw.getComponent());
-            }
+
+            evaluator.getComponents().forEach((s, cw) ->
+                    container.storeComponent(cw.getComponentClass(), cw.getComponent()));
+
+            evaluator.getAdditionalComponents().forEach((cClass, cws) -> {
+                cws.forEach(cw -> container.storeAdditionalComponent(cClass, cw.getComponent()));
+            });
+
 
         } catch (Throwable t) {
             throw new RuntimeException(t);
