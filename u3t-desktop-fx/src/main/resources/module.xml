@@ -7,18 +7,30 @@
     <string id="history-btn-name" value="History" />
     <string id="quit-btn-name" value="Quit" />
 
-    <component id="Desktop.Fx.ViewFactory"
-               class="utours.ultimate.desktop.factory.DesktopViewFactory" />
+    <component class="utours.ultimate.desktop.factory.DesktopViewFactory"
+               id="Desktop.Fx.ViewFactory" />
 
-    <component id="Desktop.Fx.NavButtonContainer"
-               class="utours.ultimate.desktop.view.DesktopNavButtonContainer">
-
+    <component class="utours.ultimate.desktop.view.DesktopNavButtonContainer"
+               id="Desktop.Fx.NavButtonContainer">
         <factory class="utours.ultimate.ui.ViewFactory"
                  return="utours.ultimate.ui.NavButtonContainer"
                  value="Desktop.Fx.ViewFactory"
                  method="createNavButtonContainer" />
-
     </component>
+
+    <component class="utours.ultimate.desktop.controller.MainController" id="Desktop.Fx.MainController" />
+
+    <unique-component class="utours.ultimate.desktop.controller.NavigationController">
+        <component class="utours.ultimate.desktop.controller.NavigationController" id="Desktop.Fx.NavigationController">
+            <constructor-args>
+                <arg type="utours.ultimate.desktop.view.DesktopNavButtonContainer" value="Desktop.Fx.NavButtonContainer" />
+            </constructor-args>
+        </component>
+    </unique-component>
+
+    <unique-component class="utours.ultimate.desktop.controller.MainController">
+        <ref-component ref="Desktop.Fx.MainController"/>
+    </unique-component>
 
     <unique-component class="utours.ultimate.ui.ViewFactory">
         <ref-component ref="Desktop.Fx.ViewFactory"/>
@@ -29,17 +41,13 @@
     </unique-component>
 
     <add-component class="utours.ultimate.ui.NavButton">
-
         <component class="utours.ultimate.desktop.view.DesktopNavButton"
                    id="Desktop.Fx.NavButton.Parties"
                    type="additional">
-
             <constructor-args>
                 <arg type="java.lang.String" name="text" value="parties-btn-name" />
             </constructor-args>
-
         </component>
-
         <component class="utours.ultimate.desktop.view.DesktopNavButton"
                    id="Desktop.Fx.NavButton.Chat"
                    type="additional">
@@ -47,7 +55,6 @@
                 <arg type="java.lang.String" name="text" value="chat-btn-name" />
             </constructor-args>
         </component>
-
         <component class="utours.ultimate.desktop.view.DesktopNavButton"
                    id="Desktop.Fx.NavButton.History"
                    type="additional">
@@ -55,7 +62,6 @@
                 <arg type="java.lang.String" name="text" value="history-btn-name" />
             </constructor-args>
         </component>
-
         <component class="utours.ultimate.desktop.view.DesktopNavButton"
                    id="Desktop.Fx.NavButtonBase"
                    type="additional">
@@ -63,7 +69,6 @@
                 <arg type="java.lang.String" name="text" value="quit-btn-name" />
             </constructor-args>
         </component>
-
     </add-component>
 
 </module>

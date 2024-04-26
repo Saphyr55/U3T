@@ -7,7 +7,8 @@
 
 <fx:root xmlns:fx="http://javafx.com/fxml"
          type="utours.ultimate.desktop.view.DesktopMainView"
-         fx:id="root" >
+         fx:id="root"
+         fx:controller="utours.ultimate.desktop.controller.MainController" >
 
   <fx:define>
     <Integer fx:id="NavigationWidth" fx:value="122" />

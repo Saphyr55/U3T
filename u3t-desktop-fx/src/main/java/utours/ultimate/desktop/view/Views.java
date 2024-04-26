@@ -2,8 +2,7 @@ package utours.ultimate.desktop.view;
 
 import javafx.fxml.FXMLLoader;
 
-import utours.ultimate.desktop.controller.MainController;
-import utours.ultimate.desktop.controller.NavigationController;
+import utours.ultimate.desktop.MainApplication;
 import utours.ultimate.desktop.controller.U3TGameController;
 import utours.ultimate.game.feature.U3TGameService;
 import utours.ultimate.game.feature.internal.U3TGameServiceInternal;
@@ -11,6 +10,7 @@ import utours.ultimate.game.model.Player;
 import utours.ultimate.game.model.U3TGame;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public class Views {
 
@@ -45,19 +45,9 @@ public class Views {
 
     public static void loadNavigationView(DesktopNavigationView view) {
         try {
-            NavigationController controller = new NavigationController(new DesktopNavButtonContainer());
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(Views.class.getResource(Views.NAVIGATION_FXML));
-            loader.setControllerFactory(aClass -> {
-                try {
-                    if (aClass.equals(controller.getClass())) {
-                        return controller;
-                    }
-                    return aClass.newInstance();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            loader.setControllerFactory(Views::getComponent);
             loader.setRoot(view);
             loader.load();
         } catch (Exception e) {
@@ -67,14 +57,30 @@ public class Views {
 
     public static void loadMainView(DesktopMainView view) {
         try {
-            MainController controller = new MainController();
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(Views.class.getResource(Views.MAIN_FXML));
-            loader.setController(controller);
+            loader.setControllerFactory(Views::getComponent);
             loader.setRoot(view);
             loader.load();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
+
+    public static Object getComponent(Class<?> clazz) {
+        Object o = MainApplication.getContext()
+                .getContainerReadOnly()
+                .getUniqueComponent(clazz);
+        return Optional.ofNullable(o).orElseGet(() -> instantiate(clazz));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T instantiate(Class<?> clazz) {
+        try {
+            return (T) clazz.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

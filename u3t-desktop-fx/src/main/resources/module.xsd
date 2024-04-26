@@ -52,8 +52,8 @@
   </xs:simpleType>
 
   <xs:attributeGroup name="component-attributes">
-    <xs:attribute use="required" name="id" type="xs:string" />
     <xs:attribute use="required" name="class" type="xs:string" />
+    <xs:attribute use="required" name="id" type="xs:string" />
     <xs:attribute default="derived" name="strategy" type="component-strategy-type" />
     <xs:attribute default="unique" name="type" type="component-type-type" />
   </xs:attributeGroup>

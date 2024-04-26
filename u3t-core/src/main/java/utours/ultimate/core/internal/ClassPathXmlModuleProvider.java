@@ -88,7 +88,7 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
 
     private Module.UniqueComponent processUniqueComponent(Node node) {
 
-        String className = node.getAttributes().getNamedItem("class").getNodeValue();
+        String className = getAttributeValue(node, "class", () -> new IllegalStateException("Must to precise the class."));
 
         Module.UniqueComponent uniqueComponent = new Module.UniqueComponent();
         uniqueComponent.setClassName(className);
@@ -137,9 +137,9 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
     }
 
     private Module.Arg processArg(Node item) {
-        String name = item.getAttributes().getNamedItem("name").getNodeValue();
-        String type = item.getAttributes().getNamedItem("type").getNodeValue();
-        String value = item.getAttributes().getNamedItem("value").getNodeValue();
+        String name = getAttributeValue(item, "name", "");
+        String type = getAttributeValue(item, "type", () -> new IllegalStateException("Must to precise the argument type."));
+        String value = getAttributeValue(item, "value", () -> new IllegalStateException("Must to precise the value."));
 
         Module.Arg arg = new Module.Arg();
         arg.setName(name);
@@ -150,8 +150,8 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
     }
 
     private Module.Component processComponent(Node node) {
-        String classname = node.getAttributes().getNamedItem("class").getNodeValue();
-        String id = node.getAttributes().getNamedItem("id").getNodeValue();
+        String classname = getAttributeValue(node, "class", () -> new IllegalStateException("Must to precise the class."));
+        String id = getAttributeValue(node, "id", () -> new IllegalStateException("Must to precise the id."));
 
         Optional<Node> itemOpt = IntStream.range(0, node.getChildNodes().getLength())
                 .mapToObj(i -> node.getChildNodes().item(i))
@@ -177,10 +177,10 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
 
     private Module.Factory proccessFactory(Node item) {
         Module.Factory factory = new Module.Factory();
-        String className = item.getAttributes().getNamedItem("class").getNodeValue();
-        String returnType = item.getAttributes().getNamedItem("return").getNodeValue();
-        String value = item.getAttributes().getNamedItem("value").getNodeValue();
-        String methodName = item.getAttributes().getNamedItem("method").getNodeValue();
+        String className = getAttributeValue(item, "class", () -> new IllegalStateException("Must to precise the class."));
+        String returnType = getAttributeValue(item, "return", () -> new IllegalStateException("Must to precise the return type."));
+        String value = getAttributeValue(item, "value", () -> new IllegalStateException("Must to precise the value."));
+        String methodName = getAttributeValue(item, "method", () -> new IllegalStateException("Must to precise the method name."));
         factory.setClassName(className);
         factory.setReturnType(returnType);
         factory.setValue(value);
@@ -203,7 +203,7 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
 
         Module.AdditionalComponent additionalComponent = new Module.AdditionalComponent();
 
-        String classname = node.getAttributes().getNamedItem("class").getNodeValue();
+        String classname = getAttributeValue(node, "class", () -> new IllegalStateException("Must to precise the class."));
 
         List<Module.Component> components =
                 IntStream.range(0, node.getChildNodes().getLength())
@@ -235,8 +235,8 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
 
     private <T> Module.Value<T> processValue(Node item, Supplier<Module.Value<T>> valueFactory, Function<String, T> mapper) {
         var mValue = valueFactory.get();
-        String id = item.getAttributes().getNamedItem("id").getNodeValue();
-        String valueStr = item.getAttributes().getNamedItem("value").getNodeValue();
+        String id = getAttributeValue(item, "id", () -> new IllegalStateException("Must have an id."));
+        String valueStr = getAttributeValue(item, "value", () -> new IllegalStateException("Must have a value."));
         mValue.setId(id);
         mValue.setValue(mapper.apply(valueStr));
         return mValue;
@@ -287,6 +287,21 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String getAttributeValue(Node node, String name, String defaultValue) {
+        var opt = Optional.ofNullable(node.getAttributes().getNamedItem(name));
+        if (opt.isPresent()) {
+            return opt.get().getNodeValue();
+        } else {
+            return defaultValue;
+        }
+    }
+
+    private String getAttributeValue(Node node, String name, Supplier<? extends RuntimeException> orElseThrow) {
+        return Optional.ofNullable(node.getAttributes().getNamedItem(name))
+                .orElseThrow(orElseThrow)
+                .getNodeValue();
     }
 
     private boolean isRefComponent(Node item) {
