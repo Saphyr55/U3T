@@ -11,7 +11,6 @@ import utours.ultimate.desktop.view.u3t.Tile;
 import utours.ultimate.game.feature.U3TGameProvider;
 import utours.ultimate.game.feature.U3TGameService;
 import utours.ultimate.game.feature.internal.U3TGameAlmostFinishProvider;
-import utours.ultimate.game.feature.internal.U3TGameFinishProvider;
 import utours.ultimate.game.model.*;
 
 import java.io.IOException;
@@ -22,15 +21,21 @@ public class U3TGameController implements Initializable {
 
     public static final int GRID_SIZE = 3;
 
-    private U3TGameService gameService;
-    private U3TGame game;
+    private final U3TGameService gameService;
     private Player currentPlayer;
+    private U3TGame game;
 
     @FXML
     private GridPane u3tGrid;
 
     @FXML
     private Pane root;
+
+    public U3TGameController(U3TGameService gameService, U3TGame game, Player currentPlayer) {
+        this.gameService = gameService;
+        this.game = game;
+        this.currentPlayer = currentPlayer;
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -145,15 +150,6 @@ public class U3TGameController implements Initializable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public void setGame(U3TGame game) {
-        this.game = game;
-        this.currentPlayer = game.crossPlayer();
-    }
-
-    public void setGameService(U3TGameService gameService) {
-        this.gameService = gameService;
     }
 
 }

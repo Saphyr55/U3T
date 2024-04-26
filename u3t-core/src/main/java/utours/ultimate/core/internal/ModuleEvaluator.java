@@ -12,17 +12,53 @@ public class ModuleEvaluator {
 
     private final Map<String, ComponentWrapper> componentsById = new HashMap<>();
     private final Map<Class<?>, List<ComponentWrapper>> additionalComponents = new HashMap<>();
+    private final Map<Class<?>, ComponentWrapper> uniqueComponents = new HashMap<>();
 
     public void evaluate(Module module) throws Throwable {
 
+        for (var entry : module.getValues().entrySet()) {
+            for (var value : entry.getValue()) {
+                evaluate(entry.getKey(), value);
+            }
+        }
+
         for (Module.Component component : module.getComponents()) {
             evaluate(component);
+        }
+
+        for (Module.UniqueComponent uniqueComponent : module.getUniqueComponents()) {
+            evaluate(uniqueComponent);
         }
 
         for (Module.AdditionalComponent additionalComponent : module.getAdditionalComponents()) {
             evaluate(additionalComponent);
         }
 
+    }
+
+    private void evaluate(Module.UniqueComponent uniqueComponent) throws Throwable {
+        Class<?> clazz = Class.forName(uniqueComponent.getClassName());
+
+        ComponentWrapper cw;
+
+        if (uniqueComponent.getRefComponent() != null) {
+            cw = componentsById.get(uniqueComponent.getRefComponent().getRef());
+            uniqueComponents.put(clazz, cw);
+        } else if (uniqueComponent.getComponent() != null) {
+            evaluate(uniqueComponent.getComponent());
+            cw = componentsById.get(uniqueComponent.getComponent().getId());
+        } else {
+            throw new IllegalStateException();
+        }
+
+        uniqueComponents.put(clazz, cw);
+    }
+
+    public void evaluate(Class<?> clazz, Module.Value<?> value) {
+        ComponentWrapper cw = new ComponentWrapper();
+        cw.setComponentClass(clazz);
+        cw.setComponent(value.getValue());
+        componentsById.put(value.getId(), cw);
     }
 
     public void evaluate(Module.AdditionalComponent additionalComponent) throws Throwable {
@@ -42,7 +78,7 @@ public class ModuleEvaluator {
         }
     }
 
-    public void evaluate(Module.Component component) throws Throwable {
+    private void evaluate(Module.Component component) throws Throwable {
 
         String className = component.getClassName();
         Class<?> clazz = Class.forName(className);
@@ -56,12 +92,39 @@ public class ModuleEvaluator {
         componentsById.put(component.getId(), componentWrapper);
     }
 
-    public Object instantiate(Class<?> aClass, Module.Component component) throws Throwable {
+    public Object instantiate(Class<?> clazz, Module.Component component) throws Throwable {
 
         Module.ConstructorArgs constructorArgs = component.getConstructorArgs();
+        Module.Factory factory = component.getFactory();
+
+        if (constructorArgs != null) {
+            return instantiateWithConstructor(clazz, constructorArgs);
+        } else if (factory != null) {
+            return instantiateWithFactoryMethod(factory);
+        } else {
+            throw new IllegalStateException();
+        }
+
+    }
+
+    private Object instantiateWithFactoryMethod(Module.Factory factory) throws Throwable {
+
+        Class<?> clazzFactory = Class.forName(factory.getClassName());
+        Class<?> returnType = Class.forName(factory.getReturnType());
+        String methodName = factory.getMethodName();
+        ComponentWrapper factoryWrapper = componentsById.get(factory.getValue());
 
         MethodHandles.Lookup lookup = MethodHandles.lookup();
-        MethodHandle mh = lookup.findConstructor(aClass, methodType(constructorArgs));
+        MethodHandle mh;
+        mh = lookup.findVirtual(clazzFactory, methodName, MethodType.methodType(returnType));
+        mh = mh.bindTo(factoryWrapper.getComponent());
+
+        return mh.invoke();
+    }
+
+    private Object instantiateWithConstructor(Class<?> clazz, Module.ConstructorArgs constructorArgs) throws Throwable {
+        MethodHandles.Lookup lookup = MethodHandles.lookup();
+        MethodHandle mh = lookup.findConstructor(clazz, methodType(constructorArgs));
 
         for (int i = 0; i < constructorArgs.getArgs().size(); i++) {
             Module.Arg mArg = constructorArgs.getArgs().get(i);

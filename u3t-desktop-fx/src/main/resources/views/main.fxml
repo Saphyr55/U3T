@@ -3,16 +3,18 @@
 <?import javafx.scene.layout.GridPane?>
 <?import java.lang.Integer?>
 
-<GridPane xmlns:fx="http://javafx.com/fxml"
-          fx:id="root"
-          fx:controller="utours.ultimate.desktop.controller.MainController" >
+<?import utours.ultimate.desktop.view.DesktopNavigationView?>
+
+<fx:root xmlns:fx="http://javafx.com/fxml"
+         type="utours.ultimate.desktop.view.DesktopMainView"
+         fx:id="root" >
 
   <fx:define>
     <Integer fx:id="NavigationWidth" fx:value="122" />
     <Integer fx:id="PartiesWidth" fx:value="400" />
   </fx:define>
 
-  <fx:include source="navigation.fxml"
+  <DesktopNavigationView
               prefHeight="${root.height}"
               prefWidth="$NavigationWidth"
               GridPane.columnIndex="0"
@@ -30,4 +32,4 @@
               GridPane.columnIndex="2"
               GridPane.rowIndex="0"  />
 
-</GridPane>
+</fx:root>

@@ -2,8 +2,64 @@ package utours.ultimate.core;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class Module {
+
+    public static class Value<T> {
+        private String id;
+        private T value;
+
+        public T getValue() {
+            return value;
+        }
+
+        public void setValue(T value) {
+            this.value = value;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+    }
+
+    public static class UniqueComponent {
+
+        private String className;
+        private Component component;
+        private RefComponent refComponent;
+
+        public String getClassName() {
+            return className;
+        }
+
+        public void setClassName(String className) {
+            this.className = className;
+        }
+
+        public Component getComponent() {
+            return component;
+        }
+
+        public RefComponent getRefComponent() {
+            return refComponent;
+        }
+
+        public void setComponent(Component component) {
+            this.component = component;
+        }
+
+        public void setRefComponent(RefComponent refComponent) {
+            this.refComponent = refComponent;
+        }
+
+
+    }
 
     public static class AdditionalComponent {
         private List<Component> components;
@@ -34,13 +90,6 @@ public class Module {
             this.className = className;
         }
 
-        @Override
-        public String toString() {
-            return "AdditionalComponent{" +
-                    "components=" + Arrays.deepToString(components.toArray()) +
-                    ", className='" + className + '\'' +
-                    '}';
-        }
     }
 
     public static class RefComponent {
@@ -85,15 +134,46 @@ public class Module {
             this.type = type;
         }
 
-        @Override
-        public String toString() {
-            return "Arg{" +
-                    "name='" + name + '\'' +
-                    ", value='" + value + '\'' +
-                    ", type='" + type + '\'' +
-                    '}';
+    }
+
+    public static class Factory {
+
+        private String className;
+        private String methodName;
+        private String returnType;
+        private String value;
+
+        public String getClassName() {
+            return className;
         }
 
+        public void setClassName(String className) {
+            this.className = className;
+        }
+
+        public String getMethodName() {
+            return methodName;
+        }
+
+        public void setMethodName(String methodName) {
+            this.methodName = methodName;
+        }
+
+        public String getReturnType() {
+            return returnType;
+        }
+
+        public void setReturnType(String returnType) {
+            this.returnType = returnType;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
     }
 
     public static class ConstructorArgs {
@@ -114,6 +194,7 @@ public class Module {
                     "args=" + Arrays.deepToString(args.toArray()) +
                     '}';
         }
+
     }
 
     public static class Component {
@@ -121,6 +202,7 @@ public class Module {
         private String id;
         private String className;
         private ConstructorArgs constructorArgs;
+        private Factory factory;
 
         public String getId() {
             return id;
@@ -146,18 +228,20 @@ public class Module {
             this.constructorArgs = constructorArgs;
         }
 
-        @Override
-        public String toString() {
-            return "Component{" +
-                    "id='" + id + '\'' +
-                    ", classname='" + className + '\'' +
-                    ", constructorArgs=" + constructorArgs +
-                    '}';
+        public Factory getFactory() {
+            return factory;
         }
+
+        public void setFactory(Factory factory) {
+            this.factory = factory;
+        }
+
     }
 
     private List<Component> components;
     private List<AdditionalComponent> additionalComponents;
+    private List<UniqueComponent> uniqueComponents;
+    private Map<Class<?>, List<Value<?>>> values;
 
     public List<Component> getComponents() {
         return components;
@@ -165,6 +249,14 @@ public class Module {
 
     public void setComponents(List<Component> components) {
         this.components = components;
+    }
+
+    public List<UniqueComponent> getUniqueComponents() {
+        return uniqueComponents;
+    }
+
+    public void setUniqueComponents(List<UniqueComponent> uniqueComponents) {
+        this.uniqueComponents = uniqueComponents;
     }
 
     public List<AdditionalComponent> getAdditionalComponents() {
@@ -175,11 +267,12 @@ public class Module {
         this.additionalComponents = additionalComponents;
     }
 
-    @Override
-    public String toString() {
-        return "Module{" +
-                "components=" + Arrays.deepToString(components.toArray()) +
-                ",\nadditionalComponents=" + Arrays.deepToString(additionalComponents.toArray()) +
-                '}';
+    public Map<Class<?>, List<Value<?>>> getValues() {
+        return values;
     }
+
+    public void setValues(Map<Class<?>, List<Value<?>>> values) {
+        this.values = values;
+    }
+
 }

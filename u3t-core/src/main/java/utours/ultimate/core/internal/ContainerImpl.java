@@ -7,10 +7,12 @@ import java.util.*;
 public class ContainerImpl implements Container {
 
     private final Map<Class<?>, List<Object>> additionalComponents;
-    private final Map<Class<?>, Object> components;
+    private final Map<Class<?>, Object> uniqueComponents;
+    private final Map<String, Object> components;
 
     public ContainerImpl() {
         this.additionalComponents = new HashMap<>();
+        this.uniqueComponents = new HashMap<>();
         this.components = new HashMap<>();
     }
 
@@ -21,20 +23,26 @@ public class ContainerImpl implements Container {
                 .toList();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <T> T getComponent(Class<T> componentClass) {
-        return (T) components.get(componentClass);
+    @SuppressWarnings(value = "unchecked")
+    public <T> T getUniqueComponent(Class<T> componentClass) {
+        return (T) uniqueComponents.get(componentClass);
     }
 
     @Override
-    public <T> void storeComponent(Class<T> tClass, T component) {
-        components.put(tClass, component);
+    @SuppressWarnings(value = "unchecked")
+    public <T> T getComponent(String identifier) {
+        return (T) components.get(identifier);
     }
 
     @Override
-    public <T> void removeComponent(Class<T> tClass) {
-        components.remove(tClass);
+    public <T> void storeUniqueComponent(Class<T> tClass, T component) {
+        uniqueComponents.put(tClass, component);
+    }
+
+    @Override
+    public <T> void removeUniqueComponent(Class<T> tClass) {
+        uniqueComponents.remove(tClass);
     }
 
     @Override
@@ -47,6 +55,11 @@ public class ContainerImpl implements Container {
     @Override
     public <T> void removeAdditionalComponents(Class<T> tClass) {
         additionalComponents.remove(tClass);
+    }
+
+    @Override
+    public <T> void storeComponent(String id, T component) {
+        components.put(id, component);
     }
 
     private <T> List<Object> listSupplier(Class<T> componentClass) {

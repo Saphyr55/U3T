@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="module.xsd">
+
+    <string id="parties-btn-name" value="Parties" />
+    <string id="chat-btn-name" value="Chat" />
+    <string id="history-btn-name" value="History" />
+    <string id="quit-btn-name" value="Quit" />
+
+    <component id="Desktop.Fx.ViewFactory"
+               class="utours.ultimate.desktop.factory.DesktopViewFactory" />
+
+    <component id="Desktop.Fx.NavButtonContainer"
+               class="utours.ultimate.desktop.view.DesktopNavButtonContainer">
+
+        <factory class="utours.ultimate.ui.ViewFactory"
+                 return="utours.ultimate.ui.NavButtonContainer"
+                 value="Desktop.Fx.ViewFactory"
+                 method="createNavButtonContainer" />
+
+    </component>
+
+    <unique-component class="utours.ultimate.ui.ViewFactory">
+        <ref-component ref="Desktop.Fx.ViewFactory"/>
+    </unique-component>
+
+    <unique-component class="utours.ultimate.ui.NavButtonContainer">
+        <ref-component ref="Desktop.Fx.NavButtonContainer" />
+    </unique-component>
+
+    <add-component class="utours.ultimate.ui.NavButton">
+
+        <component class="utours.ultimate.desktop.view.DesktopNavButton"
+                   id="Desktop.Fx.NavButton.Parties"
+                   type="additional">
+
+            <constructor-args>
+                <arg type="java.lang.String" name="text" value="parties-btn-name" />
+            </constructor-args>
+
+        </component>
+
+        <component class="utours.ultimate.desktop.view.DesktopNavButton"
+                   id="Desktop.Fx.NavButton.Chat"
+                   type="additional">
+            <constructor-args>
+                <arg type="java.lang.String" name="text" value="chat-btn-name" />
+            </constructor-args>
+        </component>
+
+        <component class="utours.ultimate.desktop.view.DesktopNavButton"
+                   id="Desktop.Fx.NavButton.History"
+                   type="additional">
+            <constructor-args>
+                <arg type="java.lang.String" name="text" value="history-btn-name" />
+            </constructor-args>
+        </component>
+
+        <component class="utours.ultimate.desktop.view.DesktopNavButton"
+                   id="Desktop.Fx.NavButtonBase"
+                   type="additional">
+            <constructor-args>
+                <arg type="java.lang.String" name="text" value="quit-btn-name" />
+            </constructor-args>
+        </component>
+
+    </add-component>
+
+</module>

@@ -79,8 +79,8 @@
 
   <xs:complexType name="component-type">
     <xs:choice>
-      <xs:element type="constructor-args-type" minOccurs="0" maxOccurs="unbounded" name="constructor-args"/>
-      <xs:element type="factory-type" name="factory"/>
+        <xs:element type="constructor-args-type" minOccurs="0" maxOccurs="unbounded" name="constructor-args"/>
+        <xs:element type="factory-type" name="factory"/>
     </xs:choice>
     <xs:attributeGroup ref="component-attributes"/>
   </xs:complexType>
