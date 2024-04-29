@@ -2,23 +2,41 @@
 <module xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="module.xsd">
 
-    <string id="parties-btn-name" value="Parties" />
-    <string id="chat-btn-name" value="Chat" />
-    <string id="history-btn-name" value="History" />
-    <string id="quit-btn-name" value="Quit" />
+    <string id="parties-btn-name"   value="Parties" />
+    <string id="chat-btn-name"      value="Chat" />
+    <string id="history-btn-name"   value="History" />
+    <string id="quit-btn-name"      value="Quit" />
 
-    <component class="utours.ultimate.desktop.factory.DesktopViewFactory"
-               id="Desktop.Fx.ViewFactory" />
+    <component class="utours.ultimate.game.feature.U3TGameService"
+               derived="utours.ultimate.game.feature.internal.U3TGameServiceInternal"
+               id="U3T.GameService" />
 
-    <component class="utours.ultimate.desktop.view.DesktopNavButtonContainer"
-               id="Desktop.Fx.NavButtonContainer">
-        <factory class="utours.ultimate.ui.ViewFactory"
-                 return="utours.ultimate.ui.NavButtonContainer"
-                 value="Desktop.Fx.ViewFactory"
-                 method="createNavButtonContainer" />
+    <component class="utours.ultimate.desktop.factory.ClientFactory" id="Desktop.Fx.ClientFactory" />
+
+    <component class="utours.ultimate.desktop.factory.DesktopViewFactory" id="Desktop.Fx.ViewFactory" />
+
+    <component class="utours.ultimate.net.Client" id="Desktop.Fx.Client">
+        <factory method="getClient" ref="Desktop.Fx.ClientFactory" />
     </component>
 
-    <component class="utours.ultimate.desktop.controller.MainController" id="Desktop.Fx.MainController" />
+    <component class="utours.ultimate.desktop.factory.ControllerFactory"
+               derived="utours.ultimate.desktop.factory.impl.ControllerFactoryImpl"
+               id="Desktop.Fx.ControllerFactory" >
+        <constructor-args>
+            <arg type="utours.ultimate.game.feature.U3TGameService" value="U3T.GameService" />
+            <arg type="utours.ultimate.net.Client" value="Desktop.Fx.Client" />
+        </constructor-args>
+    </component>
+
+    <component class="utours.ultimate.desktop.view.DesktopNavButtonContainer" id="Desktop.Fx.NavButtonContainer">
+        <factory ref="Desktop.Fx.ViewFactory" method="createNavButtonContainer" />
+    </component>
+
+    <component class="utours.ultimate.desktop.controller.U3TGameController" id="Desktop.Fx.U3TGameController">
+        <factory ref="Desktop.Fx.ControllerFactory" method="createU3TGameController" />
+    </component>
+
+    <!-- Unique Mapping -->
 
     <unique-component class="utours.ultimate.desktop.controller.NavigationController">
         <component class="utours.ultimate.desktop.controller.NavigationController" id="Desktop.Fx.NavigationController">
@@ -28,8 +46,16 @@
         </component>
     </unique-component>
 
+    <unique-component class="utours.ultimate.net.Client">
+        <ref-component ref="Desktop.Fx.Client"/>
+    </unique-component>
+
+    <unique-component class="utours.ultimate.desktop.controller.U3TGameController">
+        <ref-component ref="Desktop.Fx.U3TGameController"/>
+    </unique-component>
+
     <unique-component class="utours.ultimate.desktop.controller.MainController">
-        <ref-component ref="Desktop.Fx.MainController"/>
+        <component class="utours.ultimate.desktop.controller.MainController" id="Desktop.Fx.MainController" />
     </unique-component>
 
     <unique-component class="utours.ultimate.ui.ViewFactory">
@@ -39,6 +65,14 @@
     <unique-component class="utours.ultimate.ui.NavButtonContainer">
         <ref-component ref="Desktop.Fx.NavButtonContainer" />
     </unique-component>
+
+    <unique-component class="utours.ultimate.game.feature.U3TGameService">
+        <ref-component ref="U3T.GameService"/>
+    </unique-component>
+
+
+
+    <!-- Buttons -->
 
     <add-component class="utours.ultimate.ui.NavButton">
         <component class="utours.ultimate.desktop.view.DesktopNavButton"

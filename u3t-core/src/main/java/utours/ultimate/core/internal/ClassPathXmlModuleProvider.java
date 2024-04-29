@@ -14,13 +14,11 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class ClassPathXmlModuleProvider implements ModuleProvider {
 
@@ -150,8 +148,11 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
     }
 
     private Module.Component processComponent(Node node) {
-        String classname = getAttributeValue(node, "class", () -> new IllegalStateException("Must to precise the class."));
+
         String id = getAttributeValue(node, "id", () -> new IllegalStateException("Must to precise the id."));
+        String classname = getAttributeValue(node, "class", () -> new IllegalStateException("Must to precise the class."));
+        String derived = getAttributeValue(node, "derived", classname);
+        if  (derived.isEmpty()) derived = classname;
 
         Optional<Node> itemOpt = IntStream.range(0, node.getChildNodes().getLength())
                 .mapToObj(i -> node.getChildNodes().item(i))
@@ -161,6 +162,7 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
         Module.Component component = new Module.Component();
         component.setClassName(classname);
         component.setId(id);
+        component.setDerived(derived);
 
         if (itemOpt.isEmpty() || isConstructorArgs(itemOpt.get())) {
             Module.ConstructorArgs constructorArgs = processConstructorArgs(node);
@@ -177,13 +179,9 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
 
     private Module.Factory proccessFactory(Node item) {
         Module.Factory factory = new Module.Factory();
-        String className = getAttributeValue(item, "class", () -> new IllegalStateException("Must to precise the class."));
-        String returnType = getAttributeValue(item, "return", () -> new IllegalStateException("Must to precise the return type."));
-        String value = getAttributeValue(item, "value", () -> new IllegalStateException("Must to precise the value."));
+        String value = getAttributeValue(item, "ref", () -> new IllegalStateException("Must to precise the value reference."));
         String methodName = getAttributeValue(item, "method", () -> new IllegalStateException("Must to precise the method name."));
-        factory.setClassName(className);
-        factory.setReturnType(returnType);
-        factory.setValue(value);
+        factory.setReference(value);
         factory.setMethodName(methodName);
         return factory;
     }
@@ -322,6 +320,10 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
 
     private boolean isConstructorArgs(Node item) {
         return item.getNodeName().equals("constructor-args");
+    }
+
+    private boolean isDerived(Node item) {
+        return item.getNodeName().equals("derived");
     }
 
     private boolean isFactory(Node item) {

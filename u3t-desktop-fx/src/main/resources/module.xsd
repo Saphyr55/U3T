@@ -52,10 +52,11 @@
   </xs:simpleType>
 
   <xs:attributeGroup name="component-attributes">
-    <xs:attribute use="required" name="class" type="xs:string" />
-    <xs:attribute use="required" name="id" type="xs:string" />
+    <xs:attribute use="required"    name="class"    type="xs:string" />
+    <xs:attribute use="required"    name="id"       type="xs:string" />
+    <xs:attribute                   name="derived"  type="xs:attribute" />
     <xs:attribute default="derived" name="strategy" type="component-strategy-type" />
-    <xs:attribute default="unique" name="type" type="component-type-type" />
+    <xs:attribute default="unique"  name="type"     type="component-type-type" />
   </xs:attributeGroup>
 
   <xs:complexType name="arg-type">
@@ -71,15 +72,22 @@
   </xs:complexType>
 
   <xs:complexType name="factory-type">
-    <xs:attribute name="class" type="xs:string" use="required" />
     <xs:attribute name="method" type="xs:string" use="required" />
-    <xs:attribute name="value" type="xs:string" use="required" />
-    <xs:attribute name="return" type="xs:string" use="required" />
+    <xs:attribute name="ref" type="xs:string" use="required" />
+  </xs:complexType>
+
+  <xs:complexType name="derived-type">
+    <xs:choice>
+      <xs:element type="constructor-args-type" minOccurs="0"  name="constructor-args"/>
+      <xs:element type="factory-type" name="factory"/>
+    </xs:choice>
+    <xs:attribute type="xs:string" name="class" />
   </xs:complexType>
 
   <xs:complexType name="component-type">
     <xs:choice>
-        <xs:element type="constructor-args-type" minOccurs="0" maxOccurs="unbounded" name="constructor-args"/>
+        <xs:element type="derived-type" name="derived" />
+        <xs:element type="constructor-args-type" minOccurs="0" name="constructor-args"/>
         <xs:element type="factory-type" name="factory"/>
     </xs:choice>
     <xs:attributeGroup ref="component-attributes"/>

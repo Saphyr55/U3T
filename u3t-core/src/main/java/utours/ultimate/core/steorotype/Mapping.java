@@ -7,8 +7,15 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface Component {
+public @interface Mapping {
+    
+    Class<?> clazz();
 
+    Type type() default Type.Unique;
 
+    enum Type {
+        Unique,
+        Additional
+    }
 
 }

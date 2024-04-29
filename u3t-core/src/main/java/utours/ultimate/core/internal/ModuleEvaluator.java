@@ -6,6 +6,7 @@ import utours.ultimate.core.Module;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Method;
 import java.util.*;
 
 public class ModuleEvaluator {
@@ -83,7 +84,14 @@ public class ModuleEvaluator {
         String className = component.getClassName();
         Class<?> clazz = Class.forName(className);
 
-        Object object = instantiate(clazz, component);
+        String derivedClassName = component.getDerived();
+        Class<?> derivedClazz = Class.forName(derivedClassName);
+
+        if (!clazz.isAssignableFrom(derivedClazz)) {
+            throw new IllegalStateException("Derived class " + derivedClassName + " is not a subclass of " + clazz);
+        }
+
+        Object object = instantiate(derivedClazz, component);
 
         ComponentWrapper componentWrapper = new ComponentWrapper();
         componentWrapper.setComponent(object);
@@ -109,14 +117,14 @@ public class ModuleEvaluator {
 
     private Object instantiateWithFactoryMethod(Module.Factory factory) throws Throwable {
 
-        Class<?> clazzFactory = Class.forName(factory.getClassName());
-        Class<?> returnType = Class.forName(factory.getReturnType());
         String methodName = factory.getMethodName();
-        ComponentWrapper factoryWrapper = componentsById.get(factory.getValue());
+        ComponentWrapper factoryWrapper = componentsById.get(factory.getReference());
+
+        Method method = factoryWrapper.getComponentClass().getDeclaredMethod(methodName);
 
         MethodHandles.Lookup lookup = MethodHandles.lookup();
         MethodHandle mh;
-        mh = lookup.findVirtual(clazzFactory, methodName, MethodType.methodType(returnType));
+        mh = lookup.findVirtual(factoryWrapper.getComponentClass(), methodName, MethodType.methodType(method.getReturnType()));
         mh = mh.bindTo(factoryWrapper.getComponent());
 
         return mh.invoke();

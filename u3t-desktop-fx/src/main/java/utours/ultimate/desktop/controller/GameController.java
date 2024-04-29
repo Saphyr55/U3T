@@ -3,8 +3,7 @@ package utours.ultimate.desktop.controller;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.Pane;
-import utours.ultimate.desktop.view.Views;
-import utours.ultimate.game.feature.internal.U3TGameFinishProvider;
+import utours.ultimate.desktop.view.U3TGameView;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -16,14 +15,15 @@ public class GameController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        Pane pane = Views.loadU3TGamePane();
+        
+        U3TGameView gameView = new U3TGameView();
 
         gamePane.getChildren().clear();
-        gamePane.getChildren().add(pane);
+        gamePane.getChildren().add(gameView);
 
-        pane.prefWidthProperty().bind(gamePane.widthProperty());
+        gameView.prefWidthProperty().bind(gamePane.widthProperty());
 
-        pane.prefHeightProperty().bind(gamePane.heightProperty());
+        gameView.prefHeightProperty().bind(gamePane.heightProperty());
     }
 
 

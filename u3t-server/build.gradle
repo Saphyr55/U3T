@@ -6,7 +6,7 @@ plugins {
 sourceCompatibility = '21'
 targetCompatibility = '21'
 
-group = 'utours.ultimate'
+group = 'utours.ultimate.server'
 version = '1.0'
 
 application {

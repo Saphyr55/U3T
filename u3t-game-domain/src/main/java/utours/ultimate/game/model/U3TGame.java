@@ -43,6 +43,12 @@ public record U3TGame(Long gameID,
                     .crossPlayer(game.crossPlayer);
         }
 
+        public static Builder newDefaultBuilder() {
+            return newBuilder()
+                    .roundPlayer(Player.Builder.newBuilder("1", "Player O").build())
+                    .crossPlayer(Player.Builder.newBuilder("2", "Player X").build());
+        }
+
         public static Builder newBuilder() {
             Builder builder = new Builder();
             builder.gameID = lastGameID++;

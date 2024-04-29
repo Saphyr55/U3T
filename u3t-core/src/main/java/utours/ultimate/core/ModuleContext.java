@@ -30,7 +30,7 @@ public interface ModuleContext {
      * @param moduleProvider module provider.
      * @return module context.
      */
-    static ModuleContext newInstance(ModuleProvider moduleProvider) {
+    static ModuleContext create(ModuleProvider moduleProvider) {
         return new ModuleContextImpl(moduleProvider);
     }
 
@@ -40,8 +40,8 @@ public interface ModuleContext {
      * @param moduleProvider module provider.
      * @return module context.
      */
-    static ModuleContext newInstanceAndLoad(ModuleProvider moduleProvider) {
-        ModuleContext moduleContext = newInstance(moduleProvider);
+    static ModuleContext createAndLoad(ModuleProvider moduleProvider) {
+        ModuleContext moduleContext = create(moduleProvider);
         moduleContext.load();
         return moduleContext;
     }

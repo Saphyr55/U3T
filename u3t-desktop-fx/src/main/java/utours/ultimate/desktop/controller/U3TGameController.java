@@ -5,13 +5,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.layout.*;
-import utours.ultimate.desktop.view.Views;
 import utours.ultimate.desktop.view.u3t.PrimitiveTile;
 import utours.ultimate.desktop.view.u3t.Tile;
 import utours.ultimate.game.feature.U3TGameProvider;
 import utours.ultimate.game.feature.U3TGameService;
 import utours.ultimate.game.feature.internal.U3TGameAlmostFinishProvider;
 import utours.ultimate.game.model.*;
+import utours.ultimate.net.Client;
 
 import java.io.IOException;
 import java.net.URL;
@@ -21,6 +21,7 @@ public class U3TGameController implements Initializable {
 
     public static final int GRID_SIZE = 3;
 
+    private final Client client;
     private final U3TGameService gameService;
     private Player currentPlayer;
     private U3TGame game;
@@ -31,10 +32,15 @@ public class U3TGameController implements Initializable {
     @FXML
     private Pane root;
 
-    public U3TGameController(U3TGameService gameService, U3TGame game, Player currentPlayer) {
+    public U3TGameController(U3TGameService gameService,
+                             U3TGame game,
+                             Player currentPlayer,
+                             Client client) {
+
         this.gameService = gameService;
         this.game = game;
         this.currentPlayer = currentPlayer;
+        this.client = client;
     }
 
     @Override
@@ -141,7 +147,7 @@ public class U3TGameController implements Initializable {
             U3TGameWonController controller = new U3TGameWonController(wonPlayer);
 
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource(Views.U3T_GAME_WON_FXML));
+            loader.setLocation(getClass().getResource("/views/u3t-game-won.fxml"));
             loader.setController(controller);
 
             Parent parent = loader.load();

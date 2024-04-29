@@ -138,18 +138,8 @@ public class Module {
 
     public static class Factory {
 
-        private String className;
         private String methodName;
-        private String returnType;
-        private String value;
-
-        public String getClassName() {
-            return className;
-        }
-
-        public void setClassName(String className) {
-            this.className = className;
-        }
+        private String reference;
 
         public String getMethodName() {
             return methodName;
@@ -159,20 +149,12 @@ public class Module {
             this.methodName = methodName;
         }
 
-        public String getReturnType() {
-            return returnType;
+        public String getReference() {
+            return reference;
         }
 
-        public void setReturnType(String returnType) {
-            this.returnType = returnType;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public void setValue(String value) {
-            this.value = value;
+        public void setReference(String reference) {
+            this.reference = reference;
         }
     }
 
@@ -201,6 +183,7 @@ public class Module {
 
         private String id;
         private String className;
+        private String derived;
         private ConstructorArgs constructorArgs;
         private Factory factory;
 
@@ -236,8 +219,15 @@ public class Module {
             this.factory = factory;
         }
 
-    }
+        public void setDerived(String derived) {
+            this.derived = derived;
+        }
 
+        public String getDerived() {
+            return derived;
+        }
+
+    }
     private List<Component> components;
     private List<AdditionalComponent> additionalComponents;
     private List<UniqueComponent> uniqueComponents;

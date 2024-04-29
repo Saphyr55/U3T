@@ -5,7 +5,7 @@ import utours.ultimate.net.data.ApplicationConfigurationData;
 
 public interface ApplicationConfiguration {
 
-    static ApplicationConfiguration ofProperties() {
+    static ApplicationConfiguration ofFileProperties() {
         return new ApplicationConfigFileProperties();
     }
 
