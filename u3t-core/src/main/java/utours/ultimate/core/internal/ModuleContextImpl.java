@@ -1,7 +1,7 @@
-package utours.ultimate.core;
+package utours.ultimate.core.internal;
 
-import utours.ultimate.core.internal.ContainerImpl;
-import utours.ultimate.core.internal.ModuleEvaluator;
+import utours.ultimate.core.*;
+import utours.ultimate.core.Module;
 
 public class ModuleContextImpl implements ModuleContext {
 

@@ -17,16 +17,16 @@ public class ContainerImpl implements Container {
     }
 
     @Override
-    public <T> List<T> getAdditionalComponent(Class<T> componentClass) {
-        return additionalComponents.computeIfAbsent(componentClass, this::listSupplier).stream()
-                .map(componentClass::cast)
+    public <T> List<T> getAdditionalComponent(Class<T> cClass) {
+        return additionalComponents.computeIfAbsent(cClass, this::listSupplier).stream()
+                .map(cClass::cast)
                 .toList();
     }
 
     @Override
     @SuppressWarnings(value = "unchecked")
-    public <T> T getUniqueComponent(Class<T> componentClass) {
-        return (T) uniqueComponents.get(componentClass);
+    public <T> T getUniqueComponent(Class<T> cClass) {
+        return (T) uniqueComponents.get(cClass);
     }
 
     @Override

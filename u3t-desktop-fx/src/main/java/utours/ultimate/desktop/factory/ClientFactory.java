@@ -2,16 +2,8 @@ package utours.ultimate.desktop.factory;
 
 import utours.ultimate.net.Client;
 
-public class ClientFactory {
+public interface ClientFactory {
 
-    private final Client client;
-
-    public ClientFactory() {
-        client = Client.of("127.0.0.1", 6667);
-    }
-
-    public Client getClient() {
-        return client;
-    }
+    Client getClient();
 
 }

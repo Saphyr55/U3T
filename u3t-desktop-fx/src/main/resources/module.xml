@@ -11,9 +11,13 @@
                derived="utours.ultimate.game.feature.internal.U3TGameServiceInternal"
                id="U3T.GameService" />
 
-    <component class="utours.ultimate.desktop.factory.ClientFactory" id="Desktop.Fx.ClientFactory" />
+    <component class="utours.ultimate.desktop.factory.ClientFactory"
+               derived="utours.ultimate.desktop.factory.impl.ClientFactoryImpl"
+               id="Desktop.Fx.ClientFactory" />
 
-    <component class="utours.ultimate.desktop.factory.DesktopViewFactory" id="Desktop.Fx.ViewFactory" />
+    <component class="utours.ultimate.ui.ViewFactory"
+               derived="utours.ultimate.desktop.factory.DesktopViewFactory"
+               id="Desktop.Fx.ViewFactory" />
 
     <component class="utours.ultimate.net.Client" id="Desktop.Fx.Client">
         <factory method="getClient" ref="Desktop.Fx.ClientFactory" />

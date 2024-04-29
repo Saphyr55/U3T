@@ -5,9 +5,7 @@ public class ComponentWrapper {
     private Class<?> componentClass;
     private Object component;
 
-    public ComponentWrapper() {
-
-    }
+    public ComponentWrapper() { }
 
     public void setComponent(Object component) {
         this.component = component;
