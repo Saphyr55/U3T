@@ -36,7 +36,7 @@ public class ModuleEvaluator {
 
     private void evaluate(Module.Group group) throws Throwable {
 
-        ComponentWrapper.Data cw = new ComponentWrapper.Data();
+        ComponentWrapper cw = new ComponentWrapper();
         Class<?> clazz = Class.forName(group.getClassName());
         String id = group.getId();
 
@@ -65,15 +65,17 @@ public class ModuleEvaluator {
                 }
                 case Module.RefComponent refComponent -> {
                     ComponentWrapper componentWrapper = componentsById.get(refComponent.getRef());
-                    switch (componentWrapper) {
-                        case ComponentWrapper.Data data -> list.add(data.getComponent());
-                        case ComponentWrapper.Group group1 -> { }
-                    }
+                    list.add(componentWrapper.getComponent());
+                }
+                case Module.RefGroup refGroup -> {
+                    ComponentWrapper componentWrapper = componentsById.get(refGroup.getRef());
+                    List<Object> objects = componentWrapper.getComponent();
+                    list.addAll(objects);
                 }
             }
         }
 
-        cw.setComponentClass(list.getClass());
+        cw.setComponentClass(clazz);
         cw.setComponent(list);
 
         componentsById.put(id, cw);
@@ -93,13 +95,15 @@ public class ModuleEvaluator {
                 uniqueComponents.put(clazz, cw);
                 yield cw;
             }
+            case Module.RefGroup ignored ->
+                    throw new IllegalStateException("Ref group is not supported by unique component.");
         };
 
         uniqueComponents.put(clazz, cw);
     }
 
     public void evaluate(Class<?> clazz, Module.Value<?> value) {
-        ComponentWrapper.Data cw = new ComponentWrapper.Data();
+        ComponentWrapper cw = new ComponentWrapper();
         cw.setComponentClass(clazz);
         cw.setComponent(value.getValue());
         componentsById.put(value.getId(), cw);
@@ -114,25 +118,26 @@ public class ModuleEvaluator {
                 case Module.Component component -> {
                     evaluate(component);
                     ComponentWrapper componentWrapper = componentsById.get(component.getId());
-                    additionalComponents
-                            .computeIfAbsent(clazz, aClass -> new LinkedList<>())
+                    additionalComponents.computeIfAbsent(clazz, aClass -> new LinkedList<>())
                             .add(componentWrapper);
                 }
                 case Module.RefComponent refComponent -> {
                     ComponentWrapper componentWrapper = componentsById.get(refComponent.getRef());
-                    switch (componentWrapper) {
-                        case ComponentWrapper.Data data -> {
-                            additionalComponents
-                                    .computeIfAbsent(clazz, aClass -> new LinkedList<>())
-                                    .add(data);
-                        }
-                        case ComponentWrapper.Group group -> {
-                            for (ComponentWrapper component : group.getComponents()) {
+                    additionalComponents.computeIfAbsent(clazz, aClass -> new LinkedList<>())
+                            .add(componentWrapper);
+                }
+                case Module.RefGroup refGroup -> {
+                    ComponentWrapper componentWrapper = componentsById.get(refGroup.getRef());
+                    List<Object> objects = componentWrapper.getComponent();
 
-                            }
-                        }
-                    }
+                    checkIsAllSubClasses(clazz, objects);
 
+                    List<ComponentWrapper> componentWrappers = objects.stream()
+                            .map(ComponentWrapper::fromObject)
+                            .toList();
+
+                    additionalComponents.computeIfAbsent(clazz, aClass -> new LinkedList<>())
+                            .addAll(componentWrappers);
                 }
             }
         }
@@ -226,5 +231,19 @@ public class ModuleEvaluator {
         return additionalComponents;
     }
 
+    private void checkIsAllSubClasses(Class<?> clazz, List<Object> objects) throws Throwable {
+        for (Object object : objects) {
+            List<Throwable> exceptions = new ArrayList<>();
+            if (!clazz.isInstance(object)) {
+                exceptions.add(new IllegalStateException("Derived class " + object.getClass() + " is not a subclass of " + clazz));
+            }
+            if (!exceptions.isEmpty()) {
+                throw exceptions.stream().reduce((throwable, throwable2) -> {
+                    throwable.addSuppressed(throwable2);
+                    return throwable;
+                }).get();
+            }
+        }
+    }
 
 }

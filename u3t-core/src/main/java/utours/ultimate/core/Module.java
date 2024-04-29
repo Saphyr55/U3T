@@ -118,6 +118,19 @@ public class Module {
         }
     }
 
+    public static final class RefGroup implements ComponentInterface {
+
+        private String ref;
+
+        public String getRef() {
+            return ref;
+        }
+
+        public void setRef(String ref) {
+            this.ref = ref;
+        }
+    }
+
     public static class Arg {
         private String name;
         private String value;
@@ -181,13 +194,6 @@ public class Module {
 
         public void setArgs(List<Arg> args) {
             this.args = args;
-        }
-
-        @Override
-        public String toString() {
-            return "ConstructorArgs{" +
-                    "args=" + Arrays.deepToString(args.toArray()) +
-                    '}';
         }
 
     }
@@ -260,4 +266,5 @@ public class Module {
     public void setStatements(List<Statement> statements) {
         this.statements = statements;
     }
+
 }

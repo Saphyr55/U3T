@@ -111,10 +111,13 @@
   </xs:complexType>
 
   <xs:complexType name="add-component-type">
-    <xs:sequence>
-      <xs:element name="component" type="component-type" minOccurs="0" maxOccurs="unbounded"/>
-      <xs:element name="ref-component" type="ref-component-type" minOccurs="0" maxOccurs="unbounded"/>
-    </xs:sequence>
+    <xs:choice  minOccurs="0" maxOccurs="unbounded">
+      <xs:sequence>
+        <xs:element name="ref-group" type="ref-component-type" minOccurs="0" maxOccurs="unbounded" />
+        <xs:element name="component" type="component-type" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="ref-component" type="ref-component-type" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:choice>
     <xs:attribute use="required" name="class" type="xs:string"/>
   </xs:complexType>
 

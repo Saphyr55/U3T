@@ -102,7 +102,7 @@
     <!-- Buttons -->
 
     <add-component class="utours.ultimate.ui.NavButton">
-        <ref-component ref="Desktop.Fx.NavButtons"/>
+        <ref-group ref="Desktop.Fx.NavButtons"/>
     </add-component>
 
 </module>

@@ -68,6 +68,7 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
     private List<Module.Statement> processStatements(NodeList content) {
         return IntStream.range(0, content.getLength())
                 .mapToObj(content::item)
+                .filter(n -> isUniqueComponent(n) || isComponent(n) || isGroup(n) || isAddComponent(n))
                 .map(this::processStatement)
                 .toList();
     }
@@ -86,7 +87,7 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
 
         String id = getAttributeValue(node, "id", () -> new IllegalStateException("Must to precise the id."));
         String className = getAttributeValue(node, "class", Object.class.getName());
-        
+
         Module.Group group = new Module.Group();
         group.setId(id);
         group.setClassName(className);
@@ -206,26 +207,43 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
     }
 
     private List<Module.ComponentInterface> getComponentInterfaces(Node node) {
+        return IntStream.range(0, node.getChildNodes().getLength())
+                .mapToObj(node.getChildNodes()::item)
+                .filter(n -> isComponent(n) || isRefComponent(n) || isRefGroup(n))
+                .map(n -> switch (n.getNodeName()) {
+                    case "component" -> processComponentGroup(n);
+                    case "ref-component" -> processRefComponent(n);
+                    case "ref-group" -> processRefGroup(n);
+                    default -> throw new IllegalStateException();
+                }).toList();
+    }
 
-        List<Module.Component> components =
-                IntStream.range(0, node.getChildNodes().getLength())
-                    .mapToObj(node.getChildNodes()::item)
-                    .filter(this::isComponent)
-                    .map(this::processComponent)
-                    .toList();
+    private Module.Component processComponentGroup(Node node) {
 
-        List<Module.RefComponent> refComponents =
-                IntStream.range(0, node.getChildNodes().getLength())
-                    .mapToObj(node.getChildNodes()::item)
-                    .filter(this::isRefComponent)
-                    .map(this::processRefComponent)
-                    .toList();
+        String classname = getAttributeValue(node, "class", () -> new IllegalStateException("Must to precise the class."));
+        String derived = getAttributeValue(node, "derived", classname);
+        if  (derived.isEmpty()) derived = classname;
 
-        List<Module.ComponentInterface> componentInterfaces = new LinkedList<>();
-        componentInterfaces.addAll(refComponents);
-        componentInterfaces.addAll(components);
+        Optional<Node> itemOpt = IntStream.range(0, node.getChildNodes().getLength())
+                .mapToObj(i -> node.getChildNodes().item(i))
+                .filter(i -> isConstructorArgs(i) || isFactory(i))
+                .findFirst();
 
-        return componentInterfaces;
+        Module.Component component = new Module.Component();
+        component.setClassName(classname);
+        component.setDerived(derived);
+
+        if (itemOpt.isEmpty() || isConstructorArgs(itemOpt.get())) {
+            Module.ConstructorArgs constructorArgs = processConstructorArgs(node);
+            component.setConstructorArgs(constructorArgs);
+        } else if (isFactory(itemOpt.get())) {
+            Module.Factory factory = proccessFactory(itemOpt.get());
+            component.setFactory(factory);
+        } else {
+            throw new IllegalStateException();
+        }
+
+        return component;
     }
 
     private <T> List<T> processNodeList(NodeList list, Function<Node, T> mapper) {
@@ -272,13 +290,17 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
         return processNodeList(list, item -> processValue(item, Module.Value<String>::new, Function.identity()));
     }
 
+    private Module.RefGroup processRefGroup(Node item) {
+        String ref = getAttributeValue(item, "ref", () -> new IllegalStateException("Must to precise the value reference."));
+        Module.RefGroup refGroup = new Module.RefGroup();
+        refGroup.setRef(ref);
+        return refGroup;
+    }
+
     private Module.RefComponent processRefComponent(Node item) {
-
-        String ref = item.getAttributes().getNamedItem("ref").getNodeValue();
-
+        String ref = getAttributeValue(item, "ref", () -> new IllegalStateException("Must to precise the value reference."));
         Module.RefComponent refComponent = new Module.RefComponent();
         refComponent.setRef(ref);
-
         return refComponent;
     }
 
@@ -304,6 +326,10 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
         return Optional.ofNullable(node.getAttributes().getNamedItem(name))
                 .orElseThrow(orElseThrow)
                 .getNodeValue();
+    }
+
+    private boolean isRefGroup(Node item) {
+        return item.getNodeName().equals("ref-group");
     }
 
     private boolean isRefComponent(Node item) {

@@ -1,58 +1,36 @@
 package utours.ultimate.core;
 
-import java.util.List;
+public class ComponentWrapper {
 
-public sealed interface ComponentWrapper {
+    private Class<?> componentClass;
+    private Object component;
 
-    final class Data implements ComponentWrapper {
+    public static <T> ComponentWrapper fromObject(T t) {
+        ComponentWrapper cw = new ComponentWrapper();
+        cw.componentClass = t.getClass();
+        cw.component = t;
+        return cw;
+    }
 
-        private Class<?> componentClass;
-        private Object component;
-
-        public Data() {
-
-        }
-
-        public void setComponent(Object component) {
-            this.component = component;
-        }
-
-        public Class<?> getComponentClass() {
-            return componentClass;
-        }
-
-        public void setComponentClass(Class<?> componentClass) {
-            this.componentClass = componentClass;
-        }
-
-        @SuppressWarnings("unchecked")
-        public <T> T getComponent() {
-            return (T) component;
-        }
+    public ComponentWrapper() {
 
     }
 
-    final class Group implements ComponentWrapper {
+    public void setComponent(Object component) {
+        this.component = component;
+    }
 
-        private Class<?> componentClass;
-        private List<ComponentWrapper> components;
+    public Class<?> getComponentClass() {
+        return componentClass;
+    }
 
-        public void setComponents(List<ComponentWrapper> components) {
-            this.components = components;
-        }
+    public void setComponentClass(Class<?> componentClass) {
+        this.componentClass = componentClass;
+    }
 
-        public Class<?> getComponentClass() {
-            return componentClass;
-        }
-
-        public void setComponentClass(Class<?> componentClass) {
-            this.componentClass = componentClass;
-        }
-
-        public List<ComponentWrapper> getComponents() {
-            return components;
-        }
-
+    @SuppressWarnings("unchecked")
+    public <T> T getComponent() {
+        return (T) component;
     }
 
 }
