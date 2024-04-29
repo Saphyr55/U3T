@@ -25,7 +25,6 @@ public class NavigationController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-
         ContainerReadOnly container = MainApplication.getContext().getContainerReadOnly();
 
         container.getAdditionalComponent(NavButton.class).forEach(this::addContainer);

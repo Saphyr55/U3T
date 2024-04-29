@@ -3,17 +3,17 @@ package utours.ultimate.game.feature.internal;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import utours.ultimate.game.feature.U3TGameService;
+import utours.ultimate.game.feature.GameService;
 import utours.ultimate.game.model.Board;
 import utours.ultimate.game.model.Cell;
-import utours.ultimate.game.model.U3TGame;
+import utours.ultimate.game.model.Game;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class U3TGameServiceInternalTest {
+class GameServiceInternalTest {
 
-    U3TGameService gameService;
-    U3TGame game;
+    GameService gameService;
+    Game game;
 
     @BeforeEach
     void setUp() {
@@ -24,8 +24,8 @@ class U3TGameServiceInternalTest {
                 { new Cell.Cross(), new Cell.Empty(), new Cell.Empty() },
         };
 
-        gameService = new U3TGameServiceInternal();
-        game = U3TGame.Builder.newBuilder()
+        gameService = new GameServiceInternal();
+        game = Game.Builder.newBuilder()
                 .board(new Board(cells))
                 .build();
     }

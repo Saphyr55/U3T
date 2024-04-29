@@ -7,9 +7,9 @@ import javafx.scene.Parent;
 import javafx.scene.layout.*;
 import utours.ultimate.desktop.view.u3t.PrimitiveTile;
 import utours.ultimate.desktop.view.u3t.Tile;
-import utours.ultimate.game.feature.U3TGameProvider;
-import utours.ultimate.game.feature.U3TGameService;
-import utours.ultimate.game.feature.internal.U3TGameAlmostFinishProvider;
+import utours.ultimate.game.feature.GameProvider;
+import utours.ultimate.game.feature.GameService;
+import utours.ultimate.game.feature.internal.GameAlmostFinishProvider;
 import utours.ultimate.game.model.*;
 import utours.ultimate.net.Client;
 
@@ -22,9 +22,8 @@ public class U3TGameController implements Initializable {
     public static final int GRID_SIZE = 3;
 
     private final Client client;
-    private final U3TGameService gameService;
-    private Player currentPlayer;
-    private U3TGame game;
+    private final GameService gameService;
+    private Game game;
 
     @FXML
     private GridPane u3tGrid;
@@ -32,14 +31,12 @@ public class U3TGameController implements Initializable {
     @FXML
     private Pane root;
 
-    public U3TGameController(U3TGameService gameService,
-                             U3TGame game,
-                             Player currentPlayer,
+    public U3TGameController(GameService gameService,
+                             Game game,
                              Client client) {
 
         this.gameService = gameService;
         this.game = game;
-        this.currentPlayer = currentPlayer;
         this.client = client;
     }
 
@@ -48,9 +45,9 @@ public class U3TGameController implements Initializable {
         u3tGrid.setHgap(10);
         u3tGrid.setVgap(10);
 
-        U3TGameProvider gameProvider = new U3TGameAlmostFinishProvider(game);
+        GameProvider gameProvider = new GameAlmostFinishProvider(game);
 
-        var gridPanes = new Region[GRID_SIZE][GRID_SIZE];
+        Region[][] gridPanes = new Region[GRID_SIZE][GRID_SIZE];
 
         for (int i = 0; i < GRID_SIZE; i++) {
             for (int j = 0; j < GRID_SIZE; j++) {
@@ -64,7 +61,7 @@ public class U3TGameController implements Initializable {
         loadGame(gameProvider, gridPanes);
     }
 
-    private void loadGame(U3TGameProvider gameProvider, Region[][] gridPanes) {
+    private void loadGame(GameProvider gameProvider, Region[][] gridPanes) {
         for (Action action : gameProvider.actions()) {
             Region region = gridPanes[action.posOut().x()][action.posOut().y()];
             if (region instanceof GridPane gridPane) {
@@ -78,39 +75,43 @@ public class U3TGameController implements Initializable {
 
     private void onPressedTile(PrimitiveTile tile) {
 
-        Action action = new Action(currentPlayer, tile.getPosOut(), tile.getPosIn());
+        Action action = new Action(game.currentPlayer(), tile.getPosOut(), tile.getPosIn());
 
         if (gameService.isPlayableAction(game, action)) {
-
-            System.out.printf("Action.of(game.%s, Cell.pos(%s, %s), Cell.pos(%s, %s))\n",
-                    currentPlayer.equals(game.crossPlayer()) ? "crossPlayer()" : "roundPlayer()",
-                    String.valueOf(tile.getPosOut().x()),
-                    String.valueOf(tile.getPosOut().y()),
-                    String.valueOf(tile.getPosIn().x()),
-                    String.valueOf(tile.getPosIn().y())
-            );
 
             game = gameService.placeMark(game, action);
             IsWinGame isWinGameInner = gameService.checkInnerWinner(game, action);
             game = isWinGameInner.game();
             game = game.lastAction(action);
 
-            currentPlayer = gameService.oppositePlayer(game, currentPlayer);
+            game = gameService.oppositePlayer(game);
+
             Cell cell = gameService.cellAt(game, action.posOut(), action.posIn());
 
             tile.setCell(cell);
 
-            onWinning(isWinGameInner, action, cell);
+            onWinning(action, cell, isWinGameInner.isWin());
+
+            // severing();
 
             if (gameService.checkOuterWinner(game, action.posOut())) {
                 finishGame();
             }
 
         }
+
     }
 
-    private void onWinning(IsWinGame isWinGameInner, Action action, Cell cell) {
-        if (isWinGameInner.isWin()) {
+    private void severing() {
+        client.messageSender().send("u3t.game.%d".formatted(game.gameID()), game, message -> {
+            if (!message.isSuccess()) {
+                throw new IllegalStateException("Unexpected error: " + message.content());
+            }
+        });
+    }
+
+    private void onWinning(Action action, Cell cell, boolean isWin) {
+        if (isWin) {
             int i = action.posOut().x();
             int j = action.posOut().y();
             var child = u3tGrid.getChildren().get(i * GRID_SIZE + j);
@@ -143,7 +144,7 @@ public class U3TGameController implements Initializable {
         try {
             root.getChildren().remove(u3tGrid);
 
-            Player wonPlayer = gameService.oppositePlayer(game, currentPlayer);
+            Player wonPlayer = gameService.oppositePlayer(game, game.currentPlayer());
             U3TGameWonController controller = new U3TGameWonController(wonPlayer);
 
             FXMLLoader loader = new FXMLLoader();
@@ -156,6 +157,16 @@ public class U3TGameController implements Initializable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void printActions(PrimitiveTile tile) {
+        System.out.printf("Action.of(game.%s, Cell.pos(%d, %d), Cell.pos(%d, %d))\n",
+                game.currentPlayer().equals(game.crossPlayer()) ? "crossPlayer()" : "roundPlayer()",
+                tile.getPosOut().x(),
+                tile.getPosOut().y(),
+                tile.getPosIn().x(),
+                tile.getPosIn().y()
+        );
     }
 
 }

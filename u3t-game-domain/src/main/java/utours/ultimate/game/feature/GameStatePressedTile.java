@@ -1,13 +1,13 @@
 package utours.ultimate.game.feature;
 
-import utours.ultimate.game.model.U3TGame;
-import utours.ultimate.game.model.U3TGameState;
+import utours.ultimate.game.model.Game;
+import utours.ultimate.game.model.GameState;
 
-public class U3TGameStatePressedTile implements U3TGameStateHandler {
+public class GameStatePressedTile implements GameStateHandler {
 
-    private U3TGame game;
+    private Game game;
 
-    public U3TGameStatePressedTile(U3TGame game) {
+    public GameStatePressedTile(Game game) {
         this.game = game;
     }
 
@@ -16,7 +16,7 @@ public class U3TGameStatePressedTile implements U3TGameStateHandler {
     }
 
     @Override
-    public void handle(U3TGameState state) {
+    public void handle(GameState state) {
         switch (state) {
             case Ready -> {
 
@@ -31,7 +31,7 @@ public class U3TGameStatePressedTile implements U3TGameStateHandler {
 
             }
         }
-        game = U3TGame.Builder.copyOf(game)
+        game = Game.Builder.copyOf(game)
                 .state(state.nextState())
                 .build();
     }

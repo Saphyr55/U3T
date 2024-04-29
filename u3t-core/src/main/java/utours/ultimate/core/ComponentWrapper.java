@@ -1,28 +1,58 @@
 package utours.ultimate.core;
 
-public class ComponentWrapper {
+import java.util.List;
 
-    private Class<?> componentClass;
-    private Object component;
+public sealed interface ComponentWrapper {
 
-    public ComponentWrapper() { }
+    final class Data implements ComponentWrapper {
 
-    public void setComponent(Object component) {
-        this.component = component;
+        private Class<?> componentClass;
+        private Object component;
+
+        public Data() {
+
+        }
+
+        public void setComponent(Object component) {
+            this.component = component;
+        }
+
+        public Class<?> getComponentClass() {
+            return componentClass;
+        }
+
+        public void setComponentClass(Class<?> componentClass) {
+            this.componentClass = componentClass;
+        }
+
+        @SuppressWarnings("unchecked")
+        public <T> T getComponent() {
+            return (T) component;
+        }
+
     }
 
-    public Class<?> getComponentClass() {
-        return componentClass;
-    }
+    final class Group implements ComponentWrapper {
 
-    public void setComponentClass(Class<?> componentClass) {
-        this.componentClass = componentClass;
-    }
+        private Class<?> componentClass;
+        private List<ComponentWrapper> components;
 
-    @SuppressWarnings("unchecked")
-    public <T> T getComponent() {
-        return (T) component;
-    }
+        public void setComponents(List<ComponentWrapper> components) {
+            this.components = components;
+        }
 
+        public Class<?> getComponentClass() {
+            return componentClass;
+        }
+
+        public void setComponentClass(Class<?> componentClass) {
+            this.componentClass = componentClass;
+        }
+
+        public List<ComponentWrapper> getComponents() {
+            return components;
+        }
+
+    }
 
 }

@@ -1,10 +1,10 @@
 package utours.ultimate.game.model;
 
-public enum U3TGameState {
+public enum GameState {
 
     Ready {
         @Override
-        public U3TGameState nextState() {
+        public GameState nextState() {
             return CrossToPlay;
         }
     },
@@ -12,26 +12,26 @@ public enum U3TGameState {
     CrossToPlay {
 
         @Override
-        public U3TGameState nextState() {
+        public GameState nextState() {
             return RoundToPlay;
         }
     },
 
     RoundToPlay {
         @Override
-        public U3TGameState nextState() {
+        public GameState nextState() {
             return CrossToPlay;
         }
     },
 
     Finish {
         @Override
-        public U3TGameState nextState() {
+        public GameState nextState() {
             return Finish;
         }
     };
 
-    public abstract U3TGameState nextState();
+    public abstract GameState nextState();
 
 }
 

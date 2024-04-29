@@ -23,60 +23,120 @@ public class ModuleEvaluator {
             }
         }
 
-        for (Module.Component component : module.getComponents()) {
-            evaluate(component);
-        }
-
-        for (Module.UniqueComponent uniqueComponent : module.getUniqueComponents()) {
-            evaluate(uniqueComponent);
-        }
-
-        for (Module.AdditionalComponent additionalComponent : module.getAdditionalComponents()) {
-            evaluate(additionalComponent);
+        for (Module.Statement statement : module.getStatements()) {
+            switch (statement) {
+                case Module.AdditionalComponent additionalComponent -> evaluate(additionalComponent);
+                case Module.Group group -> evaluate(group);
+                case Module.UniqueComponent uniqueComponent -> evaluate(uniqueComponent);
+                case Module.Component component -> evaluate(component);
+            }
         }
 
     }
 
+    private void evaluate(Module.Group group) throws Throwable {
+
+        ComponentWrapper.Data cw = new ComponentWrapper.Data();
+        Class<?> clazz = Class.forName(group.getClassName());
+        String id = group.getId();
+
+        List<Object> list = new ArrayList<>();
+
+        for (Module.ComponentInterface componentInterface : group.getComponentInterfaces()) {
+            switch (componentInterface) {
+                case Module.Component component -> {
+
+                    String className = component.getClassName();
+                    Class<?> componentClazz = Class.forName(className);
+
+                    String derivedClassName = component.getDerived();
+                    Class<?> derivedClazz = Class.forName(derivedClassName);
+
+                    if (!componentClazz.isAssignableFrom(derivedClazz)) {
+                        throw new IllegalStateException("Derived class " + derivedClassName + " is not a subclass of " + clazz);
+                    }
+
+                    if (!clazz.isAssignableFrom(componentClazz)) {
+                        throw new IllegalStateException("Component class " + className + " is not a subclass of " + clazz);
+                    }
+
+                    Object object = instantiate(derivedClazz, component);
+                    list.add(object);
+                }
+                case Module.RefComponent refComponent -> {
+                    ComponentWrapper componentWrapper = componentsById.get(refComponent.getRef());
+                    switch (componentWrapper) {
+                        case ComponentWrapper.Data data -> list.add(data.getComponent());
+                        case ComponentWrapper.Group group1 -> { }
+                    }
+                }
+            }
+        }
+
+        cw.setComponentClass(list.getClass());
+        cw.setComponent(list);
+
+        componentsById.put(id, cw);
+    }
+
     private void evaluate(Module.UniqueComponent uniqueComponent) throws Throwable {
+
         Class<?> clazz = Class.forName(uniqueComponent.getClassName());
 
-        ComponentWrapper cw;
-
-        if (uniqueComponent.getRefComponent() != null) {
-            cw = componentsById.get(uniqueComponent.getRefComponent().getRef());
-            uniqueComponents.put(clazz, cw);
-        } else if (uniqueComponent.getComponent() != null) {
-            evaluate(uniqueComponent.getComponent());
-            cw = componentsById.get(uniqueComponent.getComponent().getId());
-        } else {
-            throw new IllegalStateException();
-        }
+        ComponentWrapper cw = switch (uniqueComponent.getComponentInterface()) {
+            case Module.Component component -> {
+                evaluate(component);
+                yield componentsById.get(component.getId());
+            }
+            case Module.RefComponent refComponent -> {
+                cw = componentsById.get(refComponent.getRef());
+                uniqueComponents.put(clazz, cw);
+                yield cw;
+            }
+        };
 
         uniqueComponents.put(clazz, cw);
     }
 
     public void evaluate(Class<?> clazz, Module.Value<?> value) {
-        ComponentWrapper cw = new ComponentWrapper();
+        ComponentWrapper.Data cw = new ComponentWrapper.Data();
         cw.setComponentClass(clazz);
         cw.setComponent(value.getValue());
         componentsById.put(value.getId(), cw);
     }
 
     public void evaluate(Module.AdditionalComponent additionalComponent) throws Throwable {
+
         Class<?> clazz = Class.forName(additionalComponent.getClassName());
-        for (Module.Component component : additionalComponent.getComponents()) {
-            evaluate(component);
-            ComponentWrapper componentWrapper = componentsById.get(component.getId());
-            additionalComponents
-                    .computeIfAbsent(clazz, aClass -> new LinkedList<>())
-                    .add(componentWrapper);
+
+        for (Module.ComponentInterface componentInterface : additionalComponent.getComponentsInterface()) {
+            switch (componentInterface) {
+                case Module.Component component -> {
+                    evaluate(component);
+                    ComponentWrapper componentWrapper = componentsById.get(component.getId());
+                    additionalComponents
+                            .computeIfAbsent(clazz, aClass -> new LinkedList<>())
+                            .add(componentWrapper);
+                }
+                case Module.RefComponent refComponent -> {
+                    ComponentWrapper componentWrapper = componentsById.get(refComponent.getRef());
+                    switch (componentWrapper) {
+                        case ComponentWrapper.Data data -> {
+                            additionalComponents
+                                    .computeIfAbsent(clazz, aClass -> new LinkedList<>())
+                                    .add(data);
+                        }
+                        case ComponentWrapper.Group group -> {
+                            for (ComponentWrapper component : group.getComponents()) {
+
+                            }
+                        }
+                    }
+
+                }
+            }
         }
-        for (Module.RefComponent refComponent : additionalComponent.getRefComponents()) {
-            ComponentWrapper componentWrapper = componentsById.get(refComponent.getRef());
-            additionalComponents
-                    .computeIfAbsent(clazz, aClass -> new LinkedList<>())
-                    .add(componentWrapper);
-        }
+
     }
 
     private void evaluate(Module.Component component) throws Throwable {

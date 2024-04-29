@@ -5,15 +5,17 @@ import javafx.geometry.Pos;
 import javafx.scene.layout.VBox;
 import utours.ultimate.ui.NavButtonContainer;
 
+import java.util.List;
+
 public class DesktopNavButtonContainer implements NavButtonContainer<DesktopNavButton> {
 
     private VBox vbox;
 
     public DesktopNavButtonContainer() {
-        vbox = new VBox();
-        vbox.setSpacing(10);
-        vbox.setPadding(new Insets(24));
-        vbox.setAlignment(Pos.CENTER);
+        this.vbox = new VBox();
+        this.vbox.setSpacing(10);
+        this.vbox.setPadding(new Insets(24));
+        this.vbox.setAlignment(Pos.CENTER);
     }
 
     public VBox getVbox() {

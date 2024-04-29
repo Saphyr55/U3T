@@ -7,8 +7,31 @@
     <string id="history-btn-name"   value="History" />
     <string id="quit-btn-name"      value="Quit" />
 
-    <component class="utours.ultimate.game.feature.U3TGameService"
-               derived="utours.ultimate.game.feature.internal.U3TGameServiceInternal"
+    <group class="utours.ultimate.ui.NavButton" id="Desktop.Fx.NavButtons">
+        <component class="utours.ultimate.desktop.view.DesktopNavButton" type="additional">
+            <constructor-args>
+                <arg type="java.lang.String" name="text" value="parties-btn-name" />
+            </constructor-args>
+        </component>
+        <component class="utours.ultimate.desktop.view.DesktopNavButton" type="additional">
+            <constructor-args>
+                <arg type="java.lang.String" name="text" value="chat-btn-name" />
+            </constructor-args>
+        </component>
+        <component class="utours.ultimate.desktop.view.DesktopNavButton" type="additional">
+            <constructor-args>
+                <arg type="java.lang.String" name="text" value="history-btn-name" />
+            </constructor-args>
+        </component>
+        <component class="utours.ultimate.desktop.view.DesktopNavButton" type="additional">
+            <constructor-args>
+                <arg type="java.lang.String" name="text" value="quit-btn-name" />
+            </constructor-args>
+        </component>
+    </group>
+
+    <component class="utours.ultimate.game.feature.GameService"
+               derived="utours.ultimate.game.feature.internal.GameServiceInternal"
                id="U3T.GameService" />
 
     <component class="utours.ultimate.desktop.factory.ClientFactory"
@@ -27,12 +50,14 @@
                derived="utours.ultimate.desktop.factory.impl.ControllerFactoryImpl"
                id="Desktop.Fx.ControllerFactory" >
         <constructor-args>
-            <arg type="utours.ultimate.game.feature.U3TGameService" value="U3T.GameService" />
+            <arg type="utours.ultimate.game.feature.GameService" value="U3T.GameService" />
             <arg type="utours.ultimate.net.Client" value="Desktop.Fx.Client" />
         </constructor-args>
     </component>
 
-    <component class="utours.ultimate.desktop.view.DesktopNavButtonContainer" id="Desktop.Fx.NavButtonContainer">
+    <component class="utours.ultimate.ui.NavButtonContainer"
+               derived="utours.ultimate.desktop.view.DesktopNavButtonContainer"
+               id="Desktop.Fx.NavButtonContainer">
         <factory ref="Desktop.Fx.ViewFactory" method="createNavButtonContainer" />
     </component>
 
@@ -70,43 +95,14 @@
         <ref-component ref="Desktop.Fx.NavButtonContainer" />
     </unique-component>
 
-    <unique-component class="utours.ultimate.game.feature.U3TGameService">
+    <unique-component class="utours.ultimate.game.feature.GameService">
         <ref-component ref="U3T.GameService"/>
     </unique-component>
-
-
 
     <!-- Buttons -->
 
     <add-component class="utours.ultimate.ui.NavButton">
-        <component class="utours.ultimate.desktop.view.DesktopNavButton"
-                   id="Desktop.Fx.NavButton.Parties"
-                   type="additional">
-            <constructor-args>
-                <arg type="java.lang.String" name="text" value="parties-btn-name" />
-            </constructor-args>
-        </component>
-        <component class="utours.ultimate.desktop.view.DesktopNavButton"
-                   id="Desktop.Fx.NavButton.Chat"
-                   type="additional">
-            <constructor-args>
-                <arg type="java.lang.String" name="text" value="chat-btn-name" />
-            </constructor-args>
-        </component>
-        <component class="utours.ultimate.desktop.view.DesktopNavButton"
-                   id="Desktop.Fx.NavButton.History"
-                   type="additional">
-            <constructor-args>
-                <arg type="java.lang.String" name="text" value="history-btn-name" />
-            </constructor-args>
-        </component>
-        <component class="utours.ultimate.desktop.view.DesktopNavButton"
-                   id="Desktop.Fx.NavButtonBase"
-                   type="additional">
-            <constructor-args>
-                <arg type="java.lang.String" name="text" value="quit-btn-name" />
-            </constructor-args>
-        </component>
+        <ref-component ref="Desktop.Fx.NavButtons"/>
     </add-component>
 
 </module>

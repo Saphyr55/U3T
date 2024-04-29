@@ -2,17 +2,18 @@ package utours.ultimate.game.model;
 
 import java.util.Optional;
 
-public record U3TGame(Long gameID,
-                      Player crossPlayer,
-                      Player roundPlayer,
-                      Board board,
-                      U3TGameState state,
-                      Action lastAction,
-                      int size
+public record Game(Long gameID,
+                   Player crossPlayer,
+                   Player roundPlayer,
+                   Player currentPlayer,
+                   Board board,
+                   GameState state,
+                   Action lastAction,
+                   int size
 ) {
 
-    public U3TGame lastAction(Action action) {
-        return U3TGame.Builder.copyOf(this)
+    public Game lastAction(Action action) {
+        return Game.Builder.copyOf(this)
                 .lastAction(action)
                 .build();
     }
@@ -28,25 +29,32 @@ public record U3TGame(Long gameID,
         private long gameID;
         private Player crossPlayer;
         private Player roundPlayer;
+        private Player currentPlayer;
         private Action lastAction;
         private Board board = Board.newEmptyBoard();
-        private U3TGameState state = U3TGameState.Ready;
+        private GameState state = GameState.Ready;
         private int size = 3;
 
-        public static Builder copyOf(U3TGame game) {
+        public static Builder copyOf(Game game) {
             Builder builder = new Builder();
             builder.gameID = game.gameID;
             return builder
                     .board(game.board)
                     .state(game.state)
                     .roundPlayer(game.roundPlayer)
-                    .crossPlayer(game.crossPlayer);
+                    .crossPlayer(game.crossPlayer)
+                    .lastAction(game.lastAction)
+                    .currentPlayer(game.currentPlayer)
+                    .size(game.size);
         }
 
         public static Builder newDefaultBuilder() {
-            return newBuilder()
+            Builder builder = newBuilder()
                     .roundPlayer(Player.Builder.newBuilder("1", "Player O").build())
                     .crossPlayer(Player.Builder.newBuilder("2", "Player X").build());
+            builder.currentPlayer(builder.crossPlayer);
+            return builder;
+
         }
 
         public static Builder newBuilder() {
@@ -59,6 +67,11 @@ public record U3TGame(Long gameID,
 
         public Builder crossPlayer(Player crossPlayer) {
             this.crossPlayer = crossPlayer;
+            return this;
+        }
+
+        public Builder currentPlayer(Player currentPlayer) {
+            this.currentPlayer = currentPlayer;
             return this;
         }
 
@@ -77,7 +90,7 @@ public record U3TGame(Long gameID,
             return this;
         }
 
-        public Builder state(U3TGameState state) {
+        public Builder state(GameState state) {
             this.state = state;
             return this;
         }
@@ -87,8 +100,12 @@ public record U3TGame(Long gameID,
             return this;
         }
 
-        public U3TGame build() {
-            return new U3TGame(gameID, crossPlayer, roundPlayer, board, state, lastAction, size);
+        public Game build() {
+
+            if (currentPlayer == null)
+                currentPlayer = crossPlayer;
+
+            return new Game(gameID, crossPlayer, roundPlayer, currentPlayer, board, state, lastAction, size);
         }
 
     }

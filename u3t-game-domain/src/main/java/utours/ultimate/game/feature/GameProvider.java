@@ -4,11 +4,11 @@ import utours.ultimate.game.model.*;
 
 import java.util.List;
 
-public interface U3TGameProvider {
+public interface GameProvider {
 
     List<Action> actions();
 
-    default Board board(U3TGame game, U3TGameService gameService) {
+    default Board board(Game game, GameService gameService) {
 
         Board board = Board.newEmptyBoard();
 

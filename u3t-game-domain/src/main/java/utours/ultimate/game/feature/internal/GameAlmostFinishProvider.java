@@ -1,17 +1,17 @@
 package utours.ultimate.game.feature.internal;
 
-import utours.ultimate.game.feature.U3TGameProvider;
+import utours.ultimate.game.feature.GameProvider;
 import utours.ultimate.game.model.Action;
 import utours.ultimate.game.model.Cell;
-import utours.ultimate.game.model.U3TGame;
+import utours.ultimate.game.model.Game;
 
 import java.util.List;
 
-public class U3TGameAlmostFinishProvider implements U3TGameProvider {
+public class GameAlmostFinishProvider implements GameProvider {
 
     private final List<Action> actions;
 
-    public U3TGameAlmostFinishProvider(U3TGame game) {
+    public GameAlmostFinishProvider(Game game) {
         this.actions = List.of(
                 Action.of(game.crossPlayer(), Cell.pos(0, 0), Cell.pos(0, 0)),
                 Action.of(game.roundPlayer(), Cell.pos(0, 0), Cell.pos(1, 1)),

@@ -13,9 +13,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
@@ -31,13 +29,11 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = factory.newDocumentBuilder();
         Document document = documentBuilder.parse(ClassPathResource.getResourceAsStream(MODULE_XML_FILENAME));
+        NodeList content = document.getDocumentElement().getChildNodes();
 
         XPathFactory xPathfactory = XPathFactory.newInstance();
         XPath xpath = xPathfactory.newXPath();
 
-        XPathExpression componentsExpr = xpath.compile("/module/component");
-        XPathExpression uniqueComponentsExpr = xpath.compile("/module/unique-component");
-        XPathExpression additionalComponentsExpr = xpath.compile("/module/add-component");
         XPathExpression stringExpr = xpath.compile("/module/string");
         XPathExpression integerExpr = xpath.compile("/module/integer");
         XPathExpression booleanExpr = xpath.compile("/module/boolean");
@@ -46,9 +42,6 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
         XPathExpression longExpr = xpath.compile("/module/long");
         XPathExpression byteExpr = xpath.compile("/module/byte");
 
-        NodeList componentNodes = (NodeList) componentsExpr.evaluate(document, XPathConstants.NODESET);
-        NodeList uniqueComponentsNodes = (NodeList) uniqueComponentsExpr.evaluate(document, XPathConstants.NODESET);
-        NodeList additionalComponentNodes = (NodeList) additionalComponentsExpr.evaluate(document, XPathConstants.NODESET);
         NodeList stringNodes = (NodeList) stringExpr.evaluate(document, XPathConstants.NODESET);
         NodeList integerNodes = (NodeList) integerExpr.evaluate(document, XPathConstants.NODESET);
         NodeList booleanNodes = (NodeList) booleanExpr.evaluate(document, XPathConstants.NODESET);
@@ -57,14 +50,9 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
         NodeList longNodes = (NodeList) longExpr.evaluate(document, XPathConstants.NODESET);
         NodeList byteNodes = (NodeList) byteExpr.evaluate(document, XPathConstants.NODESET);
 
-        List<Module.Component> components = processComponents(componentNodes);
-        List<Module.AdditionalComponent> additionalComponents = processAdditionalComponents(additionalComponentNodes);
-        List<Module.UniqueComponent> uniqueComponents = processUniqueComponents(uniqueComponentsNodes);
-
+        List<Module.Statement> statements = processStatements(content);
         Module module = new Module();
-        module.setComponents(components);
-        module.setAdditionalComponents(additionalComponents);
-        module.setUniqueComponents(uniqueComponents);
+        module.setStatements(statements);
         module.setValues(new HashMap<>());
         module.getValues().put(Boolean.class, List.copyOf(processBoolean(booleanNodes)  ));
         module.getValues().put(Integer.class, List.copyOf(processIntegers(integerNodes) ));
@@ -77,11 +65,34 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
         return module;
     }
 
-    private List<Module.UniqueComponent> processUniqueComponents(NodeList nodes) {
-        return IntStream.range(0, nodes.getLength())
-                .mapToObj(nodes::item)
-                .map(this::processUniqueComponent)
+    private List<Module.Statement> processStatements(NodeList content) {
+        return IntStream.range(0, content.getLength())
+                .mapToObj(content::item)
+                .map(this::processStatement)
                 .toList();
+    }
+
+    private Module.Statement processStatement(Node node) {
+        return switch (node.getNodeName()) {
+            case "unique-component" -> processUniqueComponent(node);
+            case "component" -> processComponent(node);
+            case "add-component" -> processAdditionalComponent(node);
+            case "group" -> processGroup(node);
+            default -> throw new IllegalStateException("Unexpected value: " + node.getNodeName());
+        };
+    }
+
+    private Module.Group processGroup(Node node) {
+
+        String id = getAttributeValue(node, "id", () -> new IllegalStateException("Must to precise the id."));
+        String className = getAttributeValue(node, "class", Object.class.getName());
+        
+        Module.Group group = new Module.Group();
+        group.setId(id);
+        group.setClassName(className);
+        group.setComponentInterfaces(getComponentInterfaces(node));
+
+        return group;
     }
 
     private Module.UniqueComponent processUniqueComponent(Node node) {
@@ -98,21 +109,12 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
                 .orElseThrow(IllegalArgumentException::new);
 
         if (isComponent(item)) {
-            Module.Component component = processComponent(item);
-            uniqueComponent.setComponent(component);
+            uniqueComponent.setComponentInterface(processComponent(item));
         } else if (isRefComponent(item)) {
-            Module.RefComponent refComponent = processRefComponent(item);
-            uniqueComponent.setRefComponent(refComponent);
+            uniqueComponent.setComponentInterface(processRefComponent(item));
         }
 
         return uniqueComponent;
-    }
-
-    private List<Module.Component> processComponents(NodeList componentNodes) {
-        return IntStream.range(0, componentNodes.getLength())
-                .mapToObj(componentNodes::item)
-                .map(this::processComponent)
-                .toList();
     }
 
     private Module.ConstructorArgs processConstructorArgs(Node node) {
@@ -186,14 +188,6 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
         return factory;
     }
 
-    private List<Module.AdditionalComponent> processAdditionalComponents(NodeList nodes) {
-        return IntStream.range(0, nodes.getLength())
-                .mapToObj(nodes::item)
-                .filter(this::isAddComponent)
-                .map(this::processAdditionalComponent)
-                .toList();
-    }
-
     private Module.AdditionalComponent processAdditionalComponent(Node node) {
 
         if (!isAddComponent(node))
@@ -202,6 +196,16 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
         Module.AdditionalComponent additionalComponent = new Module.AdditionalComponent();
 
         String classname = getAttributeValue(node, "class", () -> new IllegalStateException("Must to precise the class."));
+
+        List<Module.ComponentInterface> componentInterfaces = getComponentInterfaces(node);
+
+        additionalComponent.setClassName(classname);
+        additionalComponent.setComponentsInterface(componentInterfaces);
+
+        return additionalComponent;
+    }
+
+    private List<Module.ComponentInterface> getComponentInterfaces(Node node) {
 
         List<Module.Component> components =
                 IntStream.range(0, node.getChildNodes().getLength())
@@ -217,11 +221,11 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
                     .map(this::processRefComponent)
                     .toList();
 
-        additionalComponent.setClassName(classname);
-        additionalComponent.setComponents(components);
-        additionalComponent.setRefComponents(refComponents);
+        List<Module.ComponentInterface> componentInterfaces = new LinkedList<>();
+        componentInterfaces.addAll(refComponents);
+        componentInterfaces.addAll(components);
 
-        return additionalComponent;
+        return componentInterfaces;
     }
 
     private <T> List<T> processNodeList(NodeList list, Function<Node, T> mapper) {
@@ -330,5 +334,12 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
         return item.getNodeName().equals("factory");
     }
 
+    private boolean isUniqueComponent(Node item) {
+        return item.getNodeName().equals("unique-component");
+    }
+
+    private boolean isGroup(Node item) {
+        return item.getNodeName().equals("group");
+    }
 
 }

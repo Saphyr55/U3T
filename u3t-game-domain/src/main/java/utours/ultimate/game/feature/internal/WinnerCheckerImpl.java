@@ -1,12 +1,11 @@
 package utours.ultimate.game.feature.internal;
 
-import utours.ultimate.game.feature.U3TGameService;
+import utours.ultimate.game.feature.GameService;
 import utours.ultimate.game.model.Cell;
-import utours.ultimate.game.model.U3TGame;
+import utours.ultimate.game.model.Game;
 import utours.ultimate.game.feature.WinnerChecker;
 
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 public class WinnerCheckerImpl implements WinnerChecker {
@@ -24,13 +23,13 @@ public class WinnerCheckerImpl implements WinnerChecker {
             };
         }
 
-        static MarkType fromGame(U3TGame game, Cell.Pos posOut) {
+        static MarkType fromGame(Game game, Cell.Pos posOut) {
             Cell[][] cellsOut = game.board().cells();
             Cell cell = cellsOut[posOut.x()][posOut.y()];
             return fromCell(cell);
         }
 
-        static MarkType fromGame(U3TGame game, Cell.Pos posOut, Cell.Pos posIn) {
+        static MarkType fromGame(Game game, Cell.Pos posOut, Cell.Pos posIn) {
             Cell[][] cellsOut = game.board().cells();
             Cell cell = cellsOut[posOut.x()][posOut.y()];
             if (cell instanceof Cell.Board(Cell[][] cells)) {
@@ -42,17 +41,17 @@ public class WinnerCheckerImpl implements WinnerChecker {
 
     }
 
-    private final U3TGameService gameService;
+    private final GameService gameService;
     private Map<Integer, Set<Cell.Pos>> leftDiagonalCache = new HashMap<>();
     private Map<Integer, Set<Cell.Pos>> rightDiagonalCache = new HashMap<>();
 
 
-    public WinnerCheckerImpl(U3TGameService gameService) {
+    public WinnerCheckerImpl(GameService gameService) {
         this.gameService = gameService;
     }
 
     @Override
-    public boolean checkInnerWinner(U3TGame game, Cell.Pos posOut, Cell.Pos posIn) {
+    public boolean checkInnerWinner(Game game, Cell.Pos posOut, Cell.Pos posIn) {
 
         Cell cellOut = gameService.cellAt(game, posOut);
 
@@ -103,7 +102,7 @@ public class WinnerCheckerImpl implements WinnerChecker {
     }
 
     @Override
-    public boolean checkWinner(U3TGame game, Cell.Pos pos) {
+    public boolean checkWinner(Game game, Cell.Pos pos) {
 
         Cell cell = gameService.cellAt(game, pos);
 
@@ -150,7 +149,7 @@ public class WinnerCheckerImpl implements WinnerChecker {
         return i == game.size();
     }
 
-    private boolean checkDiagonal(U3TGame game, Cell.Pos posOut, Cell.Pos posIn, MarkType m, Set<Cell.Pos> leftDiagonal) {
+    private boolean checkDiagonal(Game game, Cell.Pos posOut, Cell.Pos posIn, MarkType m, Set<Cell.Pos> leftDiagonal) {
         if (leftDiagonal.contains(posIn)) {
             int i = 0;
             for (Cell.Pos pos : leftDiagonal) {
@@ -164,7 +163,7 @@ public class WinnerCheckerImpl implements WinnerChecker {
         return false;
     }
 
-    private boolean checkDiagonal(U3TGame game, Cell.Pos posOut, MarkType m, Set<Cell.Pos> leftDiagonal) {
+    private boolean checkDiagonal(Game game, Cell.Pos posOut, MarkType m, Set<Cell.Pos> leftDiagonal) {
         if (leftDiagonal.contains(posOut)) {
             int i = 0;
             for (Cell.Pos pos : leftDiagonal) {
