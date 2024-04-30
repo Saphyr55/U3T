@@ -1,7 +1,6 @@
-package core;
+package utours.ultimate.core;
 
 import org.junit.jupiter.api.Test;
-import utours.ultimate.core.ClassPathResource;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;

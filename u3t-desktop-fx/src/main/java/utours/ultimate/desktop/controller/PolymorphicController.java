@@ -11,7 +11,7 @@ import java.util.ResourceBundle;
 public class PolymorphicController implements Initializable {
 
     @FXML private PolymorphicView root;
-    
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 

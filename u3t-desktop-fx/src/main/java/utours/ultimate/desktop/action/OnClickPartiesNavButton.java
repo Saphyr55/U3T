@@ -1,7 +1,7 @@
-package utours.ultimate.desktop.actions;
+package utours.ultimate.desktop.action;
 
 import utours.ultimate.desktop.controller.PolymorphicController;
-import utours.ultimate.desktop.view.U3TGameView;
+import utours.ultimate.desktop.view.DesktopPartiesView;
 import utours.ultimate.ui.OnClickButton;
 import utours.ultimate.ui.event.MouseEvent;
 
@@ -15,7 +15,7 @@ public class OnClickPartiesNavButton implements OnClickButton {
 
     @Override
     public void performClick(MouseEvent event) {
-        controller.replaceRegion(new U3TGameView());
+        controller.replaceRegion(new DesktopPartiesView());
     }
 
 }

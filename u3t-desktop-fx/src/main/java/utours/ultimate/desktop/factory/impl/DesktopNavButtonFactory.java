@@ -1,7 +1,7 @@
 package utours.ultimate.desktop.factory.impl;
 
-import utours.ultimate.desktop.actions.OnClickChatNavButton;
-import utours.ultimate.desktop.actions.OnClickPartiesNavButton;
+import utours.ultimate.desktop.action.OnClickChatNavButton;
+import utours.ultimate.desktop.action.OnClickPartiesNavButton;
 import utours.ultimate.desktop.controller.PolymorphicController;
 import utours.ultimate.desktop.view.DesktopChatView;
 import utours.ultimate.desktop.view.DesktopNavButton;

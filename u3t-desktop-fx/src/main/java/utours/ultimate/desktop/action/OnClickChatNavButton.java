@@ -1,4 +1,4 @@
-package utours.ultimate.desktop.actions;
+package utours.ultimate.desktop.action;
 
 import utours.ultimate.desktop.controller.PolymorphicController;
 import utours.ultimate.desktop.view.DesktopChatView;

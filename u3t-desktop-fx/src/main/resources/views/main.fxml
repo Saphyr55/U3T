@@ -28,7 +28,7 @@
               GridPane.columnIndex="1"
               GridPane.rowIndex="0"/>
 
-  <fx:include source="game.fxml"
+  <PolymorphicView
               prefHeight="${root.height}"
               prefWidth="${root.width - PartiesWidth - NavigationWidth}"
               GridPane.columnIndex="2"
