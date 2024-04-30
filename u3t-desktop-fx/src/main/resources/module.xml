@@ -1,50 +1,30 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<module xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="module.xsd">
+<module xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="module.xsd">
 
-    <string id="parties-btn-name"   value="Parties" />
-    <string id="chat-btn-name"      value="Chat" />
-    <string id="history-btn-name"   value="History" />
-    <string id="quit-btn-name"      value="Quit" />
-
-    <group class="utours.ultimate.ui.NavButton" id="Desktop.Fx.NavButtons">
-        <component class="utours.ultimate.desktop.view.DesktopNavButton" type="additional">
-            <constructor-args>
-                <arg type="java.lang.String" name="text" value="parties-btn-name" />
-            </constructor-args>
-        </component>
-        <component class="utours.ultimate.desktop.view.DesktopNavButton" type="additional">
-            <constructor-args>
-                <arg type="java.lang.String" name="text" value="chat-btn-name" />
-            </constructor-args>
-        </component>
-        <component class="utours.ultimate.desktop.view.DesktopNavButton" type="additional">
-            <constructor-args>
-                <arg type="java.lang.String" name="text" value="history-btn-name" />
-            </constructor-args>
-        </component>
-        <component class="utours.ultimate.desktop.view.DesktopNavButton" type="additional">
-            <constructor-args>
-                <arg type="java.lang.String" name="text" value="quit-btn-name" />
-            </constructor-args>
-        </component>
-    </group>
+    <!-- Game Service -->
 
     <component class="utours.ultimate.game.feature.GameService"
                derived="utours.ultimate.game.feature.internal.GameServiceInternal"
                id="U3T.GameService" />
 
+    <!-- Client -->
+
     <component class="utours.ultimate.desktop.factory.ClientFactory"
                derived="utours.ultimate.desktop.factory.impl.ClientFactoryImpl"
                id="Desktop.Fx.ClientFactory" />
 
-    <component class="utours.ultimate.ui.ViewFactory"
-               derived="utours.ultimate.desktop.factory.DesktopViewFactory"
-               id="Desktop.Fx.ViewFactory" />
-
     <component class="utours.ultimate.net.Client" id="Desktop.Fx.Client">
         <factory method="getClient" ref="Desktop.Fx.ClientFactory" />
     </component>
+
+    <!-- View Factory -->
+
+    <component class="utours.ultimate.ui.ViewFactory"
+               derived="utours.ultimate.desktop.factory.impl.DesktopViewFactory"
+               id="Desktop.Fx.ViewFactory" />
+
+
+    <!-- Controller Factory -->
 
     <component class="utours.ultimate.desktop.factory.ControllerFactory"
                derived="utours.ultimate.desktop.factory.impl.ControllerFactoryImpl"
@@ -55,28 +35,84 @@
         </constructor-args>
     </component>
 
-    <component class="utours.ultimate.ui.NavButtonContainer"
-               derived="utours.ultimate.desktop.view.DesktopNavButtonContainer"
-               id="Desktop.Fx.NavButtonContainer">
-        <factory ref="Desktop.Fx.ViewFactory" method="createNavButtonContainer" />
+
+    <!-- Controllers -->
+
+    <component class="utours.ultimate.desktop.controller.ChatController" id="Desktop.Fx.ChatController">
+        <factory method="createChatController" ref="Desktop.Fx.ControllerFactory"/>
+    </component>
+
+    <component class="utours.ultimate.desktop.controller.PolymorphicController" id="Desktop.Fx.PolymorphicController">
+        <factory ref="Desktop.Fx.ControllerFactory" method="createPolymorphicController" />
     </component>
 
     <component class="utours.ultimate.desktop.controller.U3TGameController" id="Desktop.Fx.U3TGameController">
         <factory ref="Desktop.Fx.ControllerFactory" method="createU3TGameController" />
     </component>
 
+
+    <!-- Nav Button Factory -->
+
+    <component class="utours.ultimate.ui.NavButtonFactory"
+               id="Ui.NavButtonFactory"
+               derived="utours.ultimate.desktop.factory.impl.DesktopNavButtonFactory" />
+
+    <!-- Nav Buttons -->
+
+    <group class="utours.ultimate.ui.NavButton" id="Desktop.Fx.NavButtons">
+
+        <component class="utours.ultimate.desktop.view.DesktopNavButton" type="additional">
+            <factory method="createPartiesNavButton" ref="Ui.NavButtonFactory"/>
+        </component>
+
+        <component class="utours.ultimate.desktop.view.DesktopNavButton" type="additional">
+            <factory method="createChatNavButton" ref="Ui.NavButtonFactory"/>
+        </component>
+
+        <component class="utours.ultimate.desktop.view.DesktopNavButton" type="additional">
+            <factory method="createHistoryNavButton" ref="Ui.NavButtonFactory"/>
+        </component>
+
+        <component class="utours.ultimate.desktop.view.DesktopNavButton" type="additional">
+            <factory method="createSettingsNavButton"  ref="Ui.NavButtonFactory"/>
+        </component>
+
+    </group>
+
+
+    <!-- Views -->
+
+    <component class="utours.ultimate.ui.NavButtonContainer"
+               derived="utours.ultimate.desktop.view.DesktopNavButtonContainer"
+               id="Desktop.Fx.NavButtonContainer">
+        <factory ref="Desktop.Fx.ViewFactory" method="createNavButtonContainer" />
+    </component>
+
+
     <!-- Unique Mapping -->
 
     <unique-component class="utours.ultimate.desktop.controller.NavigationController">
+
+        <!-- Navigation Controller -->
+
         <component class="utours.ultimate.desktop.controller.NavigationController" id="Desktop.Fx.NavigationController">
             <constructor-args>
                 <arg type="utours.ultimate.desktop.view.DesktopNavButtonContainer" value="Desktop.Fx.NavButtonContainer" />
             </constructor-args>
         </component>
+
     </unique-component>
 
     <unique-component class="utours.ultimate.net.Client">
         <ref-component ref="Desktop.Fx.Client"/>
+    </unique-component>
+
+    <unique-component class="utours.ultimate.desktop.controller.ChatController">
+        <ref-component ref="Desktop.Fx.ChatController"/>
+    </unique-component>
+
+    <unique-component class="utours.ultimate.desktop.controller.PolymorphicController">
+        <ref-component ref="Desktop.Fx.PolymorphicController"/>
     </unique-component>
 
     <unique-component class="utours.ultimate.desktop.controller.U3TGameController">
@@ -99,7 +135,7 @@
         <ref-component ref="U3T.GameService"/>
     </unique-component>
 
-    <!-- Buttons -->
+    <!-- Additional Nav Buttons Mapping -->
 
     <add-component class="utours.ultimate.ui.NavButton">
         <ref-group ref="Desktop.Fx.NavButtons"/>

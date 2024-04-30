@@ -1,6 +1,8 @@
 package utours.ultimate.desktop.factory.impl;
 
 import utours.ultimate.core.steorotype.Component;
+import utours.ultimate.desktop.controller.ChatController;
+import utours.ultimate.desktop.controller.PolymorphicController;
 import utours.ultimate.desktop.controller.U3TGameController;
 import utours.ultimate.desktop.factory.ControllerFactory;
 import utours.ultimate.game.feature.GameService;
@@ -20,10 +22,17 @@ public class ControllerFactoryImpl implements ControllerFactory {
 
     @Override
     public U3TGameController createU3TGameController() {
-        return u3tGameController.apply(Game
-                .Builder
-                .newDefaultBuilder()
-                .build());
+        return u3tGameController.apply(Game.Builder.newDefaultBuilder().build());
+    }
+
+    @Override
+    public PolymorphicController createPolymorphicController() {
+        return new PolymorphicController();
+    }
+
+    @Override
+    public ChatController createChatController() {
+        return new ChatController();
     }
 
 }

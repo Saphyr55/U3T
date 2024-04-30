@@ -8,7 +8,7 @@ public interface GameService {
 
     boolean isPlayableCell(Cell cell);
 
-    Cell newCell(Game game, Player currentPlayer);
+    Cell cellOfPlayer(Game game, Player currentPlayer);
 
     Cell cellAt(Game game, Cell.Pos posOut);
 

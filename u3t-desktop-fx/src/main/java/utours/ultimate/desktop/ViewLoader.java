@@ -1,23 +1,22 @@
 package utours.ultimate.desktop;
 
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 
 import java.net.URL;
 import java.util.Optional;
 
 public class ViewLoader {
 
-    public static <T> T  load(T node, String path) {
-        return load(node, ViewLoader.class.getResource(path));
+    public static <T> T  load(T root, String path) {
+        return load(root, ViewLoader.class.getResource(path));
     }
 
-    public static <T> T load(T node, URL url) {
+    public static <T> T load(T root, URL url) {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(url);
             loader.setControllerFactory(ViewLoader::getController);
-            loader.setRoot(node);
+            loader.setRoot(root);
             return loader.load();
         } catch (Exception e) {
             throw new RuntimeException(e);

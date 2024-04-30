@@ -3,6 +3,9 @@ package utours.ultimate.core.internal;
 import utours.ultimate.core.*;
 import utours.ultimate.core.Module;
 
+import java.util.List;
+import java.util.Map;
+
 public class ModuleContextImpl implements ModuleContext {
 
     private final ModuleProvider moduleProvider;
@@ -22,14 +25,21 @@ public class ModuleContextImpl implements ModuleContext {
 
             evaluator.evaluate(module);
 
-            evaluator.getComponents().forEach((s, cw) -> {
-                container.storeComponent(s, cw.getComponent());
-                container.storeUniqueComponent(cw.getComponentClass(), cw.getComponent());
-            });
+            for (Map.Entry<String, ComponentWrapper> e : evaluator.getComponents().entrySet()) {
+                String s = e.getKey();
+                ComponentWrapper v = e.getValue();
+                container.storeComponent(s, v.getComponent());
+            }
 
-            evaluator.getAdditionalComponents().forEach((cClass, cws) -> {
+            for (ComponentWrapper cw : evaluator.getUniqueComponents().values()) {
+                container.storeUniqueComponent(cw.getComponentClass(), cw.getComponent());
+            }
+
+            for (Map.Entry<Class<?>, List<ComponentWrapper>> entry : evaluator.getAdditionalComponents().entrySet()) {
+                Class<?> cClass = entry.getKey();
+                List<ComponentWrapper> cws = entry.getValue();
                 cws.forEach(cw -> container.storeAdditionalComponent(cClass, cw.getComponent()));
-            });
+            }
 
         } catch (Throwable throwable) {
             throw new RuntimeException(throwable);

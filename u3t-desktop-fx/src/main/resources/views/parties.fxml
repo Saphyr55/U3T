@@ -4,6 +4,7 @@
 <?import javafx.scene.layout.*?>
 
 <?import java.lang.Integer?>
+
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:id="partiesAnchorPane"

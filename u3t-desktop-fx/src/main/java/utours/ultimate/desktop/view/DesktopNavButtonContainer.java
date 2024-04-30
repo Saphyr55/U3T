@@ -5,8 +5,6 @@ import javafx.geometry.Pos;
 import javafx.scene.layout.VBox;
 import utours.ultimate.ui.NavButtonContainer;
 
-import java.util.List;
-
 public class DesktopNavButtonContainer implements NavButtonContainer<DesktopNavButton> {
 
     private VBox vbox;
@@ -28,10 +26,10 @@ public class DesktopNavButtonContainer implements NavButtonContainer<DesktopNavB
 
     @Override
     public void add(DesktopNavButton navButton) {
-        if (navButton.position() < 0)
+        if (navButton.getPosition() < 0)
             vbox.getChildren().add(navButton);
         else
-            vbox.getChildren().add(navButton.position(), navButton);
+            vbox.getChildren().add(navButton.getPosition(), navButton);
     }
 
     @Override

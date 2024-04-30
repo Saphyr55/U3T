@@ -1,10 +1,9 @@
-package utours.ultimate.desktop.factory;
+package utours.ultimate.desktop.factory.impl;
 
 import utours.ultimate.desktop.view.DesktopNavButton;
 import utours.ultimate.desktop.view.DesktopNavButtonContainer;
 import utours.ultimate.ui.NavButtonContainer;
 import utours.ultimate.ui.ViewFactory;
-
 
 public class DesktopViewFactory implements ViewFactory<DesktopNavButton> {
 

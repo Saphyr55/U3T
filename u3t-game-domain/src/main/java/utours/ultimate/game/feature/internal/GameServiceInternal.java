@@ -34,7 +34,7 @@ public class GameServiceInternal implements GameService {
     }
 
     @Override
-    public Cell newCell(Game game, Player currentPlayer) {
+    public Cell cellOfPlayer(Game game, Player currentPlayer) {
         if (game.crossPlayer().equals(currentPlayer)) {
             return new Cell.Cross();
         } else if (game.roundPlayer().equals(currentPlayer)) {
@@ -90,7 +90,7 @@ public class GameServiceInternal implements GameService {
             Cell[][] cellsIn = board.cells();
             Cell cellIn = cellsIn[action.posIn().x()][action.posIn().y()];
             if (isPlayableCell(cellIn)) {
-                cellsIn[action.posIn().x()][action.posIn().y()] = newCell(game, action.player());
+                cellsIn[action.posIn().x()][action.posIn().y()] = cellOfPlayer(game, action.player());
             }
         }
 
@@ -105,7 +105,7 @@ public class GameServiceInternal implements GameService {
         boolean isWin = checker.checkInnerWinner(game, action.posOut(), action.posIn());
         if (isWin) {
             Cell[][] cellsOut = game.board().cells();
-            cellsOut[action.posOut().x()][action.posOut().y()] = newCell(game, action.player());
+            cellsOut[action.posOut().x()][action.posOut().y()] = cellOfPlayer(game, action.player());
         }
         return new IsWinGame(game, isWin);
     }

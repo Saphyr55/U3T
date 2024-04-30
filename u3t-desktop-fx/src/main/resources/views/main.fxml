@@ -5,6 +5,7 @@
 
 <?import utours.ultimate.desktop.view.DesktopNavigationView?>
 
+<?import utours.ultimate.desktop.view.PolymorphicView?>
 <fx:root xmlns:fx="http://javafx.com/fxml"
          type="utours.ultimate.desktop.view.DesktopMainView"
          fx:id="root"
@@ -21,7 +22,7 @@
               GridPane.columnIndex="0"
               GridPane.rowIndex="0" />
 
-  <fx:include source="parties.fxml"
+  <PolymorphicView
               prefHeight="${root.height}"
               prefWidth="$PartiesWidth"
               GridPane.columnIndex="1"

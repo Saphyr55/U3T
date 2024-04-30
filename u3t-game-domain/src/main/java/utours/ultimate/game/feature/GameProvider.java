@@ -15,7 +15,7 @@ public interface GameProvider {
         actions().forEach(action -> {
             var cell = board.cells()[action.posOut().x()][action.posOut().y()];
             if (cell instanceof Cell.Board(Cell[][] cells)) {
-                Cell newCell = gameService.newCell(game, action.player());
+                Cell newCell = gameService.cellOfPlayer(game, action.player());
                 cells[action.posIn().x()][action.posIn().y()] = newCell;
             }
         });

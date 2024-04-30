@@ -42,6 +42,8 @@ public class U3TGameController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        u3tGrid.prefWidthProperty().bind(root.widthProperty());
+        u3tGrid.prefHeightProperty().bind(root.widthProperty());
         u3tGrid.setHgap(10);
         u3tGrid.setVgap(10);
 

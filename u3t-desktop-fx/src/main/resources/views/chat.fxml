@@ -3,9 +3,10 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="utours.ultimate.desktop.controller.ChatController">
+<fx:root xmlns="http://javafx.com/javafx"
+         xmlns:fx="http://javafx.com/fxml"
+         type="utours.ultimate.desktop.view.DesktopChatView"
+         fx:controller="utours.ultimate.desktop.controller.ChatController">
 
     <ScrollPane>
 
@@ -17,4 +18,4 @@
     </Pane>
 
 
-</BorderPane>
+</fx:root>

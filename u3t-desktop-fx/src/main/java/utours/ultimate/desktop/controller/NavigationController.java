@@ -33,11 +33,14 @@ public class NavigationController implements Initializable {
     }
 
     private void addContainer(NavButton navButton) {
-        if (navButton instanceof DesktopNavButton desktopNavButton) {
-            navButtonContainer.add(desktopNavButton);
-        } else {
-            throw new IllegalStateException();
+        switch (navButton) {
+            case DesktopNavButton desktopNavButton -> processDesktopNavButton(desktopNavButton);
+            default -> throw new IllegalStateException("Unexpected value: " + navButton);
         }
+    }
+
+    private void processDesktopNavButton(DesktopNavButton desktopNavButton) {
+        navButtonContainer.add(desktopNavButton);
     }
 
 }

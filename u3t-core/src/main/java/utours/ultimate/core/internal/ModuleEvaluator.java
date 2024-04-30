@@ -14,6 +14,7 @@ public class ModuleEvaluator {
     private final Map<String, ComponentWrapper> componentsById = new HashMap<>();
     private final Map<Class<?>, List<ComponentWrapper>> additionalComponents = new HashMap<>();
     private final Map<Class<?>, ComponentWrapper> uniqueComponents = new HashMap<>();
+    private Throwable error = null;
 
     public void evaluate(Module module) throws Throwable {
 
@@ -24,12 +25,21 @@ public class ModuleEvaluator {
         }
 
         for (Module.Statement statement : module.getStatements()) {
-            switch (statement) {
-                case Module.AdditionalComponent additionalComponent -> evaluate(additionalComponent);
-                case Module.Group group -> evaluate(group);
-                case Module.UniqueComponent uniqueComponent -> evaluate(uniqueComponent);
-                case Module.Component component -> evaluate(component);
+            try {
+                switch (statement) {
+                    case Module.AdditionalComponent additionalComponent -> evaluate(additionalComponent);
+                    case Module.Group group -> evaluate(group);
+                    case Module.UniqueComponent uniqueComponent -> evaluate(uniqueComponent);
+                    case Module.Component component -> evaluate(component);
+                }
+            } catch (Throwable t) {
+                error = Optional.ofNullable(error).orElse(new IllegalStateException());
+                error.addSuppressed(t);
             }
+        }
+
+        if (Optional.ofNullable(error).isPresent()) {
+            throw error;
         }
 
     }
@@ -64,11 +74,11 @@ public class ModuleEvaluator {
                     list.add(object);
                 }
                 case Module.RefComponent refComponent -> {
-                    ComponentWrapper componentWrapper = componentsById.get(refComponent.getRef());
+                    ComponentWrapper componentWrapper = getComponentById(refComponent.getRef());
                     list.add(componentWrapper.getComponent());
                 }
                 case Module.RefGroup refGroup -> {
-                    ComponentWrapper componentWrapper = componentsById.get(refGroup.getRef());
+                    ComponentWrapper componentWrapper = getComponentById(refGroup.getRef());
                     List<Object> objects = componentWrapper.getComponent();
                     list.addAll(objects);
                 }
@@ -88,15 +98,14 @@ public class ModuleEvaluator {
         ComponentWrapper cw = switch (uniqueComponent.getComponentInterface()) {
             case Module.Component component -> {
                 evaluate(component);
-                yield componentsById.get(component.getId());
+                yield getComponentById(component.getId());
             }
             case Module.RefComponent refComponent -> {
-                cw = componentsById.get(refComponent.getRef());
+                cw = getComponentById(refComponent.getRef());
                 uniqueComponents.put(clazz, cw);
                 yield cw;
             }
-            case Module.RefGroup ignored ->
-                    throw new IllegalStateException("Ref group is not supported by unique component.");
+            case Module.RefGroup ignored -> throw new IllegalStateException("Ref group is not supported by unique component.");
         };
 
         uniqueComponents.put(clazz, cw);
@@ -117,17 +126,17 @@ public class ModuleEvaluator {
             switch (componentInterface) {
                 case Module.Component component -> {
                     evaluate(component);
-                    ComponentWrapper componentWrapper = componentsById.get(component.getId());
+                    ComponentWrapper componentWrapper = getComponentById(component.getId());
                     additionalComponents.computeIfAbsent(clazz, aClass -> new LinkedList<>())
                             .add(componentWrapper);
                 }
                 case Module.RefComponent refComponent -> {
-                    ComponentWrapper componentWrapper = componentsById.get(refComponent.getRef());
+                    ComponentWrapper componentWrapper = getComponentById(refComponent.getRef());
                     additionalComponents.computeIfAbsent(clazz, aClass -> new LinkedList<>())
                             .add(componentWrapper);
                 }
                 case Module.RefGroup refGroup -> {
-                    ComponentWrapper componentWrapper = componentsById.get(refGroup.getRef());
+                    ComponentWrapper componentWrapper = getComponentById(refGroup.getRef());
                     List<Object> objects = componentWrapper.getComponent();
 
                     checkIsAllSubClasses(clazz, objects);
@@ -175,15 +184,14 @@ public class ModuleEvaluator {
         } else if (factory != null) {
             return instantiateWithFactoryMethod(factory);
         } else {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Must have a constructor or a factory method.");
         }
-
     }
 
     private Object instantiateWithFactoryMethod(Module.Factory factory) throws Throwable {
 
         String methodName = factory.getMethodName();
-        ComponentWrapper factoryWrapper = componentsById.get(factory.getReference());
+        ComponentWrapper factoryWrapper = getComponentById(factory.getReference());
 
         Method method = factoryWrapper.getComponentClass().getDeclaredMethod(methodName);
 
@@ -201,7 +209,7 @@ public class ModuleEvaluator {
 
         for (int i = 0; i < constructorArgs.getArgs().size(); i++) {
             Module.Arg mArg = constructorArgs.getArgs().get(i);
-            ComponentWrapper componentWrapper = componentsById.get(mArg.getValue());
+            ComponentWrapper componentWrapper = getComponentById(mArg.getValue());
             mh = mh.bindTo(componentWrapper.getComponent());
         }
 
@@ -235,7 +243,7 @@ public class ModuleEvaluator {
         for (Object object : objects) {
             List<Throwable> exceptions = new ArrayList<>();
             if (!clazz.isInstance(object)) {
-                exceptions.add(new IllegalStateException("Derived class " + object.getClass() + " is not a subclass of " + clazz));
+                exceptions.add(new IllegalStateException("Derived class '" + object.getClass() + "' is not a subclass of '" + clazz + "'"));
             }
             if (!exceptions.isEmpty()) {
                 throw exceptions.stream().reduce((throwable, throwable2) -> {
@@ -244,6 +252,15 @@ public class ModuleEvaluator {
                 }).get();
             }
         }
+    }
+
+    public ComponentWrapper getComponentById(String id) {
+        return Optional.ofNullable(componentsById.get(id))
+                .orElseThrow(() -> new IllegalStateException("No component with id '" + id + "'"));
+    }
+
+    public Map<Class<?>, ComponentWrapper> getUniqueComponents() {
+        return uniqueComponents;
     }
 
 }
