@@ -55,7 +55,11 @@
 
     <component class="utours.ultimate.ui.NavButtonFactory"
                id="Ui.NavButtonFactory"
-               derived="utours.ultimate.desktop.factory.impl.DesktopNavButtonFactory" />
+               derived="utours.ultimate.desktop.factory.impl.DesktopNavButtonFactory">
+        <constructor-args>
+            <arg type="utours.ultimate.desktop.controller.PolymorphicController" value="Desktop.Fx.PolymorphicController" />
+        </constructor-args>
+    </component>
 
     <!-- Nav Buttons -->
 
