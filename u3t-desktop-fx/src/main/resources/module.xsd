@@ -43,6 +43,13 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <xs:simpleType name="component-scope-type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="prototype" />
+      <xs:enumeration value="singleton" />
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:simpleType name="component-type-type">
     <xs:restriction base="xs:string">
       <xs:enumeration value="additional" />
@@ -60,7 +67,8 @@
 
   <xs:attributeGroup name="component-attributes">
     <xs:attributeGroup ref="component-group-attributes" />
-    <xs:attribute use="required"    name="id"       type="xs:string" />
+    <xs:attribute use="required"      name="id"       type="xs:string" />
+    <xs:attribute default="singleton" name="scope"    type="component-scope-type" />
   </xs:attributeGroup>
 
   <xs:complexType name="arg-type">

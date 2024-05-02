@@ -12,6 +12,15 @@ public class ComponentWrapper {
         return cw;
     }
 
+    public ComponentWrapper(Class<?> componentClass, Object component) {
+        this.componentClass = componentClass;
+        this.component = component;
+    }
+
+    public ComponentWrapper(Class<?> componentClass) {
+        this.componentClass = componentClass;
+    }
+
     public ComponentWrapper() {
 
     }
@@ -31,6 +40,14 @@ public class ComponentWrapper {
     @SuppressWarnings("unchecked")
     public <T> T getComponent() {
         return (T) component;
+    }
+
+    @Override
+    public String toString() {
+        return "ComponentWrapper{" +
+                "componentClass=" + componentClass +
+                ", component=" + component +
+                '}';
     }
 
 }

@@ -5,14 +5,14 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import utours.ultimate.core.ContainerReadOnly;
 import utours.ultimate.core.ModuleContext;
-import utours.ultimate.core.internal.ClassPathXmlModuleProvider;
+import utours.ultimate.core.ModuleProvider;
+import utours.ultimate.core.provider.AnnotationModuleProvider;
 import utours.ultimate.desktop.view.DesktopMainView;
 import utours.ultimate.net.Client;
 
 public class MainApplication extends Application {
 
-    private static final ModuleContext context =
-            ModuleContext.createAndLoad(new ClassPathXmlModuleProvider());
+    private static final ModuleContext context = ModuleContext.createAndLoad(getModuleProvider());
 
     private static final String TITLE = "U3T";
     private static final int WIDTH = 1084;
@@ -41,6 +41,19 @@ public class MainApplication extends Application {
 
     public static ModuleContext getContext() {
         return context;
+    }
+
+    private static ModuleProvider getModuleProvider() {
+        return new AnnotationModuleProvider("utours.ultimate.desktop",
+                "utours.ultimate.desktop.action",
+                "utours.ultimate.desktop.controller",
+                "utours.ultimate.desktop.factory",
+                "utours.ultimate.desktop.factory.impl",
+                "utours.ultimate.desktop.service",
+                "utours.ultimate.desktop.service.impl",
+                "utours.ultimate.desktop.view",
+                "utours.ultimate.desktop.view.u3t"
+        );
     }
 
 }

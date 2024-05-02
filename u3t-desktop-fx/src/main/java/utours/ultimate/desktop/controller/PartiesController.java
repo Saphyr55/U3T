@@ -25,7 +25,7 @@ public class PartiesController implements Initializable {
     @FXML private DesktopPartiesView partiesView;
     @FXML private VBox container;
 
-    public PartiesController(Client client, ClientService clientService) {
+    public PartiesController(ClientService clientService, Client client) {
         this.client = client;
         this.clientService = clientService;
     }

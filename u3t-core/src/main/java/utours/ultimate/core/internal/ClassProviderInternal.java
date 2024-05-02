@@ -8,8 +8,13 @@ import java.util.stream.Collectors;
 
 public class ClassProviderInternal {
 
+    public static String denormalizePackageName(String packageName) {
+        return packageName.replaceAll("[.]", "/");
+    }
+
     public static Set<Class<?>> classesOf(String packageName) {
-        String packagePath = packageName.replaceAll("[.]", "/");
+
+        String packagePath = denormalizePackageName(packageName);
 
         InputStream stream = ClassLoader.getSystemClassLoader().getResourceAsStream(packagePath);
 

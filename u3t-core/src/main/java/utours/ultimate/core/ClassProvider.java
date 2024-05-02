@@ -11,6 +11,15 @@ public class ClassProvider {
      * @param packageName
      * @return
      */
+    public static String denormalizePackageName(String packageName) {
+        return ClassProviderInternal.denormalizePackageName(packageName);
+    }
+
+    /**
+     *
+     * @param packageName
+     * @return
+     */
     public static Set<Class<?>> classesOf(String packageName) {
         return ClassProviderInternal.classesOf(packageName);
     }

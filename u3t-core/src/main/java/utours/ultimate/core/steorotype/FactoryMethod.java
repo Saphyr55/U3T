@@ -6,9 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface Component {
+@Target(ElementType.METHOD)
+public @interface FactoryMethod {
 
-    String id() default "";
+
+
 
 }

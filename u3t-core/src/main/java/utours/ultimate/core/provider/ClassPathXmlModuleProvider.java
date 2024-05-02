@@ -1,4 +1,4 @@
-package utours.ultimate.core.internal;
+package utours.ultimate.core.provider;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;

@@ -2,7 +2,10 @@
 <module xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="module.xsd">
 
-    <!-- Game Service -->
+    <!-- Services -->
+
+    <component class="utours.ultimate.desktop.service.impl.DesktopClientService" id="Desktop.Fx.ClientService" />
+
 
     <component class="utours.ultimate.game.feature.GameService"
                derived="utours.ultimate.game.feature.internal.GameServiceInternal"
@@ -32,18 +35,22 @@
                id="Desktop.Fx.ControllerFactory" >
         <constructor-args>
             <arg type="utours.ultimate.game.feature.GameService" value="U3T.GameService" />
+            <arg type="utours.ultimate.desktop.service.ClientService" value="Desktop.Fx.ClientService" />
             <arg type="utours.ultimate.net.Client" value="Desktop.Fx.Client" />
         </constructor-args>
     </component>
 
-
     <!-- Controllers -->
+
+    <component class="utours.ultimate.desktop.controller.PartiesController" id="Desktop.Fx.PartiesController">
+        <factory method="createPartiesController" ref="Desktop.Fx.ControllerFactory"/>
+    </component>
 
     <component class="utours.ultimate.desktop.controller.ChatController" id="Desktop.Fx.ChatController">
         <factory method="createChatController" ref="Desktop.Fx.ControllerFactory"/>
     </component>
 
-    <component class="utours.ultimate.desktop.controller.PolymorphicController" id="Desktop.Fx.PolymorphicController">
+    <component class="utours.ultimate.desktop.controller.PolymorphicController" id="Desktop.Fx.PolymorphicController" scope="prototype">
         <factory ref="Desktop.Fx.ControllerFactory" method="createPolymorphicController" />
     </component>
 
@@ -106,6 +113,10 @@
             </constructor-args>
         </component>
 
+    </unique-component>
+
+    <unique-component class="utours.ultimate.desktop.controller.PartiesController">
+        <ref-component ref="Desktop.Fx.PartiesController"/>
     </unique-component>
 
     <unique-component class="utours.ultimate.net.Client">

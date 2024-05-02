@@ -1,7 +1,7 @@
 package utours.ultimate.server;
 
 import utours.ultimate.core.ModuleContext;
-import utours.ultimate.core.internal.ClassPathXmlModuleProvider;
+import utours.ultimate.core.provider.ClassPathXmlModuleProvider;
 import utours.ultimate.net.Application;
 import utours.ultimate.net.ApplicationConfiguration;
 import utours.ultimate.net.Context;

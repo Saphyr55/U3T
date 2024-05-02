@@ -4,22 +4,41 @@ import java.util.*;
 
 public class ComponentGraph {
 
-    private final Map<ComponentWrapper, List<ComponentWrapper>> graph;
+    private final List<Class<?>> components;
+    private final Map<Integer, List<Integer>> graph;
 
     public ComponentGraph() {
-        graph = new HashMap<>();
+        this.components = new LinkedList<>();
+        this.graph = new HashMap<>();
     }
 
-    public void addComponent(ComponentWrapper component) {
-        graph.computeIfAbsent(component, k -> new LinkedList<>());
+    public void addComponent(Class<?> component) {
+        if (!components.contains(component)) {
+            this.components.add(component);
+        }
     }
 
-    public void addComponent(ComponentWrapper component, List<ComponentWrapper> dependencies) {
-        graph.put(component, dependencies);
+    public int indexOf(Class<?> component) {
+        return components.indexOf(component);
     }
 
-    public Map<ComponentWrapper, List<ComponentWrapper>> getGraph() {
+    public void addEdge(Class<?> from, Class<?> to) {
+        var idxFrom = indexOf(from);
+        var idxTo = indexOf(to);
+        addEdge(idxFrom, idxTo);
+    }
+
+    public void addEdge(int from, int to) {
+        graph.computeIfAbsent(from, k -> new LinkedList<>()).add(to);
+    }
+
+    public List<Class<?>> getComponents() {
+        return components;
+    }
+
+    public Map<Integer, List<Integer>> getGraph() {
         return graph;
     }
+
 
 }
