@@ -29,21 +29,21 @@ public interface ModuleContext {
     /**
      * Instantiate the module context implementation.
      *
-     * @param moduleProvider module provider.
+     * @param moduleEvaluatorProvider module provider.
      * @return module context.
      */
-    static ModuleContext create(ModuleProvider moduleProvider) {
-        return new ModuleContextImpl(moduleProvider);
+    static ModuleContext create(ModuleEvaluatorProvider moduleEvaluatorProvider) {
+        return new ModuleContextImpl(moduleEvaluatorProvider);
     }
 
     /**
      * Instantiate the module context implementation and load the context.
      *
-     * @param moduleProvider module provider.
+     * @param moduleEvaluatorProvider module provider.
      * @return module context.
      */
-    static ModuleContext createAndLoad(ModuleProvider moduleProvider) {
-        ModuleContext moduleContext = create(moduleProvider);
+    static ModuleContext createAndLoad(ModuleEvaluatorProvider moduleEvaluatorProvider) {
+        ModuleContext moduleContext = create(moduleEvaluatorProvider);
         moduleContext.load();
         return moduleContext;
     }

@@ -5,7 +5,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import utours.ultimate.core.ClassPathResource;
 import utours.ultimate.core.Module;
-import utours.ultimate.core.ModuleProvider;
+import utours.ultimate.core.ModuleEvaluator;
+import utours.ultimate.core.ModuleEvaluatorProvider;
+import utours.ultimate.core.internal.XmlModuleEvaluator;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -18,11 +20,11 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
-public class ClassPathXmlModuleProvider implements ModuleProvider {
+public class ClassPathXmlModuleEvaluatorProvider implements ModuleEvaluatorProvider {
 
     public static final String MODULE_XML_FILENAME = "module.xml";
 
-    public ClassPathXmlModuleProvider() { }
+    public ClassPathXmlModuleEvaluatorProvider() { }
 
     private Module interpretXmlModule() throws Exception {
 
@@ -305,9 +307,9 @@ public class ClassPathXmlModuleProvider implements ModuleProvider {
     }
 
     @Override
-    public Module provideModule() {
+    public ModuleEvaluator provideModuleEvaluator() {
         try {
-            return interpretXmlModule();
+            return new XmlModuleEvaluator(interpretXmlModule());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

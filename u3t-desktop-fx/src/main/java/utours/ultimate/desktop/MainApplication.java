@@ -5,8 +5,8 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import utours.ultimate.core.ContainerReadOnly;
 import utours.ultimate.core.ModuleContext;
-import utours.ultimate.core.ModuleProvider;
-import utours.ultimate.core.provider.AnnotationModuleProvider;
+import utours.ultimate.core.ModuleEvaluatorProvider;
+import utours.ultimate.core.provider.AnnotationModuleEvaluatorProvider;
 import utours.ultimate.desktop.view.DesktopMainView;
 import utours.ultimate.net.Client;
 
@@ -43,8 +43,8 @@ public class MainApplication extends Application {
         return context;
     }
 
-    private static ModuleProvider getModuleProvider() {
-        return new AnnotationModuleProvider("utours.ultimate.desktop",
+    private static ModuleEvaluatorProvider getModuleProvider() {
+        return new AnnotationModuleEvaluatorProvider("utours.ultimate.desktop",
                 "utours.ultimate.desktop.action",
                 "utours.ultimate.desktop.controller",
                 "utours.ultimate.desktop.factory",

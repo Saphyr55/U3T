@@ -2,6 +2,7 @@ package utours.ultimate.core.internal;
 
 import utours.ultimate.core.ComponentWrapper;
 import utours.ultimate.core.Module;
+import utours.ultimate.core.ModuleEvaluator;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -9,12 +10,17 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.util.*;
 
-public class ModuleEvaluator {
+public class XmlModuleEvaluator implements ModuleEvaluator {
 
     private final Map<String, ComponentWrapper> componentsById = new HashMap<>();
     private final Map<Class<?>, List<ComponentWrapper>> additionalComponents = new HashMap<>();
     private final Map<Class<?>, ComponentWrapper> uniqueComponents = new HashMap<>();
+    private final Module module;
     private Throwable error = null;
+
+    public XmlModuleEvaluator(Module module) {
+        this.module = module;
+    }
 
     public void evaluate(Module module) throws Throwable {
 
@@ -257,6 +263,15 @@ public class ModuleEvaluator {
     public ComponentWrapper getComponentById(String id) {
         return Optional.ofNullable(componentsById.get(id))
                 .orElseThrow(() -> new IllegalStateException("No component with id '" + id + "'"));
+    }
+
+    @Override
+    public void evaluate() {
+        try {
+            evaluate(module);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Map<Class<?>, ComponentWrapper> getUniqueComponents() {

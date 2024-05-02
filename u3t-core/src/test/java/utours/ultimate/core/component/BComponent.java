@@ -1,7 +1,7 @@
 package utours.ultimate.core.component;
 
 import utours.ultimate.core.steorotype.Component;
-import utours.ultimate.core.steorotype.ConstructorProperty;
+import utours.ultimate.core.steorotype.ConstructorProperties;
 
 @Component
 public class BComponent {
@@ -12,7 +12,7 @@ public class BComponent {
         aComponent = null;
     }
 
-    @ConstructorProperty
+    @ConstructorProperties
     public BComponent(AComponent aComponent) {
         this.aComponent = aComponent;
     }

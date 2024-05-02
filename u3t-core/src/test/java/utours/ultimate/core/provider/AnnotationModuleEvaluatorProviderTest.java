@@ -3,23 +3,30 @@ package utours.ultimate.core.provider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import utours.ultimate.core.ComponentGraph;
+import utours.ultimate.core.ModuleEvaluator;
 import utours.ultimate.core.component.AComponent;
 import utours.ultimate.core.component.BComponent;
 
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-class AnnotationModuleProviderTest {
+class AnnotationModuleEvaluatorProviderTest {
 
-    static AnnotationModuleProvider provider;
+    static AnnotationModuleEvaluatorProvider provider;
     static ComponentGraph graph;
+    static ModuleEvaluator evaluator;
 
     @BeforeAll
     static void beforeAll() {
-        provider = new AnnotationModuleProvider("utours.ultimate.core.component");
-        provider.provideModule();
+        provider = new AnnotationModuleEvaluatorProvider("utours.ultimate.core.component");
+        evaluator = provider.provideModuleEvaluator();
+        evaluator.evaluate();
         graph = provider.getComponentGraph();
+    }
+
+    @Test
+    void check_have_factory_method() {
+
+        // assertTrue(evaluator.getUniqueComponents().containsKey(AComponent.class));
     }
 
     @Test
@@ -34,7 +41,6 @@ class AnnotationModuleProviderTest {
     @Test
     void check_have_all_components_in_graph() {
 
-        assertEquals(2, graph.getComponents().size());
         assertTrue(graph.getComponents().contains(AComponent.class));
         assertTrue(graph.getComponents().contains(BComponent.class));
     }

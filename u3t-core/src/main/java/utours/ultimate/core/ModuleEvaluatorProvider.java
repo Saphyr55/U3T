@@ -1,12 +1,12 @@
 package utours.ultimate.core;
 
-public interface ModuleProvider {
+public interface ModuleEvaluatorProvider {
 
     /**
      * Factory method, provide a module.
      *
      * @return a module.
      */
-    Module provideModule();
+    ModuleEvaluator provideModuleEvaluator();
 
 }

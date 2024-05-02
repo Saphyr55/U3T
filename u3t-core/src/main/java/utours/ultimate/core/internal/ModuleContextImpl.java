@@ -8,22 +8,20 @@ import java.util.Map;
 
 public class ModuleContextImpl implements ModuleContext {
 
-    private final ModuleProvider moduleProvider;
+    private final ModuleEvaluatorProvider moduleEvaluatorProvider;
     private final Container container;
 
-    public ModuleContextImpl(ModuleProvider moduleProvider) {
-        this.moduleProvider = moduleProvider;
+    public ModuleContextImpl(ModuleEvaluatorProvider moduleEvaluatorProvider) {
+        this.moduleEvaluatorProvider = moduleEvaluatorProvider;
         this.container = new ContainerImpl();
     }
 
     @Override
     public void load() {
         try {
-            Module module = moduleProvider.provideModule();
 
-            ModuleEvaluator evaluator = new ModuleEvaluator();
-
-            evaluator.evaluate(module);
+            ModuleEvaluator evaluator = moduleEvaluatorProvider.provideModuleEvaluator();
+            evaluator.evaluate();
 
             for (Map.Entry<String, ComponentWrapper> e : evaluator.getComponents().entrySet()) {
                 String s = e.getKey();
