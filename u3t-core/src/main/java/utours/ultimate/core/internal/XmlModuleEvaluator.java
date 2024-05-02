@@ -1,5 +1,6 @@
 package utours.ultimate.core.internal;
 
+import utours.ultimate.core.ComponentProvider;
 import utours.ultimate.core.ComponentWrapper;
 import utours.ultimate.core.Module;
 import utours.ultimate.core.ModuleEvaluator;
@@ -12,9 +13,9 @@ import java.util.*;
 
 public class XmlModuleEvaluator implements ModuleEvaluator {
 
-    private final Map<String, ComponentWrapper> componentsById = new HashMap<>();
-    private final Map<Class<?>, List<ComponentWrapper>> additionalComponents = new HashMap<>();
-    private final Map<Class<?>, ComponentWrapper> uniqueComponents = new HashMap<>();
+    private final Map<String, ComponentProvider> componentsById = new HashMap<>();
+    private final Map<Class<?>, List<ComponentProvider>> additionalComponents = new HashMap<>();
+    private final Map<Class<?>, ComponentProvider> uniqueComponents = new HashMap<>();
     private final Module module;
     private Throwable error = null;
 
@@ -80,11 +81,11 @@ public class XmlModuleEvaluator implements ModuleEvaluator {
                     list.add(object);
                 }
                 case Module.RefComponent refComponent -> {
-                    ComponentWrapper componentWrapper = getComponentById(refComponent.getRef());
+                    ComponentWrapper componentWrapper = getComponentById(refComponent.getRef()).get();
                     list.add(componentWrapper.getComponent());
                 }
                 case Module.RefGroup refGroup -> {
-                    ComponentWrapper componentWrapper = getComponentById(refGroup.getRef());
+                    ComponentWrapper componentWrapper = getComponentById(refGroup.getRef()).get();
                     List<Object> objects = componentWrapper.getComponent();
                     list.addAll(objects);
                 }
@@ -94,14 +95,14 @@ public class XmlModuleEvaluator implements ModuleEvaluator {
         cw.setComponentClass(clazz);
         cw.setComponent(list);
 
-        componentsById.put(id, cw);
+        componentsById.put(id, new ComponentProvider.Singleton(cw));
     }
 
     private void evaluate(Module.UniqueComponent uniqueComponent) throws Throwable {
 
         Class<?> clazz = Class.forName(uniqueComponent.getClassName());
 
-        ComponentWrapper cw = switch (uniqueComponent.getComponentInterface()) {
+        ComponentProvider cw = switch (uniqueComponent.getComponentInterface()) {
             case Module.Component component -> {
                 evaluate(component);
                 yield getComponentById(component.getId());
@@ -121,7 +122,7 @@ public class XmlModuleEvaluator implements ModuleEvaluator {
         ComponentWrapper cw = new ComponentWrapper();
         cw.setComponentClass(clazz);
         cw.setComponent(value.getValue());
-        componentsById.put(value.getId(), cw);
+        componentsById.put(value.getId(), new ComponentProvider.Singleton(cw));
     }
 
     public void evaluate(Module.AdditionalComponent additionalComponent) throws Throwable {
@@ -132,27 +133,25 @@ public class XmlModuleEvaluator implements ModuleEvaluator {
             switch (componentInterface) {
                 case Module.Component component -> {
                     evaluate(component);
-                    ComponentWrapper componentWrapper = getComponentById(component.getId());
-                    additionalComponents.computeIfAbsent(clazz, aClass -> new LinkedList<>())
-                            .add(componentWrapper);
+                    var provider = getComponentById(component.getId());
+                    additionalComponents.computeIfAbsent(clazz, aClass -> new LinkedList<>()).add(provider);
                 }
                 case Module.RefComponent refComponent -> {
-                    ComponentWrapper componentWrapper = getComponentById(refComponent.getRef());
-                    additionalComponents.computeIfAbsent(clazz, aClass -> new LinkedList<>())
-                            .add(componentWrapper);
+                    var provider = getComponentById(refComponent.getRef());
+                    additionalComponents.computeIfAbsent(clazz, aClass -> new LinkedList<>()).add(provider);
                 }
                 case Module.RefGroup refGroup -> {
-                    ComponentWrapper componentWrapper = getComponentById(refGroup.getRef());
+                    var componentWrapper = getComponentById(refGroup.getRef()).get();
                     List<Object> objects = componentWrapper.getComponent();
 
                     checkIsAllSubClasses(clazz, objects);
 
-                    List<ComponentWrapper> componentWrappers = objects.stream()
+                    var providers = objects.stream()
                             .map(ComponentWrapper::fromObject)
+                            .map(ComponentProvider.Singleton::new)
                             .toList();
 
-                    additionalComponents.computeIfAbsent(clazz, aClass -> new LinkedList<>())
-                            .addAll(componentWrappers);
+                    additionalComponents.computeIfAbsent(clazz, aClass -> new LinkedList<>()).addAll(providers);
                 }
             }
         }
@@ -177,7 +176,7 @@ public class XmlModuleEvaluator implements ModuleEvaluator {
         componentWrapper.setComponent(object);
         componentWrapper.setComponentClass(clazz);
 
-        componentsById.put(component.getId(), componentWrapper);
+        componentsById.put(component.getId(), new ComponentProvider.Singleton(componentWrapper));
     }
 
     public Object instantiate(Class<?> clazz, Module.Component component) throws Throwable {
@@ -197,7 +196,7 @@ public class XmlModuleEvaluator implements ModuleEvaluator {
     private Object instantiateWithFactoryMethod(Module.Factory factory) throws Throwable {
 
         String methodName = factory.getMethodName();
-        ComponentWrapper factoryWrapper = getComponentById(factory.getReference());
+        ComponentWrapper factoryWrapper = getComponentById(factory.getReference()).get();
 
         Method method = factoryWrapper.getComponentClass().getDeclaredMethod(methodName);
 
@@ -215,7 +214,7 @@ public class XmlModuleEvaluator implements ModuleEvaluator {
 
         for (int i = 0; i < constructorArgs.getArgs().size(); i++) {
             Module.Arg mArg = constructorArgs.getArgs().get(i);
-            ComponentWrapper componentWrapper = getComponentById(mArg.getValue());
+            ComponentWrapper componentWrapper = getComponentById(mArg.getValue()).get();
             mh = mh.bindTo(componentWrapper.getComponent());
         }
 
@@ -237,11 +236,11 @@ public class XmlModuleEvaluator implements ModuleEvaluator {
         return MethodType.methodType(void.class, classes);
     }
 
-    public Map<String, ComponentWrapper> getComponents() {
+    public Map<String, ComponentProvider> getComponents() {
         return componentsById;
     }
 
-    public Map<Class<?>, List<ComponentWrapper>> getAdditionalComponents() {
+    public Map<Class<?>, List<ComponentProvider>> getAdditionalComponents() {
         return additionalComponents;
     }
 
@@ -260,7 +259,7 @@ public class XmlModuleEvaluator implements ModuleEvaluator {
         }
     }
 
-    public ComponentWrapper getComponentById(String id) {
+    public ComponentProvider getComponentById(String id) {
         return Optional.ofNullable(componentsById.get(id))
                 .orElseThrow(() -> new IllegalStateException("No component with id '" + id + "'"));
     }
@@ -274,7 +273,7 @@ public class XmlModuleEvaluator implements ModuleEvaluator {
         }
     }
 
-    public Map<Class<?>, ComponentWrapper> getUniqueComponents() {
+    public Map<Class<?>, ComponentProvider> getUniqueComponents() {
         return uniqueComponents;
     }
 

@@ -35,14 +35,16 @@ class AnnotationModuleEvaluatorProviderTest {
         var indexAC = graph.indexOf(AComponent.class);
         var indexBC = graph.indexOf(BComponent.class);
 
-        assertTrue(graph.getGraph().get(indexBC).contains(indexAC));
+        var deps = graph.getGraph().get(indexBC);
+
+        assertTrue(deps.contains(indexAC));
     }
 
     @Test
     void check_have_all_components_in_graph() {
 
-        assertTrue(graph.getComponents().contains(AComponent.class));
-        assertTrue(graph.getComponents().contains(BComponent.class));
+        assertTrue(graph.getComponents().containsKey(AComponent.class));
+        assertTrue(graph.getComponents().containsKey(BComponent.class));
     }
 
 }

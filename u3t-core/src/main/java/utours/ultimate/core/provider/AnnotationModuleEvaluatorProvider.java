@@ -38,7 +38,7 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         var constructors = setupDependencies();
 
         Map<Class<?>, Module.Component> components = new HashMap<>();
-        Map<Class<?>, Map<Class<?>, MethodHandle>> factoryMethodHandlesMapped = new HashMap<>();
+        Map<Class<?>, Map.Entry<Class<?>, MethodHandle>> factoryMethodHandlesMapped = new HashMap<>();
 
         for (var clazz : classes) {
 
@@ -48,28 +48,24 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
                 var mComponent = processComponent(component, clazz);
                 components.put(clazz, mComponent);
 
-                var factoryMethods = getFactoryMethods(clazz);
-                factoryMethodHandlesMapped.put(clazz, factoryMethods);
-
+                setFactoryMethods(factoryMethodHandlesMapped, clazz);
             }
-
         }
 
         return new AnnotationModuleEvaluator(componentGraph, factoryMethodHandlesMapped, constructors);
     }
 
-    private Map<Class<?>, MethodHandle> getFactoryMethods(Class<?> clazz) {
+    private void setFactoryMethods(Map<Class<?>, Map.Entry<Class<?>, MethodHandle>> factoryMethodHandlesMapped, Class<?> clazz) {
         MethodHandles.Lookup lookup = MethodHandles.lookup();
 
         Exception exception = null;
-        Map<Class<?>, MethodHandle> methodHandles = new HashMap<>();
 
         for (Method method : clazz.getDeclaredMethods()) {
 
             if (method.isAnnotationPresent(FactoryMethod.class)) {
                 try {
                     var mh = lookup.unreflect(method);
-                    methodHandles.put(mh.type().returnType(), mh);
+                    factoryMethodHandlesMapped.put(mh.type().returnType(), Map.entry(clazz, mh));
                 } catch (Exception e) {
                     exception = Optional.ofNullable(exception).orElseGet(IllegalStateException::new);
                     exception.addSuppressed(e);
@@ -80,8 +76,6 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
 
         if (Optional.ofNullable(exception).isPresent())
             throw new RuntimeException(exception);
-
-        return methodHandles;
 
     }
 
@@ -116,7 +110,7 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
     }
 
     private boolean isInComponentGraph(Class<?> clazz) {
-        return componentGraph.getComponents().contains(clazz);
+        return componentGraph.getComponents().containsKey(clazz);
     }
 
     private Constructor<?> getConstructorProperties(Class<?> clazz) {

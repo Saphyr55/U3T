@@ -23,20 +23,21 @@ public class ModuleContextImpl implements ModuleContext {
             ModuleEvaluator evaluator = moduleEvaluatorProvider.provideModuleEvaluator();
             evaluator.evaluate();
 
-            for (Map.Entry<String, ComponentWrapper> e : evaluator.getComponents().entrySet()) {
+            for (Map.Entry<String, ComponentProvider> e : evaluator.getComponents().entrySet()) {
                 String s = e.getKey();
-                ComponentWrapper v = e.getValue();
+                ComponentWrapper v = e.getValue().get();
                 container.storeComponent(s, v.getComponent());
             }
 
-            for (ComponentWrapper cw : evaluator.getUniqueComponents().values()) {
+            for (ComponentProvider provider : evaluator.getUniqueComponents().values()) {
+                ComponentWrapper cw = provider.get();
                 container.storeUniqueComponent(cw.getComponentClass(), cw.getComponent());
             }
 
-            for (Map.Entry<Class<?>, List<ComponentWrapper>> entry : evaluator.getAdditionalComponents().entrySet()) {
+            for (Map.Entry<Class<?>, List<ComponentProvider>> entry : evaluator.getAdditionalComponents().entrySet()) {
                 Class<?> cClass = entry.getKey();
-                List<ComponentWrapper> cws = entry.getValue();
-                cws.forEach(cw -> container.storeAdditionalComponent(cClass, cw.getComponent()));
+                List<ComponentProvider> providers = entry.getValue();
+                providers.forEach(cw -> container.storeAdditionalComponent(cClass, cw.get().getComponent()));
             }
 
         } catch (Throwable throwable) {

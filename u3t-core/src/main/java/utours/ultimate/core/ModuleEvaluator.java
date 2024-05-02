@@ -7,10 +7,10 @@ public interface ModuleEvaluator {
 
     void evaluate();
 
-    Map<Class<?>, ComponentWrapper> getUniqueComponents();
+    Map<Class<?>, ComponentProvider> getUniqueComponents();
 
-    Map<Class<?>, List<ComponentWrapper>> getAdditionalComponents();
+    Map<Class<?>, List<ComponentProvider>> getAdditionalComponents();
 
-    Map<String, ComponentWrapper> getComponents();
+    Map<String, ComponentProvider> getComponents();
 
 }

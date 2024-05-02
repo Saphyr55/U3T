@@ -5,6 +5,8 @@ import utours.ultimate.core.steorotype.Component;
 @Component
 public class AComponent {
 
+    public AComponent() {
 
+    }
 
 }
