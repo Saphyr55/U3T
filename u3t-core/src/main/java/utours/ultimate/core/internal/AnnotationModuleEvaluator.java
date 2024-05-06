@@ -39,11 +39,7 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
             if (factoryMethodHandlesMapped.containsKey(cClass)) {
                 var e = factoryMethodHandlesMapped.get(cClass);
                 processFactoryMethod(e.getKey(), e.getValue(), cClass);
-            }
-        }
-
-        for (var cClass : componentGraph.getComponents().keySet()) {
-            if (constructors.containsKey(cClass)) {
+            } else if (constructors.containsKey(cClass)) {
                 processConstructor(constructors.get(cClass), cClass);
             }
         }
