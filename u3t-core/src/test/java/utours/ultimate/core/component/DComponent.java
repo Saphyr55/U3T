@@ -12,4 +12,9 @@ public class DComponent implements IDComponent {
         System.out.println("DComponent service");
     }
 
+    @Override
+    public String giveHelloWorldString() {
+        return "Hello World";
+    }
+
 }

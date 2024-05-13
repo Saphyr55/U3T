@@ -7,4 +7,6 @@ public interface IDComponent {
 
     void service();
 
+    String giveHelloWorldString();
+
 }
