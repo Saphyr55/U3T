@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<module xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="module.xsd">
+<xmlModule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="xmlModule.xsd">
 
     <!-- Services -->
 
@@ -157,4 +157,4 @@
         <ref-group ref="Desktop.Fx.NavButtons"/>
     </add-component>
 
-</module>
+</xmlModule>

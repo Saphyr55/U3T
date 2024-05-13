@@ -35,10 +35,8 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
             System.out.println(clazz.getName());
 
             if (mappedInterfaces.containsKey(clazz)) {
-                clazz = mappedInterfaces.get(clazz);
-            }
-
-            if (factoryMethodHandlesMapped.containsKey(clazz)) {
+                processInterface(clazz);
+            } else if (factoryMethodHandlesMapped.containsKey(clazz)) {
                 var e = factoryMethodHandlesMapped.get(clazz);
                 processFactoryMethod(e.getKey(), e.getValue(), clazz);
             } else if (constructors.containsKey(clazz)) {
@@ -47,6 +45,12 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
 
         }
 
+    }
+
+    private void processInterface(Class<?> interfaceClass) {
+        var clazz = mappedInterfaces.get(interfaceClass);
+        var cwProvider = componentsById.get(clazz.getName());
+        componentsById.put(interfaceClass.getName(), cwProvider);
     }
 
     private void processFactoryMethod(Class<?> clazz, MethodHandle mh, Class<?> component) {

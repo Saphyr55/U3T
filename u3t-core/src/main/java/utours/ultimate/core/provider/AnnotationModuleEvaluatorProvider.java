@@ -5,48 +5,39 @@ import utours.ultimate.core.internal.AnnotationModuleEvaluator;
 import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.core.steorotype.ConstructorProperties;
 import utours.ultimate.core.steorotype.FactoryMethod;
+import utours.ultimate.core.steorotype.Mapping;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvider {
 
-    private final Set<Class<?>> classes;
     private final ComponentGraph componentGraph;
+    private Map<Class<?>, Class<?>> mappedInterfaces;
 
     public AnnotationModuleEvaluatorProvider(String... packageNames) {
-
         this.componentGraph = new ComponentGraph();
-        this.classes = new HashSet<>();
-
-        for (String packageName : packageNames) {
-            classes.addAll(ClassProvider.classesOf(packageName));
-        }
-
-    }
-
-    public Set<Class<?>> getClasses() {
-        return classes;
+        this.mappedInterfaces = new HashMap<>();
+        setupNodes(Arrays.stream(packageNames)
+                .flatMap(packageName -> ClassProvider.classesOf(packageName).stream())
+                .collect(Collectors.toSet()));
     }
 
     @Override
     public ModuleEvaluator provideModuleEvaluator() {
 
-        setupGraph();
-        var constructors = setupConstructorsDependencies();
-
         Map<Class<?>, Map.Entry<Class<?>, MethodHandle>> factoryMethodHandlesMapped = new HashMap<>();
 
-        for (var clazz : classes) {
-            if (clazz.isAnnotationPresent(Component.class)) {
-                setFactoryMethods(factoryMethodHandlesMapped, clazz);
-            }
+        var constructors = setupConstructorsDependencies();
+        for (var clazz : componentGraph.getComponents()) {
+            setFactoryMethods(factoryMethodHandlesMapped, clazz);
         }
 
-        return new AnnotationModuleEvaluator(componentGraph, factoryMethodHandlesMapped, constructors, new HashMap<>());
+        return new AnnotationModuleEvaluator(componentGraph, factoryMethodHandlesMapped, constructors, mappedInterfaces);
     }
 
     private void setFactoryMethods(Map<Class<?>, Map.Entry<Class<?>, MethodHandle>> factoryMethodHandlesMapped, Class<?> clazz) {
@@ -79,30 +70,29 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         Map<Class<?>, MethodHandle> constructors = new HashMap<>();
         Exception exception = null;
 
-        for (var clazz : classes) {
+        for (var clazz : componentGraph.getComponents()) {
 
-            if (clazz.isAnnotationPresent(Component.class) && !clazz.isInterface() && !clazz.isAnonymousClass()) {
+            if (clazz.isInterface()) continue;
 
-                var declaredConstructor = getConstructorProperties(clazz);
-                var paramTypes = declaredConstructor.getParameterTypes();
-
-                for (Class<?> paramType : paramTypes) {
-
-                    if (isInComponentGraph(paramType)) {
-                        componentGraph.addDependency(clazz, paramType);
-                    }
-
-                }
-
-                try {
-                    var mt = MethodType.methodType(void.class, paramTypes);
-                    constructors.put(clazz, lookup.findConstructor(clazz, mt));
-                } catch (NoSuchMethodException | IllegalAccessException e) {
-                    exception = Optional.ofNullable(exception).orElseGet(IllegalStateException::new);
-                    exception.addSuppressed(e);
-                }
-
+            if (clazz.isAnnotationPresent(Mapping.class)) {
+                setupMappingClass(clazz);
             }
+
+            var declaredConstructor = getConstructorProperties(clazz);
+            var paramTypes = declaredConstructor.getParameterTypes();
+
+            Arrays.stream(paramTypes)
+                    .filter(componentGraph::hasNode)
+                    .forEach(pt -> componentGraph.addDependency(clazz, pt));
+
+            try {
+                var mt = MethodType.methodType(void.class, paramTypes);
+                constructors.put(clazz, lookup.findConstructor(clazz, mt));
+            } catch (NoSuchMethodException | IllegalAccessException e) {
+                exception = Optional.ofNullable(exception).orElseGet(IllegalStateException::new);
+                exception.addSuppressed(e);
+            }
+
         }
 
         if (Optional.ofNullable(exception).isPresent())
@@ -111,7 +101,20 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         return constructors;
     }
 
-    private void setupGraph() {
+    private void setupMappingClass(Class<?> clazz) {
+        Mapping mapping = clazz.getAnnotation(Mapping.class);
+        Class<?> interfaceClass;
+        if (mapping.clazz().equals(Class.class)) {
+            if (clazz.getInterfaces().length == 0) throw new IllegalStateException();
+            interfaceClass = clazz.getInterfaces()[0];
+        } else {
+            interfaceClass = mapping.clazz();
+        }
+        componentGraph.addDependency(interfaceClass, clazz);
+        mappedInterfaces.put(interfaceClass, clazz);
+    }
+
+    private void setupNodes(Set<Class<?>> classes) {
         for (var clazz : classes) {
             if (clazz.isAnnotationPresent(Component.class)) {
                 componentGraph.addComponent(clazz);

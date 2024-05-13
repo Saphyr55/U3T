@@ -1,9 +1,8 @@
-package utours.ultimate.core;
+package utours.ultimate.core.internal;
 
 import java.util.*;
 
-public class Module {
-
+public class XmlModule {
 
     public sealed interface Statement { }
 

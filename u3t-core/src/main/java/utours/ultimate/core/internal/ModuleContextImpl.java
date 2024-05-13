@@ -1,7 +1,6 @@
 package utours.ultimate.core.internal;
 
 import utours.ultimate.core.*;
-import utours.ultimate.core.Module;
 
 import java.util.List;
 import java.util.Map;
