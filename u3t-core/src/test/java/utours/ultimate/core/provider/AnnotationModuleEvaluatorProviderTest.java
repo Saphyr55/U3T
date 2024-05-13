@@ -26,13 +26,6 @@ class AnnotationModuleEvaluatorProviderTest {
     }
 
     @Test
-    void check_have_factory_method() {
-
-        //
-        // assertTrue(evaluator.getUniqueComponents().containsKey(AComponent.class));
-    }
-
-    @Test
     void check_have_dependencies_in_graph() {
 
         var indexAC = graph.indexOf(AComponent.class);

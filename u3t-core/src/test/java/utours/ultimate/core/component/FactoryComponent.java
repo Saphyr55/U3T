@@ -1,14 +1,21 @@
 package utours.ultimate.core.component;
 
 import utours.ultimate.core.steorotype.Component;
-import utours.ultimate.core.steorotype.FactoryMethod;
+import utours.ultimate.core.steorotype.Mapping;
 
 @Component
-public class FactoryComponent {
+@Mapping
+public class FactoryComponent implements IFactoryComponent {
 
-    @FactoryMethod
+    private final IDComponent dComponent;
+
+    public FactoryComponent(IDComponent dComponent) {
+        this.dComponent = dComponent;
+    }
+
+    @Override
     public AComponent getAComponent() {
-        return new AComponent("aComponent");
+        return new AComponent(dComponent, "aComponent");
     }
 
 }

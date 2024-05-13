@@ -54,10 +54,7 @@ public class ComponentGraph {
     public List<Class<?>> getSortedComponents(Iterator<Class<?>> iterator) {
         List<Class<?>> sortedComponents = new LinkedList<>();
         while (iterator.hasNext()) {
-            var value = iterator.next();
-            if (!sortedComponents.contains(value)) {
-                sortedComponents.add(value);
-            }
+            sortedComponents.add(iterator.next());
         }
         return sortedComponents;
     }

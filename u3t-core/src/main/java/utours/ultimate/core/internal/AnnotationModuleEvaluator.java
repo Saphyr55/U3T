@@ -1,9 +1,6 @@
 package utours.ultimate.core.internal;
 
-import utours.ultimate.core.ComponentGraph;
-import utours.ultimate.core.ComponentProvider;
-import utours.ultimate.core.ComponentWrapper;
-import utours.ultimate.core.ModuleEvaluator;
+import utours.ultimate.core.*;
 
 import java.lang.invoke.MethodHandle;
 import java.util.*;
@@ -16,15 +13,18 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
 
     private final Map<Class<?>, Map.Entry<Class<?>, MethodHandle>> factoryMethodHandlesMapped;
     private final Map<Class<?>, MethodHandle> constructors;
+    private final Map<Class<?>, Class<?>> mappedInterfaces;
     private final ComponentGraph componentGraph;
 
     public AnnotationModuleEvaluator(ComponentGraph componentGraph,
                                      Map<Class<?>, Map.Entry<Class<?>, MethodHandle>> factoryMethodHandlesMapped,
-                                     Map<Class<?>, MethodHandle> constructors) {
+                                     Map<Class<?>, MethodHandle> constructors,
+                                     Map<Class<?>, Class<?>> mappedInterfaces) {
 
         this.componentGraph = componentGraph;
         this.factoryMethodHandlesMapped = factoryMethodHandlesMapped;
         this.constructors = constructors;
+        this.mappedInterfaces = mappedInterfaces;
     }
 
     @Override
@@ -34,12 +34,17 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
 
             System.out.println(clazz.getName());
 
+            if (mappedInterfaces.containsKey(clazz)) {
+                clazz = mappedInterfaces.get(clazz);
+            }
+
             if (factoryMethodHandlesMapped.containsKey(clazz)) {
                 var e = factoryMethodHandlesMapped.get(clazz);
                 processFactoryMethod(e.getKey(), e.getValue(), clazz);
             } else if (constructors.containsKey(clazz)) {
                 processConstructor(constructors.get(clazz), clazz);
             }
+
         }
 
     }
