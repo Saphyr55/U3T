@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.ScrollPane?>
+<?import utours.ultimate.desktop.view.DesktopNavigationView?>
 
-<ScrollPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:id="nav"
-            fx:controller="utours.ultimate.desktop.controller.NavigationController" >
+<fx:root xmlns="http://javafx.com/javafx"
+         xmlns:fx="http://javafx.com/fxml"
+         type="DesktopNavigationView"
+         fx:id="nav"
+         fx:controller="utours.ultimate.desktop.controller.NavigationController"
+         >
 
-</ScrollPane>
+</fx:root>

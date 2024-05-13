@@ -6,7 +6,7 @@ plugins {
 sourceCompatibility = '21'
 targetCompatibility = '21'
 
-group = 'utours.ultimate'
+group = 'utours.ultimate.server'
 version = '1.0'
 
 application {
@@ -21,6 +21,7 @@ dependencies {
 
     implementation project(':u3t-core')
     implementation project(':u3t-net-core')
+    implementation project(':u3t-game-domain')
 
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'

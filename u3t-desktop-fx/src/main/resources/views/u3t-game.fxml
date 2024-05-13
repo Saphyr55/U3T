@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import utours.ultimate.desktop.view.U3TGameView?>
 
-<Pane xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:id="root" >
+<fx:root xmlns="http://javafx.com/javafx"
+         xmlns:fx="http://javafx.com/fxml"
+         type="utours.ultimate.desktop.view.U3TGameView"
+         fx:id="root"
+         fx:controller="utours.ultimate.desktop.controller.U3TGameController">
 
     <GridPane fx:id="u3tGrid"
               prefWidth="${root.width / 1.2}"
               prefHeight="${root.height / 1.2}"/>
 
-</Pane>
+</fx:root>

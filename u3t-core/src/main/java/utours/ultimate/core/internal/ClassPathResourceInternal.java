@@ -1,7 +1,5 @@
 package utours.ultimate.core.internal;
 
-import utours.ultimate.core.ClassPathResource;
-
 import java.io.*;
 import java.net.URL;
 import java.nio.file.FileSystems;
@@ -9,13 +7,15 @@ import java.util.stream.Collectors;
 
 public class ClassPathResourceInternal {
 
-
     public static InputStream getResourceAsStream(String filepath) throws IOException {
+
         var classLoader = Thread.currentThread().getContextClassLoader();
         var resource = classLoader.getResource(filepath);
+
         if (resource == null) {
             throw new FileNotFoundException(filepath);
         }
+
         return new FileInputStream(resource.getPath());
     }
 

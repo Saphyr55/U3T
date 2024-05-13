@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:complexType name="boolean-type">
+    <xs:attribute use="required" name="id" type="xs:string" />
+    <xs:attribute default="false" name="value" type="xs:boolean" />
+  </xs:complexType>
+
+  <xs:complexType name="integer-type">
+    <xs:attribute use="required" name="id" type="xs:string" />
+    <xs:attribute default="0" name="value" type="xs:integer" />
+  </xs:complexType>
+
+  <xs:complexType name="float-type">
+    <xs:attribute use="required" name="id" type="xs:string" />
+    <xs:attribute default="0" name="value" type="xs:float" />
+  </xs:complexType>
+
+  <xs:complexType name="long-type">
+    <xs:attribute name="id" type="xs:string" />
+    <xs:attribute name="value" type="xs:long" />
+  </xs:complexType>
+
+  <xs:complexType name="byte-type">
+    <xs:attribute use="required" name="id" type="xs:string" />
+    <xs:attribute default="0" name="value" type="xs:byte" />
+  </xs:complexType>
+
+  <xs:complexType name="double-type">
+    <xs:attribute use="required" name="id" type="xs:string" />
+    <xs:attribute default="0" name="value" type="xs:double" />
+  </xs:complexType>
+
+  <xs:complexType name="string-type">
+    <xs:attribute use="required" name="id" type="xs:string" />
+    <xs:attribute default="" name="value" type="xs:string" />
+  </xs:complexType>
+
+  <xs:simpleType name="component-strategy-type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="derived" />
+      <xs:enumeration value="interface" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="component-scope-type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="prototype" />
+      <xs:enumeration value="singleton" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="component-type-type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="additional" />
+      <xs:enumeration value="maybe" />
+      <xs:enumeration value="unique" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:attributeGroup name="component-group-attributes">
+    <xs:attribute use="required"    name="class"    type="xs:string" />
+    <xs:attribute                   name="derived"  type="xs:attribute" />
+    <xs:attribute default="derived" name="strategy" type="component-strategy-type" />
+    <xs:attribute default="unique"  name="type"     type="component-type-type" />
+  </xs:attributeGroup>
+
+  <xs:attributeGroup name="component-attributes">
+    <xs:attributeGroup ref="component-group-attributes" />
+    <xs:attribute use="required"      name="id"       type="xs:string" />
+    <xs:attribute default="singleton" name="scope"    type="component-scope-type" />
+  </xs:attributeGroup>
+
+  <xs:complexType name="arg-type">
+    <xs:attribute name="name" type="xs:string" />
+    <xs:attribute use="required" name="type" type="xs:string" />
+    <xs:attribute use="required" name="value" type="xs:string" />
+  </xs:complexType>
+
+  <xs:complexType name="constructor-args-type">
+    <xs:sequence>
+      <xs:element name="arg" minOccurs="0" maxOccurs="unbounded" type="arg-type" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="factory-type">
+    <xs:attribute name="method" type="xs:string" use="required" />
+    <xs:attribute name="ref" type="xs:string" use="required" />
+  </xs:complexType>
+
+  <xs:complexType name="derived-type">
+    <xs:choice>
+      <xs:element type="constructor-args-type" minOccurs="0"  name="constructor-args"/>
+      <xs:element type="factory-type" name="factory"/>
+    </xs:choice>
+    <xs:attribute type="xs:string" name="class" />
+  </xs:complexType>
+
+  <xs:complexType name="component-type">
+    <xs:choice>
+        <xs:element type="derived-type" name="derived" />
+        <xs:element type="constructor-args-type" minOccurs="0" name="constructor-args"/>
+        <xs:element type="factory-type" name="factory"/>
+    </xs:choice>
+    <xs:attributeGroup ref="component-attributes"/>
+  </xs:complexType>
+
+  <xs:complexType name="component-group-type">
+    <xs:choice>
+      <xs:element type="derived-type" name="derived" />
+      <xs:element type="constructor-args-type" minOccurs="0" name="constructor-args"/>
+      <xs:element type="factory-type" name="factory"/>
+    </xs:choice>
+    <xs:attributeGroup ref="component-group-attributes" />
+  </xs:complexType>
+
+  <xs:complexType name="ref-component-type">
+    <xs:attribute use="required" name="ref" type="xs:string" />
+  </xs:complexType>
+
+  <xs:complexType name="add-component-type">
+    <xs:choice  minOccurs="0" maxOccurs="unbounded">
+      <xs:sequence>
+        <xs:element name="ref-group" type="ref-component-type" minOccurs="0" maxOccurs="unbounded" />
+        <xs:element name="component" type="component-type" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="ref-component" type="ref-component-type" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:choice>
+    <xs:attribute use="required" name="class" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="unique-component-type">
+    <xs:choice>
+      <xs:element name="ref-component" type="ref-component-type" />
+      <xs:element name="component" type="component-type" />
+    </xs:choice>
+    <xs:attribute name="class" type="xs:string" use="required" />
+  </xs:complexType>
+
+  <xs:complexType name="group-type" >
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:sequence>
+        <xs:element name="component" type="component-group-type" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:sequence>
+        <xs:element name="ref-component" type="ref-component-type" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:choice>
+    <xs:attribute name="id" type="xs:string" use="required" />
+    <xs:attribute name="class" type="xs:string" default="java.lang.Object" />
+  </xs:complexType>
+
+  <xs:complexType name="xmlModule-type">
+    <xs:sequence>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="integer" type="integer-type" />
+        <xs:element name="float" type="float-type" />
+        <xs:element name="double" type="double-type" />
+        <xs:element name="long" type="long-type" />
+        <xs:element name="byte" type="byte-type" />
+        <xs:element name="boolean" type="boolean-type" />
+        <xs:element name="string" type="string-type" />
+      </xs:choice>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:sequence>
+          <xs:element name="group" type="group-type" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+        <xs:sequence>
+          <xs:element name="component" type="component-type" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:sequence>
+          <xs:element type="unique-component-type" name="unique-component" />
+        </xs:sequence>
+        <xs:sequence>
+          <xs:element name="add-component" type="add-component-type" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="xmlModule" type="xmlModule-type" />
+
+</xs:schema>

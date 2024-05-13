@@ -1,7 +1,7 @@
 package utours.ultimate.game.model;
 
 public record IsWinGame(
-        U3TGame game,
+        Game game,
         boolean isWin
 ) {
 

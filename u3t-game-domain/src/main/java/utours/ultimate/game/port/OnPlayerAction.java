@@ -1,9 +1,9 @@
 package utours.ultimate.game.port;
 
-import utours.ultimate.game.model.U3TGame;
+import utours.ultimate.game.model.Game;
 
 public interface OnPlayerAction {
 
-    U3TGame performAction(U3TGame u3TGame);
+    Game performAction(Game game);
 
 }
