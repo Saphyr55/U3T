@@ -5,8 +5,10 @@ import utours.ultimate.core.steorotype.Component;
 @Component
 public class AComponent {
 
-    public AComponent() {
+    private final String name;
 
+    public AComponent(String name) {
+        this.name = name;
     }
 
 }

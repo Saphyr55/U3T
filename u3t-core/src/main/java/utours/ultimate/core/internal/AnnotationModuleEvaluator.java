@@ -6,10 +6,7 @@ import utours.ultimate.core.ComponentWrapper;
 import utours.ultimate.core.ModuleEvaluator;
 
 import java.lang.invoke.MethodHandle;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class AnnotationModuleEvaluator implements ModuleEvaluator {
 
@@ -30,17 +27,18 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
         this.constructors = constructors;
     }
 
-
     @Override
     public void evaluate() {
-        componentGraph.sort();
 
-        for (var cClass : componentGraph.getComponents().keySet()) {
-            if (factoryMethodHandlesMapped.containsKey(cClass)) {
-                var e = factoryMethodHandlesMapped.get(cClass);
-                processFactoryMethod(e.getKey(), e.getValue(), cClass);
-            } else if (constructors.containsKey(cClass)) {
-                processConstructor(constructors.get(cClass), cClass);
+        for (var clazz : componentGraph.getSortedComponents()) {
+
+            System.out.println(clazz.getName());
+
+            if (factoryMethodHandlesMapped.containsKey(clazz)) {
+                var e = factoryMethodHandlesMapped.get(clazz);
+                processFactoryMethod(e.getKey(), e.getValue(), clazz);
+            } else if (constructors.containsKey(clazz)) {
+                processConstructor(constructors.get(clazz), clazz);
             }
         }
 
@@ -62,7 +60,8 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
         try {
             List<Object> args = new ArrayList<>();
             for (Class<?> paramClass : methodHandle.type().parameterList()) {
-                var cw = componentsById.get(paramClass.getName()).get();
+                var cwProvider = componentsById.get(paramClass.getName());
+                var cw = cwProvider.get();
                 if (cw == null) throw new IllegalStateException();
                 args.add(cw.getComponent());
             }

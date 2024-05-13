@@ -6,6 +6,8 @@ import utours.ultimate.core.ComponentGraph;
 import utours.ultimate.core.ModuleEvaluator;
 import utours.ultimate.core.component.AComponent;
 import utours.ultimate.core.component.BComponent;
+import utours.ultimate.core.component.CComponent;
+import utours.ultimate.core.component.FactoryComponent;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,6 +28,7 @@ class AnnotationModuleEvaluatorProviderTest {
     @Test
     void check_have_factory_method() {
 
+        //
         // assertTrue(evaluator.getUniqueComponents().containsKey(AComponent.class));
     }
 
@@ -41,10 +44,20 @@ class AnnotationModuleEvaluatorProviderTest {
     }
 
     @Test
-    void check_have_all_components_in_graph() {
+    void check_have_dependencies_with_factory() {
 
-        assertTrue(graph.getComponents().containsKey(AComponent.class));
-        assertTrue(graph.getComponents().containsKey(BComponent.class));
+        var indexAC = graph.indexOf(AComponent.class);
+        var indexFactoryC = graph.indexOf(FactoryComponent.class);
+
+        assertTrue(graph.getGraph().get(indexAC).contains(indexFactoryC));
+    }
+
+    @Test
+    void check_have_all_components_in_graph() {
+        assertTrue(graph.getComponents().contains(FactoryComponent.class));
+        assertTrue(graph.getComponents().contains(AComponent.class));
+        assertTrue(graph.getComponents().contains(BComponent.class));
+        assertTrue(graph.getComponents().contains(CComponent.class));
     }
 
 }

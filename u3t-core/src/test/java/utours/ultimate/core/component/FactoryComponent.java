@@ -8,7 +8,7 @@ public class FactoryComponent {
 
     @FactoryMethod
     public AComponent getAComponent() {
-        return new AComponent();
+        return new AComponent("aComponent");
     }
 
 }
