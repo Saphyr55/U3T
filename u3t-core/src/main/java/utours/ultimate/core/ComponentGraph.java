@@ -43,6 +43,14 @@ public class ComponentGraph {
         graph.computeIfAbsent(from, k -> new LinkedList<>()).add(to);
     }
 
+    public boolean hasNode(Class<?> node) {
+        return components.contains(node);
+    }
+
+    public boolean hasNode(int node) {
+        return graph.containsKey(node);
+    }
+
     public List<Class<?>> getComponents() {
         return components;
     }
@@ -54,10 +62,9 @@ public class ComponentGraph {
     public List<Class<?>> getSortedComponents(Iterator<Class<?>> iterator) {
         List<Class<?>> sortedComponents = new LinkedList<>();
         while (iterator.hasNext()) {
-            var value = iterator.next();
-            if (!sortedComponents.contains(value)) {
-                sortedComponents.add(value);
-            }
+            var next = iterator.next();
+            if (!sortedComponents.contains(next))
+                sortedComponents.add(next);
         }
         return sortedComponents;
     }

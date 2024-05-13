@@ -1,6 +1,8 @@
 package utours.ultimate.desktop.factory.impl;
 
 import utours.ultimate.core.steorotype.Component;
+import utours.ultimate.core.steorotype.ConstructorProperties;
+import utours.ultimate.core.steorotype.Mapping;
 import utours.ultimate.desktop.controller.ChatController;
 import utours.ultimate.desktop.controller.PartiesController;
 import utours.ultimate.desktop.controller.PolymorphicController;
@@ -13,7 +15,7 @@ import utours.ultimate.net.Client;
 
 import java.util.function.Function;
 
-@Component
+@Mapping(clazz = ControllerFactory.class, type = Mapping.Type.Unique)
 public class ControllerFactoryImpl implements ControllerFactory {
 
     private final Function<Game, U3TGameController> u3tGameControllerFactory;

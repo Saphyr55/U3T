@@ -2,7 +2,6 @@ package utours.ultimate.core.internal;
 
 import utours.ultimate.core.ComponentProvider;
 import utours.ultimate.core.ComponentWrapper;
-import utours.ultimate.core.Module;
 import utours.ultimate.core.ModuleEvaluator;
 
 import java.lang.invoke.MethodHandle;
@@ -16,28 +15,28 @@ public class XmlModuleEvaluator implements ModuleEvaluator {
     private final Map<String, ComponentProvider> componentsById = new HashMap<>();
     private final Map<Class<?>, List<ComponentProvider>> additionalComponents = new HashMap<>();
     private final Map<Class<?>, ComponentProvider> uniqueComponents = new HashMap<>();
-    private final Module module;
+    private final XmlModule xmlModule;
     private Throwable error = null;
 
-    public XmlModuleEvaluator(Module module) {
-        this.module = module;
+    public XmlModuleEvaluator(XmlModule xmlModule) {
+        this.xmlModule = xmlModule;
     }
 
-    public void evaluate(Module module) throws Throwable {
+    public void evaluate(XmlModule xmlModule) throws Throwable {
 
-        for (var entry : module.getValues().entrySet()) {
+        for (var entry : xmlModule.getValues().entrySet()) {
             for (var value : entry.getValue()) {
                 evaluate(entry.getKey(), value);
             }
         }
 
-        for (Module.Statement statement : module.getStatements()) {
+        for (XmlModule.Statement statement : xmlModule.getStatements()) {
             try {
                 switch (statement) {
-                    case Module.AdditionalComponent additionalComponent -> evaluate(additionalComponent);
-                    case Module.Group group -> evaluate(group);
-                    case Module.UniqueComponent uniqueComponent -> evaluate(uniqueComponent);
-                    case Module.Component component -> evaluate(component);
+                    case XmlModule.AdditionalComponent additionalComponent -> evaluate(additionalComponent);
+                    case XmlModule.Group group -> evaluate(group);
+                    case XmlModule.UniqueComponent uniqueComponent -> evaluate(uniqueComponent);
+                    case XmlModule.Component component -> evaluate(component);
                 }
             } catch (Throwable t) {
                 error = Optional.ofNullable(error).orElse(new IllegalStateException());
@@ -51,7 +50,7 @@ public class XmlModuleEvaluator implements ModuleEvaluator {
 
     }
 
-    private void evaluate(Module.Group group) throws Throwable {
+    private void evaluate(XmlModule.Group group) throws Throwable {
 
         ComponentWrapper cw = new ComponentWrapper();
         Class<?> clazz = Class.forName(group.getClassName());
@@ -59,9 +58,9 @@ public class XmlModuleEvaluator implements ModuleEvaluator {
 
         List<Object> list = new ArrayList<>();
 
-        for (Module.ComponentInterface componentInterface : group.getComponentInterfaces()) {
+        for (XmlModule.ComponentInterface componentInterface : group.getComponentInterfaces()) {
             switch (componentInterface) {
-                case Module.Component component -> {
+                case XmlModule.Component component -> {
 
                     String className = component.getClassName();
                     Class<?> componentClazz = Class.forName(className);
@@ -80,11 +79,11 @@ public class XmlModuleEvaluator implements ModuleEvaluator {
                     Object object = instantiate(derivedClazz, component);
                     list.add(object);
                 }
-                case Module.RefComponent refComponent -> {
+                case XmlModule.RefComponent refComponent -> {
                     ComponentWrapper componentWrapper = getComponentById(refComponent.getRef()).get();
                     list.add(componentWrapper.getComponent());
                 }
-                case Module.RefGroup refGroup -> {
+                case XmlModule.RefGroup refGroup -> {
                     ComponentWrapper componentWrapper = getComponentById(refGroup.getRef()).get();
                     List<Object> objects = componentWrapper.getComponent();
                     list.addAll(objects);
@@ -98,49 +97,49 @@ public class XmlModuleEvaluator implements ModuleEvaluator {
         componentsById.put(id, new ComponentProvider.Singleton(cw));
     }
 
-    private void evaluate(Module.UniqueComponent uniqueComponent) throws Throwable {
+    private void evaluate(XmlModule.UniqueComponent uniqueComponent) throws Throwable {
 
         Class<?> clazz = Class.forName(uniqueComponent.getClassName());
 
         ComponentProvider cw = switch (uniqueComponent.getComponentInterface()) {
-            case Module.Component component -> {
+            case XmlModule.Component component -> {
                 evaluate(component);
                 yield getComponentById(component.getId());
             }
-            case Module.RefComponent refComponent -> {
+            case XmlModule.RefComponent refComponent -> {
                 cw = getComponentById(refComponent.getRef());
                 uniqueComponents.put(clazz, cw);
                 yield cw;
             }
-            case Module.RefGroup ignored -> throw new IllegalStateException("Ref group is not supported by unique component.");
+            case XmlModule.RefGroup ignored -> throw new IllegalStateException("Ref group is not supported by unique component.");
         };
 
         uniqueComponents.put(clazz, cw);
     }
 
-    public void evaluate(Class<?> clazz, Module.Value<?> value) {
+    public void evaluate(Class<?> clazz, XmlModule.Value<?> value) {
         ComponentWrapper cw = new ComponentWrapper();
         cw.setComponentClass(clazz);
         cw.setComponent(value.getValue());
         componentsById.put(value.getId(), new ComponentProvider.Singleton(cw));
     }
 
-    public void evaluate(Module.AdditionalComponent additionalComponent) throws Throwable {
+    public void evaluate(XmlModule.AdditionalComponent additionalComponent) throws Throwable {
 
         Class<?> clazz = Class.forName(additionalComponent.getClassName());
 
-        for (Module.ComponentInterface componentInterface : additionalComponent.getComponentsInterface()) {
+        for (XmlModule.ComponentInterface componentInterface : additionalComponent.getComponentsInterface()) {
             switch (componentInterface) {
-                case Module.Component component -> {
+                case XmlModule.Component component -> {
                     evaluate(component);
                     var provider = getComponentById(component.getId());
                     additionalComponents.computeIfAbsent(clazz, aClass -> new LinkedList<>()).add(provider);
                 }
-                case Module.RefComponent refComponent -> {
+                case XmlModule.RefComponent refComponent -> {
                     var provider = getComponentById(refComponent.getRef());
                     additionalComponents.computeIfAbsent(clazz, aClass -> new LinkedList<>()).add(provider);
                 }
-                case Module.RefGroup refGroup -> {
+                case XmlModule.RefGroup refGroup -> {
                     var componentWrapper = getComponentById(refGroup.getRef()).get();
                     List<Object> objects = componentWrapper.getComponent();
 
@@ -158,7 +157,7 @@ public class XmlModuleEvaluator implements ModuleEvaluator {
 
     }
 
-    private void evaluate(Module.Component component) throws Throwable {
+    private void evaluate(XmlModule.Component component) throws Throwable {
 
         String className = component.getClassName();
         Class<?> clazz = Class.forName(className);
@@ -179,10 +178,10 @@ public class XmlModuleEvaluator implements ModuleEvaluator {
         componentsById.put(component.getId(), new ComponentProvider.Singleton(componentWrapper));
     }
 
-    public Object instantiate(Class<?> clazz, Module.Component component) throws Throwable {
+    public Object instantiate(Class<?> clazz, XmlModule.Component component) throws Throwable {
 
-        Module.ConstructorArgs constructorArgs = component.getConstructorArgs();
-        Module.Factory factory = component.getFactory();
+        XmlModule.ConstructorArgs constructorArgs = component.getConstructorArgs();
+        XmlModule.Factory factory = component.getFactory();
 
         if (constructorArgs != null) {
             return instantiateWithConstructor(clazz, constructorArgs);
@@ -193,7 +192,7 @@ public class XmlModuleEvaluator implements ModuleEvaluator {
         }
     }
 
-    private Object instantiateWithFactoryMethod(Module.Factory factory) throws Throwable {
+    private Object instantiateWithFactoryMethod(XmlModule.Factory factory) throws Throwable {
 
         String methodName = factory.getMethodName();
         ComponentWrapper factoryWrapper = getComponentById(factory.getReference()).get();
@@ -208,12 +207,12 @@ public class XmlModuleEvaluator implements ModuleEvaluator {
         return mh.invoke();
     }
 
-    private Object instantiateWithConstructor(Class<?> clazz, Module.ConstructorArgs constructorArgs) throws Throwable {
+    private Object instantiateWithConstructor(Class<?> clazz, XmlModule.ConstructorArgs constructorArgs) throws Throwable {
         MethodHandles.Lookup lookup = MethodHandles.lookup();
         MethodHandle mh = lookup.findConstructor(clazz, methodType(constructorArgs));
 
         for (int i = 0; i < constructorArgs.getArgs().size(); i++) {
-            Module.Arg mArg = constructorArgs.getArgs().get(i);
+            XmlModule.Arg mArg = constructorArgs.getArgs().get(i);
             ComponentWrapper componentWrapper = getComponentById(mArg.getValue()).get();
             mh = mh.bindTo(componentWrapper.getComponent());
         }
@@ -221,7 +220,7 @@ public class XmlModuleEvaluator implements ModuleEvaluator {
         return mh.invoke();
     }
 
-    public MethodType methodType(Module.ConstructorArgs constructorArgs) throws Throwable {
+    public MethodType methodType(XmlModule.ConstructorArgs constructorArgs) throws Throwable {
 
         if (constructorArgs.getArgs().isEmpty()) {
             return MethodType.methodType(void.class);
@@ -229,7 +228,7 @@ public class XmlModuleEvaluator implements ModuleEvaluator {
 
         Class<?>[] classes = new Class<?>[constructorArgs.getArgs().size()];
         for (int i = 0; i < classes.length; i++) {
-            Module.Arg arg = constructorArgs.getArgs().get(i);
+            XmlModule.Arg arg = constructorArgs.getArgs().get(i);
             classes[i] = Class.forName(arg.getType());
         }
 
@@ -267,7 +266,7 @@ public class XmlModuleEvaluator implements ModuleEvaluator {
     @Override
     public void evaluate() {
         try {
-            evaluate(module);
+            evaluate(xmlModule);
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }

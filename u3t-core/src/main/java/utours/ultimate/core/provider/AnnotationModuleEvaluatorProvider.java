@@ -1,58 +1,43 @@
 package utours.ultimate.core.provider;
 
 import utours.ultimate.core.*;
-import utours.ultimate.core.Module;
 import utours.ultimate.core.internal.AnnotationModuleEvaluator;
 import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.core.steorotype.ConstructorProperties;
 import utours.ultimate.core.steorotype.FactoryMethod;
+import utours.ultimate.core.steorotype.Mapping;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvider {
 
-    private final Set<Class<?>> classes;
     private final ComponentGraph componentGraph;
+    private Map<Class<?>, Class<?>> mappedInterfaces;
 
     public AnnotationModuleEvaluatorProvider(String... packageNames) {
         this.componentGraph = new ComponentGraph();
-        this.classes = new HashSet<>();
-        for (String packageName : packageNames) {
-            classes.addAll(ClassProvider.classesOf(packageName));
-        }
-    }
-
-    public Set<Class<?>> getClasses() {
-        return classes;
+        this.mappedInterfaces = new HashMap<>();
+        setupNodes(Arrays.stream(packageNames)
+                .flatMap(packageName -> ClassProvider.classesOf(packageName).stream())
+                .collect(Collectors.toSet()));
     }
 
     @Override
     public ModuleEvaluator provideModuleEvaluator() {
 
-        setupGraph();
-        var constructors = setupDependencies();
-
-        Map<Class<?>, Module.Component> components = new HashMap<>();
         Map<Class<?>, Map.Entry<Class<?>, MethodHandle>> factoryMethodHandlesMapped = new HashMap<>();
 
-        for (var clazz : classes) {
-
-            if (clazz.isAnnotationPresent(Component.class)) {
-
-                var component = clazz.getAnnotation(Component.class);
-                var mComponent = processComponent(component, clazz);
-                components.put(clazz, mComponent);
-
-                setFactoryMethods(factoryMethodHandlesMapped, clazz);
-            }
+        var constructors = setupConstructorsDependencies();
+        for (var clazz : componentGraph.getComponents()) {
+            setFactoryMethods(factoryMethodHandlesMapped, clazz);
         }
 
-        return new AnnotationModuleEvaluator(componentGraph, factoryMethodHandlesMapped, constructors);
+        return new AnnotationModuleEvaluator(componentGraph, factoryMethodHandlesMapped, constructors, mappedInterfaces);
     }
 
     private void setFactoryMethods(Map<Class<?>, Map.Entry<Class<?>, MethodHandle>> factoryMethodHandlesMapped, Class<?> clazz) {
@@ -60,7 +45,7 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         MethodHandles.Lookup lookup = MethodHandles.lookup();
         Exception exception = null;
 
-        for (Method method : clazz.getDeclaredMethods()) {
+        for (var method : clazz.getDeclaredMethods()) {
             if (method.isAnnotationPresent(FactoryMethod.class)) {
                 try {
                     var mh = lookup.unreflect(method);
@@ -72,7 +57,6 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
                     exception.addSuppressed(e);
                 }
             }
-
         }
 
         if (Optional.ofNullable(exception).isPresent())
@@ -80,36 +64,35 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
 
     }
 
-    private Map<Class<?>, MethodHandle> setupDependencies() {
+    private Map<Class<?>, MethodHandle> setupConstructorsDependencies() {
 
         MethodHandles.Lookup lookup = MethodHandles.lookup();
         Map<Class<?>, MethodHandle> constructors = new HashMap<>();
         Exception exception = null;
 
-        for (var clazz : classes) {
+        for (var clazz : componentGraph.getComponents()) {
 
-            if (clazz.isAnnotationPresent(Component.class)) {
+            if (clazz.isInterface()) continue;
 
-                var declaredConstructor = getConstructorProperties(clazz);
-                var paramTypes = declaredConstructor.getParameterTypes();
-
-                for (Class<?> paramType : paramTypes) {
-
-                    if (isInComponentGraph(paramType)) {
-                        componentGraph.addDependency(clazz, paramType);
-                    }
-
-                }
-
-                try {
-                    var mt = MethodType.methodType(void.class, paramTypes);
-                    constructors.put(clazz, lookup.findConstructor(clazz, mt));
-                } catch (NoSuchMethodException | IllegalAccessException e) {
-                    exception = Optional.ofNullable(exception).orElseGet(IllegalStateException::new);
-                    exception.addSuppressed(e);
-                }
-
+            if (clazz.isAnnotationPresent(Mapping.class)) {
+                setupMappingClass(clazz);
             }
+
+            var declaredConstructor = getConstructorProperties(clazz);
+            var paramTypes = declaredConstructor.getParameterTypes();
+
+            Arrays.stream(paramTypes)
+                    .filter(componentGraph::hasNode)
+                    .forEach(pt -> componentGraph.addDependency(clazz, pt));
+
+            try {
+                var mt = MethodType.methodType(void.class, paramTypes);
+                constructors.put(clazz, lookup.findConstructor(clazz, mt));
+            } catch (NoSuchMethodException | IllegalAccessException e) {
+                exception = Optional.ofNullable(exception).orElseGet(IllegalStateException::new);
+                exception.addSuppressed(e);
+            }
+
         }
 
         if (Optional.ofNullable(exception).isPresent())
@@ -118,7 +101,20 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         return constructors;
     }
 
-    private void setupGraph() {
+    private void setupMappingClass(Class<?> clazz) {
+        Mapping mapping = clazz.getAnnotation(Mapping.class);
+        Class<?> interfaceClass;
+        if (mapping.clazz().equals(Class.class)) {
+            if (clazz.getInterfaces().length == 0) throw new IllegalStateException();
+            interfaceClass = clazz.getInterfaces()[0];
+        } else {
+            interfaceClass = mapping.clazz();
+        }
+        componentGraph.addDependency(interfaceClass, clazz);
+        mappedInterfaces.put(interfaceClass, clazz);
+    }
+
+    private void setupNodes(Set<Class<?>> classes) {
         for (var clazz : classes) {
             if (clazz.isAnnotationPresent(Component.class)) {
                 componentGraph.addComponent(clazz);
@@ -131,6 +127,7 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
     }
 
     private Constructor<?> getConstructorProperties(Class<?> clazz) {
+
         var declaredConstructor = clazz.getDeclaredConstructors()[0];
         var found = false;
         for (var constructor : clazz.getDeclaredConstructors()) {
@@ -139,19 +136,8 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
                 found = true;
             }
         }
+
         return declaredConstructor;
-    }
-
-    public Module.Component processComponent(Component component, Class<?> clazz) {
-
-        Module.Component mComponent = new Module.Component();
-
-        if (component.id().isEmpty())
-            mComponent.setId(clazz.getName());
-        else
-            mComponent.setId(component.id());
-
-        return mComponent;
     }
 
     public ComponentGraph getComponentGraph() {

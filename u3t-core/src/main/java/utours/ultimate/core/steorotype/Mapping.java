@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Mapping {
     
-    Class<?> clazz();
+    Class<?> clazz() default Class.class;
 
     Type type() default Type.Unique;
 

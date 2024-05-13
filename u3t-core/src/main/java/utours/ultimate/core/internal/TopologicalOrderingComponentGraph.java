@@ -28,6 +28,7 @@ public class TopologicalOrderingComponentGraph implements Iterator<Class<?>> {
 
         int lastMin = Integer.MAX_VALUE;
         int lastIdx = -1;
+
         for (var pred : componentGraph.getPredecessors().entrySet()) {
             if (pred.getValue().size() < lastMin) {
                 lastMin = pred.getValue().size();

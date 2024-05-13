@@ -4,7 +4,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import utours.ultimate.core.ClassPathResource;
-import utours.ultimate.core.Module;
+import utours.ultimate.core.internal.XmlModule;
 import utours.ultimate.core.ModuleEvaluator;
 import utours.ultimate.core.ModuleEvaluatorProvider;
 import utours.ultimate.core.internal.XmlModuleEvaluator;
@@ -26,7 +26,7 @@ public class ClassPathXmlModuleEvaluatorProvider implements ModuleEvaluatorProvi
 
     public ClassPathXmlModuleEvaluatorProvider() { }
 
-    private Module interpretXmlModule() throws Exception {
+    private XmlModule interpretXmlModule() throws Exception {
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = factory.newDocumentBuilder();
@@ -52,22 +52,22 @@ public class ClassPathXmlModuleEvaluatorProvider implements ModuleEvaluatorProvi
         NodeList longNodes = (NodeList) longExpr.evaluate(document, XPathConstants.NODESET);
         NodeList byteNodes = (NodeList) byteExpr.evaluate(document, XPathConstants.NODESET);
 
-        List<Module.Statement> statements = processStatements(content);
-        Module module = new Module();
-        module.setStatements(statements);
-        module.setValues(new HashMap<>());
-        module.getValues().put(Boolean.class, List.copyOf(processBoolean(booleanNodes)  ));
-        module.getValues().put(Integer.class, List.copyOf(processIntegers(integerNodes) ));
-        module.getValues().put(Double.class,  List.copyOf(processDoubles(doubleNodes)   ));
-        module.getValues().put(Float.class,   List.copyOf(processFloats(floatNodes)     ));
-        module.getValues().put(Long.class,    List.copyOf(processLongs(longNodes)       ));
-        module.getValues().put(Byte.class,    List.copyOf(processBytes(byteNodes)       ));
-        module.getValues().put(String.class,  List.copyOf(processStrings(stringNodes)   ));
+        List<XmlModule.Statement> statements = processStatements(content);
+        XmlModule xmlModule = new XmlModule();
+        xmlModule.setStatements(statements);
+        xmlModule.setValues(new HashMap<>());
+        xmlModule.getValues().put(Boolean.class, List.copyOf(processBoolean(booleanNodes)  ));
+        xmlModule.getValues().put(Integer.class, List.copyOf(processIntegers(integerNodes) ));
+        xmlModule.getValues().put(Double.class,  List.copyOf(processDoubles(doubleNodes)   ));
+        xmlModule.getValues().put(Float.class,   List.copyOf(processFloats(floatNodes)     ));
+        xmlModule.getValues().put(Long.class,    List.copyOf(processLongs(longNodes)       ));
+        xmlModule.getValues().put(Byte.class,    List.copyOf(processBytes(byteNodes)       ));
+        xmlModule.getValues().put(String.class,  List.copyOf(processStrings(stringNodes)   ));
 
-        return module;
+        return xmlModule;
     }
 
-    private List<Module.Statement> processStatements(NodeList content) {
+    private List<XmlModule.Statement> processStatements(NodeList content) {
         return IntStream.range(0, content.getLength())
                 .mapToObj(content::item)
                 .filter(n -> isUniqueComponent(n) || isComponent(n) || isGroup(n) || isAddComponent(n))
@@ -75,7 +75,7 @@ public class ClassPathXmlModuleEvaluatorProvider implements ModuleEvaluatorProvi
                 .toList();
     }
 
-    private Module.Statement processStatement(Node node) {
+    private XmlModule.Statement processStatement(Node node) {
         return switch (node.getNodeName()) {
             case "unique-component" -> processUniqueComponent(node);
             case "component" -> processComponent(node);
@@ -85,12 +85,12 @@ public class ClassPathXmlModuleEvaluatorProvider implements ModuleEvaluatorProvi
         };
     }
 
-    private Module.Group processGroup(Node node) {
+    private XmlModule.Group processGroup(Node node) {
 
         String id = getAttributeValue(node, "id", () -> new IllegalStateException("Must to precise the id."));
         String className = getAttributeValue(node, "class", Object.class.getName());
 
-        Module.Group group = new Module.Group();
+        XmlModule.Group group = new XmlModule.Group();
         group.setId(id);
         group.setClassName(className);
         group.setComponentInterfaces(getComponentInterfaces(node));
@@ -98,11 +98,11 @@ public class ClassPathXmlModuleEvaluatorProvider implements ModuleEvaluatorProvi
         return group;
     }
 
-    private Module.UniqueComponent processUniqueComponent(Node node) {
+    private XmlModule.UniqueComponent processUniqueComponent(Node node) {
 
         String className = getAttributeValue(node, "class", () -> new IllegalStateException("Must to precise the class."));
 
-        Module.UniqueComponent uniqueComponent = new Module.UniqueComponent();
+        XmlModule.UniqueComponent uniqueComponent = new XmlModule.UniqueComponent();
         uniqueComponent.setClassName(className);
 
         Node item = IntStream.range(0, node.getChildNodes().getLength())
@@ -120,9 +120,9 @@ public class ClassPathXmlModuleEvaluatorProvider implements ModuleEvaluatorProvi
         return uniqueComponent;
     }
 
-    private Module.ConstructorArgs processConstructorArgs(Node node) {
+    private XmlModule.ConstructorArgs processConstructorArgs(Node node) {
 
-        List<Module.Arg> args = IntStream.range(0, node.getChildNodes().getLength())
+        List<XmlModule.Arg> args = IntStream.range(0, node.getChildNodes().getLength())
                 .mapToObj(i -> node.getChildNodes().item(i))
                 .filter(this::isConstructorArgs)
                 .findFirst()
@@ -133,18 +133,18 @@ public class ClassPathXmlModuleEvaluatorProvider implements ModuleEvaluatorProvi
                         .map(this::processArg).toList())
                 .orElse(List.of());
 
-        Module.ConstructorArgs constructorArgs = new Module.ConstructorArgs();
+        XmlModule.ConstructorArgs constructorArgs = new XmlModule.ConstructorArgs();
         constructorArgs.setArgs(args);
 
         return constructorArgs;
     }
 
-    private Module.Arg processArg(Node item) {
+    private XmlModule.Arg processArg(Node item) {
         String name = getAttributeValue(item, "name", "");
         String type = getAttributeValue(item, "type", () -> new IllegalStateException("Must to precise the argument type."));
         String value = getAttributeValue(item, "value", () -> new IllegalStateException("Must to precise the value."));
 
-        Module.Arg arg = new Module.Arg();
+        XmlModule.Arg arg = new XmlModule.Arg();
         arg.setName(name);
         arg.setType(type);
         arg.setValue(value);
@@ -152,7 +152,7 @@ public class ClassPathXmlModuleEvaluatorProvider implements ModuleEvaluatorProvi
         return arg;
     }
 
-    private Module.Component processComponent(Node node) {
+    private XmlModule.Component processComponent(Node node) {
 
         String id = getAttributeValue(node, "id", () -> new IllegalStateException("Must to precise the id."));
         String classname = getAttributeValue(node, "class", () -> new IllegalStateException("Must to precise the class."));
@@ -164,16 +164,16 @@ public class ClassPathXmlModuleEvaluatorProvider implements ModuleEvaluatorProvi
                 .filter(i -> isConstructorArgs(i) || isFactory(i))
                 .findFirst();
 
-        Module.Component component = new Module.Component();
+        XmlModule.Component component = new XmlModule.Component();
         component.setClassName(classname);
         component.setId(id);
         component.setDerived(derived);
 
         if (itemOpt.isEmpty() || isConstructorArgs(itemOpt.get())) {
-            Module.ConstructorArgs constructorArgs = processConstructorArgs(node);
+            XmlModule.ConstructorArgs constructorArgs = processConstructorArgs(node);
             component.setConstructorArgs(constructorArgs);
         } else if (isFactory(itemOpt.get())) {
-            Module.Factory factory = proccessFactory(itemOpt.get());
+            XmlModule.Factory factory = proccessFactory(itemOpt.get());
             component.setFactory(factory);
         } else {
             throw new IllegalStateException();
@@ -182,8 +182,8 @@ public class ClassPathXmlModuleEvaluatorProvider implements ModuleEvaluatorProvi
         return component;
     }
 
-    private Module.Factory proccessFactory(Node item) {
-        Module.Factory factory = new Module.Factory();
+    private XmlModule.Factory proccessFactory(Node item) {
+        XmlModule.Factory factory = new XmlModule.Factory();
         String value = getAttributeValue(item, "ref", () -> new IllegalStateException("Must to precise the value reference."));
         String methodName = getAttributeValue(item, "method", () -> new IllegalStateException("Must to precise the method name."));
         factory.setReference(value);
@@ -191,16 +191,16 @@ public class ClassPathXmlModuleEvaluatorProvider implements ModuleEvaluatorProvi
         return factory;
     }
 
-    private Module.AdditionalComponent processAdditionalComponent(Node node) {
+    private XmlModule.AdditionalComponent processAdditionalComponent(Node node) {
 
         if (!isAddComponent(node))
             throw new IllegalStateException("Not an additional component.");
 
-        Module.AdditionalComponent additionalComponent = new Module.AdditionalComponent();
+        XmlModule.AdditionalComponent additionalComponent = new XmlModule.AdditionalComponent();
 
         String classname = getAttributeValue(node, "class", () -> new IllegalStateException("Must to precise the class."));
 
-        List<Module.ComponentInterface> componentInterfaces = getComponentInterfaces(node);
+        List<XmlModule.ComponentInterface> componentInterfaces = getComponentInterfaces(node);
 
         additionalComponent.setClassName(classname);
         additionalComponent.setComponentsInterface(componentInterfaces);
@@ -208,7 +208,7 @@ public class ClassPathXmlModuleEvaluatorProvider implements ModuleEvaluatorProvi
         return additionalComponent;
     }
 
-    private List<Module.ComponentInterface> getComponentInterfaces(Node node) {
+    private List<XmlModule.ComponentInterface> getComponentInterfaces(Node node) {
         return IntStream.range(0, node.getChildNodes().getLength())
                 .mapToObj(node.getChildNodes()::item)
                 .filter(n -> isComponent(n) || isRefComponent(n) || isRefGroup(n))
@@ -220,7 +220,7 @@ public class ClassPathXmlModuleEvaluatorProvider implements ModuleEvaluatorProvi
                 }).toList();
     }
 
-    private Module.Component processComponentGroup(Node node) {
+    private XmlModule.Component processComponentGroup(Node node) {
 
         String classname = getAttributeValue(node, "class", () -> new IllegalStateException("Must to precise the class."));
         String derived = getAttributeValue(node, "derived", classname);
@@ -231,15 +231,15 @@ public class ClassPathXmlModuleEvaluatorProvider implements ModuleEvaluatorProvi
                 .filter(i -> isConstructorArgs(i) || isFactory(i))
                 .findFirst();
 
-        Module.Component component = new Module.Component();
+        XmlModule.Component component = new XmlModule.Component();
         component.setClassName(classname);
         component.setDerived(derived);
 
         if (itemOpt.isEmpty() || isConstructorArgs(itemOpt.get())) {
-            Module.ConstructorArgs constructorArgs = processConstructorArgs(node);
+            XmlModule.ConstructorArgs constructorArgs = processConstructorArgs(node);
             component.setConstructorArgs(constructorArgs);
         } else if (isFactory(itemOpt.get())) {
-            Module.Factory factory = proccessFactory(itemOpt.get());
+            XmlModule.Factory factory = proccessFactory(itemOpt.get());
             component.setFactory(factory);
         } else {
             throw new IllegalStateException();
@@ -255,7 +255,7 @@ public class ClassPathXmlModuleEvaluatorProvider implements ModuleEvaluatorProvi
                 .toList();
     }
 
-    private <T> Module.Value<T> processValue(Node item, Supplier<Module.Value<T>> valueFactory, Function<String, T> mapper) {
+    private <T> XmlModule.Value<T> processValue(Node item, Supplier<XmlModule.Value<T>> valueFactory, Function<String, T> mapper) {
         var mValue = valueFactory.get();
         String id = getAttributeValue(item, "id", () -> new IllegalStateException("Must have an id."));
         String valueStr = getAttributeValue(item, "value", () -> new IllegalStateException("Must have a value."));
@@ -264,44 +264,44 @@ public class ClassPathXmlModuleEvaluatorProvider implements ModuleEvaluatorProvi
         return mValue;
     }
 
-    private List<Module.Value<Boolean>> processBoolean(NodeList list) {
-        return processNodeList(list, item -> processValue(item, Module.Value<Boolean>::new, Boolean::parseBoolean));
+    private List<XmlModule.Value<Boolean>> processBoolean(NodeList list) {
+        return processNodeList(list, item -> processValue(item, XmlModule.Value<Boolean>::new, Boolean::parseBoolean));
     }
 
-    private List<Module.Value<Double>> processDoubles(NodeList list) {
-        return processNodeList(list, item -> processValue(item, Module.Value<Double>::new, Double::parseDouble));
+    private List<XmlModule.Value<Double>> processDoubles(NodeList list) {
+        return processNodeList(list, item -> processValue(item, XmlModule.Value<Double>::new, Double::parseDouble));
     }
 
-    private List<Module.Value<Long>> processLongs(NodeList list) {
-        return processNodeList(list, item -> processValue(item, Module.Value<Long>::new, Long::parseLong));
+    private List<XmlModule.Value<Long>> processLongs(NodeList list) {
+        return processNodeList(list, item -> processValue(item, XmlModule.Value<Long>::new, Long::parseLong));
     }
 
-    private List<Module.Value<Byte>> processBytes(NodeList list) {
-        return processNodeList(list, item -> processValue(item, Module.Value<Byte>::new, Byte::parseByte));
+    private List<XmlModule.Value<Byte>> processBytes(NodeList list) {
+        return processNodeList(list, item -> processValue(item, XmlModule.Value<Byte>::new, Byte::parseByte));
     }
 
-    private List<Module.Value<Integer>> processIntegers(NodeList list) {
-        return processNodeList(list, item -> processValue(item, Module.Value<Integer>::new, Integer::parseInt));
+    private List<XmlModule.Value<Integer>> processIntegers(NodeList list) {
+        return processNodeList(list, item -> processValue(item, XmlModule.Value<Integer>::new, Integer::parseInt));
     }
 
-    private List<Module.Value<Float>> processFloats(NodeList list) {
-        return processNodeList(list, item -> processValue(item, Module.Value<Float>::new, Float::parseFloat));
+    private List<XmlModule.Value<Float>> processFloats(NodeList list) {
+        return processNodeList(list, item -> processValue(item, XmlModule.Value<Float>::new, Float::parseFloat));
     }
 
-    private List<Module.Value<String>> processStrings(NodeList list) {
-        return processNodeList(list, item -> processValue(item, Module.Value<String>::new, Function.identity()));
+    private List<XmlModule.Value<String>> processStrings(NodeList list) {
+        return processNodeList(list, item -> processValue(item, XmlModule.Value<String>::new, Function.identity()));
     }
 
-    private Module.RefGroup processRefGroup(Node item) {
+    private XmlModule.RefGroup processRefGroup(Node item) {
         String ref = getAttributeValue(item, "ref", () -> new IllegalStateException("Must to precise the value reference."));
-        Module.RefGroup refGroup = new Module.RefGroup();
+        XmlModule.RefGroup refGroup = new XmlModule.RefGroup();
         refGroup.setRef(ref);
         return refGroup;
     }
 
-    private Module.RefComponent processRefComponent(Node item) {
+    private XmlModule.RefComponent processRefComponent(Node item) {
         String ref = getAttributeValue(item, "ref", () -> new IllegalStateException("Must to precise the value reference."));
-        Module.RefComponent refComponent = new Module.RefComponent();
+        XmlModule.RefComponent refComponent = new XmlModule.RefComponent();
         refComponent.setRef(ref);
         return refComponent;
     }

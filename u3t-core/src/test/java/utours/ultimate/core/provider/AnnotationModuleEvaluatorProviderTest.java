@@ -4,10 +4,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import utours.ultimate.core.ComponentGraph;
 import utours.ultimate.core.ModuleEvaluator;
-import utours.ultimate.core.component.AComponent;
-import utours.ultimate.core.component.BComponent;
-import utours.ultimate.core.component.CComponent;
-import utours.ultimate.core.component.FactoryComponent;
+import utours.ultimate.core.component.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,13 +23,6 @@ class AnnotationModuleEvaluatorProviderTest {
     }
 
     @Test
-    void check_have_factory_method() {
-
-        //
-        // assertTrue(evaluator.getUniqueComponents().containsKey(AComponent.class));
-    }
-
-    @Test
     void check_have_dependencies_in_graph() {
 
         var indexAC = graph.indexOf(AComponent.class);
@@ -41,6 +31,26 @@ class AnnotationModuleEvaluatorProviderTest {
         var deps = graph.getGraph().get(indexBC);
 
         assertTrue(deps.contains(indexAC));
+    }
+
+    @Test
+    void check_can_access_to_an_interface() {
+
+        var cwProvider = evaluator.getComponents().get(IDComponent.class.getName());
+
+        assertNotNull(cwProvider);
+
+        var cw = cwProvider.get();
+
+        assertNotNull(cw);
+        assertNotNull(cw.getComponent());
+
+        assertInstanceOf(IDComponent.class, cw.getComponent());
+        assertInstanceOf(DComponent.class, cw.getComponent());
+
+        IDComponent idComponent = cw.getComponent();
+
+        assertEquals("Hello World", idComponent.giveHelloWorldString());
     }
 
     @Test
