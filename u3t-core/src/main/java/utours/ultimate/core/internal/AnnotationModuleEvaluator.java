@@ -4,27 +4,28 @@ import utours.ultimate.core.*;
 
 import java.lang.invoke.MethodHandle;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class AnnotationModuleEvaluator implements ModuleEvaluator {
 
     private final Map<String, ComponentProvider> componentsById = new HashMap<>();
     private final Map<Class<?>, List<ComponentProvider>> additionalComponents = new HashMap<>();
-    private final Map<Class<?>, ComponentProvider> uniqueComponents = new HashMap<>();
+    private Map<Class<?>, ComponentProvider> uniqueComponents = new HashMap<>();
 
     private final Map<Class<?>, Map.Entry<Class<?>, MethodHandle>> factoryMethodHandlesMapped;
     private final Map<Class<?>, MethodHandle> constructors;
-    private final Map<Class<?>, Class<?>> mappedInterfaces;
+    private final Map<Class<?>, Class<?>> uniqueMappedInterfaces;
     private final ComponentGraph componentGraph;
 
     public AnnotationModuleEvaluator(ComponentGraph componentGraph,
                                      Map<Class<?>, Map.Entry<Class<?>, MethodHandle>> factoryMethodHandlesMapped,
                                      Map<Class<?>, MethodHandle> constructors,
-                                     Map<Class<?>, Class<?>> mappedInterfaces) {
+                                     Map<Class<?>, Class<?>> uniqueMappedInterfaces) {
 
         this.componentGraph = componentGraph;
         this.factoryMethodHandlesMapped = factoryMethodHandlesMapped;
         this.constructors = constructors;
-        this.mappedInterfaces = mappedInterfaces;
+        this.uniqueMappedInterfaces = uniqueMappedInterfaces;
     }
 
     @Override
@@ -34,7 +35,7 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
 
             System.out.println(clazz.getName());
 
-            if (mappedInterfaces.containsKey(clazz)) {
+            if (uniqueMappedInterfaces.containsKey(clazz)) {
                 processInterface(clazz);
             } else if (factoryMethodHandlesMapped.containsKey(clazz)) {
                 var e = factoryMethodHandlesMapped.get(clazz);
@@ -45,10 +46,13 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
 
         }
 
+        uniqueComponents = componentsById.entrySet().stream()
+                .map(this::toUnique)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private void processInterface(Class<?> interfaceClass) {
-        var clazz = mappedInterfaces.get(interfaceClass);
+        var clazz = uniqueMappedInterfaces.get(interfaceClass);
         var cwProvider = componentsById.get(clazz.getName());
         componentsById.put(interfaceClass.getName(), cwProvider);
     }
@@ -85,6 +89,15 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
     @Override
     public Map<Class<?>, ComponentProvider> getUniqueComponents() {
         return uniqueComponents;
+    }
+
+    private Map.Entry<Class<?>, ComponentProvider> toUnique(Map.Entry<String, ComponentProvider> e) {
+        try {
+            var clazz = Class.forName(e.getKey());
+            return Map.entry(clazz, e.getValue());
+        } catch (ClassNotFoundException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     @Override

@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvider {
 
     private final ComponentGraph componentGraph;
-    private Map<Class<?>, Class<?>> mappedInterfaces;
+    private final Map<Class<?>, Class<?>> mappedInterfaces;
 
     public AnnotationModuleEvaluatorProvider(String... packageNames) {
         this.componentGraph = new ComponentGraph();
