@@ -8,11 +8,11 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ClassProviderTest {
+class ClassProviderManagerTest {
 
     @Test
     void check_can_get_all_classes_in_package() {
-        Set<Class<?>> classes = ClassProvider.classesOf("utours.ultimate.core.component");
+        Set<Class<?>> classes = ClassProviderManager.classesOf("utours.ultimate.core.component");
 
         assertTrue(classes.contains(AComponent.class));
         assertTrue(classes.contains(BComponent.class));

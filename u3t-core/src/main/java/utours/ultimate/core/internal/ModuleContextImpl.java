@@ -50,7 +50,7 @@ public class ModuleContextImpl implements ModuleContext {
     }
 
     @Override
-    public ContainerReadOnly getContainerReadOnly() {
+    public ReadOnlyContainer getContainerReadOnly() {
         return container;
     }
 

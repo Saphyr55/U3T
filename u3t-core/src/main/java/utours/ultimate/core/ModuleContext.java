@@ -24,7 +24,7 @@ public interface ModuleContext {
      *
      * @return read only container.
      */
-    ContainerReadOnly getContainerReadOnly();
+    ReadOnlyContainer getContainerReadOnly();
 
     /**
      * Instantiate the module context implementation.

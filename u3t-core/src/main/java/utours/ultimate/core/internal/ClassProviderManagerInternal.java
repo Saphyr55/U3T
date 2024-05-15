@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ClassProviderInternal {
+public class ClassProviderManagerInternal {
 
     public static String denormalizePackageName(String packageName) {
         return packageName.replaceAll("[.]", "/");

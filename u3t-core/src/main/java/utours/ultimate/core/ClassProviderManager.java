@@ -1,10 +1,10 @@
 package utours.ultimate.core;
 
-import utours.ultimate.core.internal.ClassProviderInternal;
+import utours.ultimate.core.internal.ClassProviderManagerInternal;
 
 import java.util.Set;
 
-public class ClassProvider {
+public class ClassProviderManager {
 
     /**
      *
@@ -12,7 +12,7 @@ public class ClassProvider {
      * @return
      */
     public static String denormalizePackageName(String packageName) {
-        return ClassProviderInternal.denormalizePackageName(packageName);
+        return ClassProviderManagerInternal.denormalizePackageName(packageName);
     }
 
     /**
@@ -21,7 +21,7 @@ public class ClassProvider {
      * @return
      */
     public static Set<Class<?>> classesOf(String packageName) {
-        return ClassProviderInternal.classesOf(packageName);
+        return ClassProviderManagerInternal.classesOf(packageName);
     }
 
     /**
@@ -31,7 +31,7 @@ public class ClassProvider {
      * @return
      */
     public static Class<?> classOf(String className, String packageName) {
-        return ClassProviderInternal.classOf(className, packageName);
+        return ClassProviderManagerInternal.classOf(className, packageName);
     }
 
 

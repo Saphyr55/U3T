@@ -1,15 +1,15 @@
 package utours.ultimate.core;
 
-public interface Container extends ContainerReadOnly {
+public interface Container extends ReadOnlyContainer {
 
-    <T> void storeUniqueComponent(Class<T> tClass, T component);
+    <C> void storeUniqueComponent(Class<C> tClass, C component);
 
-    <T> void removeUniqueComponent(Class<T> tClass);
+    <C> void removeUniqueComponent(Class<C> tClass);
 
-    <T> void storeAdditionalComponent(Class<T> tClass, T component);
+    <C> void storeAdditionalComponent(Class<C> tClass, C component);
 
-    <T> void removeAdditionalComponents(Class<T> tClass);
+    <C> void removeAdditionalComponents(Class<C> tClass);
 
-    <T> void storeComponent(String id, T component);
+    <C> void storeComponent(String id, C component);
 
 }

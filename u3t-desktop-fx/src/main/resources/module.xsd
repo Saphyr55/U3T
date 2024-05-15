@@ -150,7 +150,7 @@
     <xs:attribute name="class" type="xs:string" default="java.lang.Object" />
   </xs:complexType>
 
-  <xs:complexType name="xmlModule-type">
+  <xs:complexType name="module-type">
     <xs:sequence>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
         <xs:element name="integer" type="integer-type" />
@@ -178,6 +178,6 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:element name="xmlModule" type="xmlModule-type" />
+  <xs:element name="module" type="module-type" />
 
 </xs:schema>

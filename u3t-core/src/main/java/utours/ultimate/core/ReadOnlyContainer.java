@@ -5,7 +5,7 @@ import java.util.List;
 /**
  *
  */
-public interface ContainerReadOnly {
+public interface ReadOnlyContainer {
 
     /**
      * Get a component list that are mapped with the current type passed in parameter.
