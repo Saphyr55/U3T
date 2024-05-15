@@ -4,7 +4,6 @@ import utours.ultimate.core.*;
 
 import java.lang.invoke.MethodHandle;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class AnnotationModuleEvaluator implements ModuleEvaluator {
 
@@ -12,76 +11,95 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
     private final Map<Class<?>, List<ComponentProvider>> additionalComponents = new HashMap<>();
     private Map<Class<?>, ComponentProvider> uniqueComponents = new HashMap<>();
 
-    private final Map<Class<?>, Map.Entry<Class<?>, MethodHandle>> factoryMethodHandlesMapped;
+    private final Map<Class<?>, Map<ComponentId, MethodHandle>> factoryMethodHandlesMapped;
     private final Map<Class<?>, MethodHandle> constructors;
-    private final Map<Class<?>, Class<?>> uniqueMappedInterfaces;
+    private final Map<Class<?>, ComponentId> uniqueMap;
     private final ComponentGraph componentGraph;
 
     public AnnotationModuleEvaluator(ComponentGraph componentGraph,
-                                     Map<Class<?>, Map.Entry<Class<?>, MethodHandle>> factoryMethodHandlesMapped,
+                                     Map<Class<?>, Map<ComponentId, MethodHandle>> factoryMethodHandlesMapped,
                                      Map<Class<?>, MethodHandle> constructors,
-                                     Map<Class<?>, Class<?>> uniqueMappedInterfaces) {
+                                     Map<Class<?>, ComponentId> uniqueMap) {
 
         this.componentGraph = componentGraph;
         this.factoryMethodHandlesMapped = factoryMethodHandlesMapped;
         this.constructors = constructors;
-        this.uniqueMappedInterfaces = uniqueMappedInterfaces;
+        this.uniqueMap = uniqueMap;
     }
 
     @Override
     public void evaluate() {
 
-        for (ComponentId componentId : componentGraph.getSortedComponents()) {
+        for (ComponentId componentId : componentGraph.getTopologicalOrderingComponents()) {
             Class<?> clazz = componentId.getClazz();
 
             System.out.println(clazz.getName());
 
-            if (uniqueMappedInterfaces.containsKey(clazz)) {
-                processInterface(clazz);
+            if (uniqueMap.containsKey(clazz)) {
+
+                processUnique(clazz);
+
             } else if (factoryMethodHandlesMapped.containsKey(clazz)) {
-                var e = factoryMethodHandlesMapped.get(clazz);
-                processFactoryMethod(e.getKey(), e.getValue(), clazz);
+
+                var handles = factoryMethodHandlesMapped.get(clazz);
+                handles.entrySet().stream().findFirst().ifPresent(e -> {
+                    processFactoryMethod(e.getKey(), e.getValue(), componentId);
+                });
+
             } else if (constructors.containsKey(clazz)) {
-                processConstructor(constructors.get(clazz), clazz);
+                processConstructor(constructors.get(clazz), componentId);
             }
 
         }
 
-        uniqueComponents = componentsById.entrySet().stream()
-                .map(this::toUnique)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private void processInterface(Class<?> interfaceClass) {
-        var clazz = uniqueMappedInterfaces.get(interfaceClass);
-        var cwProvider = componentsById.get(clazz.getName());
+    private void processUnique(Class<?> interfaceClass) {
+        var clazz = uniqueMap.get(interfaceClass);
+        var cwProvider = componentsById.get(clazz.getId());
         componentsById.put(interfaceClass.getName(), cwProvider);
+        uniqueComponents.put(interfaceClass, cwProvider);
     }
 
-    private void processFactoryMethod(Class<?> clazz, MethodHandle mh, Class<?> component) {
+    private void processFactoryMethod(ComponentId componentIdFactory, MethodHandle mh, ComponentId componentId) {
         try {
-            var factory = componentsById.get(clazz.getName()).get().getComponent();
+
+            var factory = componentsById
+                    .get(componentIdFactory.getId())
+                    .get()
+                    .getComponent();
+
             mh = mh.bindTo(factory);
             var obj = mh.invoke();
-            var cw = new ComponentWrapper(component, obj);
-            componentsById.put(component.getName(), ComponentProvider.singleton(cw));
+            var cw = new ComponentWrapper(componentId.getClazz(), obj);
+
+            componentsById.put(componentId.getId(), ComponentProvider.singleton(cw));
+
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void processConstructor(MethodHandle methodHandle, Class<?> cClass) {
+    private void processConstructor(MethodHandle methodHandle, ComponentId componentId) {
         try {
+
             List<Object> args = new ArrayList<>();
-            for (Class<?> paramClass : methodHandle.type().parameterList()) {
-                var cwProvider = componentsById.get(paramClass.getName());
+            List<Class<?>> parameters = methodHandle.type().parameterList();
+
+            for (Class<?> param : parameters) {
+                var id = getComponentId(param).getId();
+                var cwProvider = componentsById.get(id);
                 var cw = cwProvider.get();
                 if (cw == null) throw new IllegalStateException();
                 args.add(cw.getComponent());
             }
+
             var object = methodHandle.invokeWithArguments(args);
-            var provider = ComponentProvider.singleton(new ComponentWrapper(cClass, object));
-            componentsById.put(cClass.getName(), provider);
+            var cw = new ComponentWrapper(componentId.getClazz(), object);
+            var provider = ComponentProvider.singleton(cw);
+
+            componentsById.put(componentId.getId(), provider);
+
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
@@ -109,6 +127,13 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
     @Override
     public Map<String, ComponentProvider> getComponents() {
         return componentsById;
+    }
+
+    public ComponentId getComponentId(Class<?> clazz) {
+        return componentGraph.getComponents().stream()
+                .filter(componentId -> componentId.getClazz().equals(clazz))
+                .findFirst()
+                .orElseGet(() -> ComponentId.ofClass(clazz));
     }
 
 }

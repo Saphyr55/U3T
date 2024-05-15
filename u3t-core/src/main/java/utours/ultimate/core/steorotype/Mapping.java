@@ -13,6 +13,8 @@ public @interface Mapping {
 
     Type type() default Type.Unique;
 
+    boolean activate() default true;
+
     enum Type {
         Unique,
         Additional

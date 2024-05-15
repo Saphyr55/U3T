@@ -14,132 +14,185 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvider {
 
     private final ComponentGraph componentGraph;
-    private final Map<Class<?>, Class<?>> mappedInterfaces;
+    private final Map<Class<?>, ComponentId> uniqueMap;
 
     public AnnotationModuleEvaluatorProvider(String... packageNames) {
         this.componentGraph = new ComponentGraph();
-        this.mappedInterfaces = new HashMap<>();
+        this.uniqueMap = new HashMap<>();
         this.setupNodes(Arrays.stream(packageNames)
-                .flatMap(packageName -> ClassProviderManager.classesOf(packageName).stream())
+                .flatMap(this::classesOfPackageName)
                 .collect(Collectors.toSet()));
     }
+
 
     @Override
     public ModuleEvaluator provideModuleEvaluator() {
 
-        Map<Class<?>, Map.Entry<Class<?>, MethodHandle>> factoryMethodHandlesMapped = new HashMap<>();
-
-        var constructors = setupConstructorsDependencies();
+        Map<Class<?>, Map<ComponentId, MethodHandle>> factoryHandles = new HashMap<>();
+        Map<Class<?>, MethodHandle> constructors = setupConstructorsDependencies();
 
         for (ComponentId componentId : componentGraph.getComponents()) {
-            setFactoryMethods(factoryMethodHandlesMapped, componentId);
+            setFactoryMethods(factoryHandles, componentId);
         }
 
-        return new AnnotationModuleEvaluator(componentGraph, factoryMethodHandlesMapped, constructors, mappedInterfaces);
+        return new AnnotationModuleEvaluator(
+                componentGraph,
+                factoryHandles,
+                constructors,
+                uniqueMap
+        );
     }
 
-    private void setFactoryMethods(Map<Class<?>, Map.Entry<Class<?>, MethodHandle>> factoryMethodHandlesMapped,
+    private void setFactoryMethods(Map<Class<?>, Map<ComponentId, MethodHandle>> factoryHandles,
                                    ComponentId componentId) {
 
         MethodHandles.Lookup lookup = MethodHandles.lookup();
-        Exception exception = null;
         Class<?> clazz = componentId.getClazz();
+        List<Throwable> errors = new ArrayList<>();
 
         for (Method method : clazz.getDeclaredMethods()) {
-            if (method.isAnnotationPresent(FactoryMethod.class)) {
-                try {
-                    var mh = lookup.unreflect(method);
-                    var returnType = mh.type().returnType();
-                    factoryMethodHandlesMapped.put(returnType, Map.entry(clazz, mh));
-                    componentGraph.addDependency(getComponentId(returnType), componentId);
-                } catch (Exception e) {
-                    exception = Optional.ofNullable(exception).orElseGet(IllegalStateException::new);
-                    exception.addSuppressed(e);
+            try {
+
+                // We filter every method that not annotated by FactoryMethod.
+                if (!method.isAnnotationPresent(FactoryMethod.class)) {
+                    continue;
                 }
+
+                // We look up the method handle from the factory method.
+                var mh = lookup.unreflect(method);
+                var returnType = mh.type().returnType();
+                var componentReturnTypeId = getComponentId(returnType);
+
+                // We add the factory method handle in the map factory handles,
+                // if not exist, we create the map.
+                factoryHandles
+                        .computeIfAbsent(returnType, c -> new HashMap<>())
+                        .put(componentId, mh);
+
+                // Add an eta dependency from the return component to the factory component.
+                componentGraph.addDependency(componentReturnTypeId, componentId);
+
+            } catch (Exception e) {
+                errors.add(e);
             }
+
         }
 
-        if (Optional.ofNullable(exception).isPresent()) {
-            throw new RuntimeException(exception);
-        }
-
+        throwOnErrors(errors);
     }
 
+    /**
+     * Determine the dependencies based on the constructors properties.
+     *
+     * @return every method handle mapped by there corresponding class.
+     */
     private Map<Class<?>, MethodHandle> setupConstructorsDependencies() {
 
         MethodHandles.Lookup lookup = MethodHandles.lookup();
         Map<Class<?>, MethodHandle> constructors = new HashMap<>();
-        Exception exception = null;
+        List<Throwable> errors = new ArrayList<>();
 
-        for (ComponentId componentId : componentGraph.getComponents()) {
-
-            Class<?> clazz = componentId.getClazz();
-
-            if (clazz.isInterface()) {
-                continue;
-            }
-
-            if (clazz.isAnnotationPresent(Mapping.class)) {
-                setupMappingClass(clazz);
-            }
-
-            Constructor<?> declaredConstructor = getConstructorProperties(clazz);
-            Class<?>[] paramTypes = declaredConstructor.getParameterTypes();
-
-            Arrays.stream(paramTypes)
-                    .map(this::getComponentId)
-                    .filter(componentGraph::hasNode)
-                    .forEach(id -> componentGraph.addDependency(componentId, id));
-
+        for (ComponentId currentComponentId : componentGraph.getComponents()) {
             try {
-                var mt = MethodType.methodType(void.class, paramTypes);
-                constructors.put(clazz, lookup.findConstructor(clazz, mt));
+                Class<?> clazz = currentComponentId.getClazz();
+
+                // We filter every component that are not an interface.
+                if (clazz.isInterface()) {
+                    continue;
+                }
+
+                // When it's a mapping, we set up the class in the interfaces map.
+                if (clazz.isAnnotationPresent(Mapping.class)) {
+                    setupMappingClass(clazz);
+                }
+
+                // We get the constructor annotated by ConstructorProperties,
+                // if it's not found get the default constructor.
+                Constructor<?> declaredConstructor = getConstructorProperties(clazz);
+                Class<?>[] paramTypes = declaredConstructor.getParameterTypes();
+
+                // We add the dependencies corresponding to the current component.
+                Arrays.stream(paramTypes)
+                        .map(this::getComponentId)
+                        .filter(componentGraph::hasNode)
+                        .forEach(id -> {
+                            componentGraph.addDependency(currentComponentId, id);
+                        });
+
+                // We get constructor method type, and we look up for it.
+                // Then it is added in constructors map.
+                // If an error appeared, we suppressed it.
+                MethodType mt = MethodType.methodType(void.class, paramTypes);
+                MethodHandle mh = lookup.findConstructor(clazz, mt);
+                constructors.put(clazz, mh);
+
             } catch (NoSuchMethodException | IllegalAccessException e) {
-                exception = Optional.ofNullable(exception).orElseGet(IllegalStateException::new);
-                exception.addSuppressed(e);
+                errors.add(e);
             }
-
         }
 
-        if (Optional.ofNullable(exception).isPresent()) {
-            throw new RuntimeException(exception);
-        }
+        throwOnErrors(errors);
 
         return constructors;
     }
 
     private void setupMappingClass(Class<?> clazz) {
 
-        ComponentId componentId = getComponentId(clazz);
         Mapping mapping = clazz.getAnnotation(Mapping.class);
+        ComponentId componentId = getComponentId(clazz);
 
-        Class<?> interfaceClass;
+        Class<?> interfaceClass = isDeterministicMapping(mapping)
+                // The default interface is the first interface implemented.
+                // Unable to determine the interface to map, if there are any interface implemented.
+                ? getFirstInterfaceImplemented(clazz)
+                : mapping.clazz();
 
-        if (isDeterministicMapping(mapping)) {
+        ComponentId interfaceId = getComponentId(interfaceClass);
 
-            if (!hasInterfaces(clazz)) {
-                throw new IllegalStateException("The " + clazz.getName() + " has any interface to map.");
+        // Check the mapping type.
+        switch (mapping.type()) {
+            case Unique -> {
+
+                if (hasUniqueMapping(mapping, interfaceClass)) {
+                    throw getErrorUniqueMapping(interfaceClass);
+                }
+
+                if (mapping.activate()) {
+                    uniqueMap.put(interfaceClass, componentId);
+                }
+
             }
-
-            interfaceClass = clazz.getInterfaces()[0];
-        } else {
-            interfaceClass = mapping.clazz();
+            case Additional -> throw new RuntimeException("Not implemented yet.");
         }
 
-        componentGraph.addDependency(getComponentId(interfaceClass), componentId);
-        mappedInterfaces.put(interfaceClass, clazz);
+        // We add a lambda dependency.
+        componentGraph.addDependency(interfaceId, componentId);
     }
 
-    private static boolean isDeterministicMapping(Mapping mapping) {
-        return mapping.clazz().equals(Class.class);
+    private boolean hasUniqueMapping(Mapping mapping, Class<?> interfaceClass) {
+        boolean isActivate = mapping.activate();
+        return isActivate && uniqueMap.containsKey(interfaceClass);
     }
 
-    private static boolean hasInterfaces(Class<?> clazz) {
-        return clazz.getInterfaces().length > 0;
+    private IllegalStateException getErrorUniqueMapping(Class<?> interfaceClass) {
+        String nameClassAlreadyImplemented = uniqueMap.get(interfaceClass).getClazz().getName();
+        String errorMsg = "Already have "
+                + interfaceClass.getName()
+                + " mapped with "
+                + nameClassAlreadyImplemented;
+        return new IllegalStateException(errorMsg);
+    }
+
+    private static Class<?> getFirstInterfaceImplemented(Class<?> clazz) {
+        if (hasInterfaces(clazz)) {
+            return clazz.getInterfaces()[0];
+        }
+        throw new IllegalStateException("The " + clazz.getName() + " has any interface to map.");
     }
 
     private void setupNodes(Set<Class<?>> classes) {
@@ -160,8 +213,9 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
 
     private Constructor<?> getConstructorProperties(Class<?> clazz) {
 
-        Constructor<?> declaredConstructor = clazz.getDeclaredConstructors()[0];
+        Constructor<?> declaredConstructor = getFirstDeclaredConstructor(clazz);
         boolean found = false;
+
         for (Constructor<?> constructor : clazz.getDeclaredConstructors()) {
             if (constructor.isAnnotationPresent(ConstructorProperties.class) && !found) {
                 declaredConstructor = constructor;
@@ -172,15 +226,46 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         return declaredConstructor;
     }
 
-    public ComponentGraph getComponentGraph() {
-        return componentGraph;
+    private static Constructor<?> getFirstDeclaredConstructor(Class<?> clazz) {
+        if (clazz.getDeclaredConstructors().length < 1) return null;
+        return clazz.getDeclaredConstructors()[0];
     }
 
-    private ComponentId getComponentId(Class<?> clazz) {
+    private static boolean isDeterministicMapping(Mapping mapping) {
+        return mapping.clazz().equals(Class.class);
+    }
+
+    private static boolean hasInterfaces(Class<?> clazz) {
+        return clazz.getInterfaces().length > 0;
+    }
+
+    public ComponentId getComponentId(Class<?> clazz) {
         return componentGraph.getComponents().stream()
                 .filter(componentId -> componentId.getClazz().equals(clazz))
                 .findFirst()
                 .orElseGet(() -> ComponentId.ofClass(clazz));
+    }
+
+    public ComponentGraph getComponentGraph() {
+        return componentGraph;
+    }
+
+    private Stream<? extends Class<?>> classesOfPackageName(String packageName) {
+        return ClassProviderManager.classesOf(packageName).stream();
+    }
+
+    private static void throwOnErrors(List<Throwable> errors) {
+        if (!errors.isEmpty()) {
+            throw errors.stream()
+                    .reduce(AnnotationModuleEvaluatorProvider::throwableReducer)
+                    .map(IllegalStateException::new)
+                    .orElseThrow();
+        }
+    }
+
+    private static Throwable throwableReducer(Throwable e, Throwable e2) {
+        e.addSuppressed(e2);
+        return e;
     }
 
 }

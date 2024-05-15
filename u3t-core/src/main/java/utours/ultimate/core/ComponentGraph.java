@@ -59,7 +59,7 @@ public class ComponentGraph {
         return graph;
     }
 
-    public List<ComponentId> getSortedComponents(Iterator<ComponentId> iterator) {
+    public List<ComponentId> getTopologicalOrderingComponents(Iterator<ComponentId> iterator) {
         List<ComponentId> sortedComponents = new ArrayList<>();
         while (iterator.hasNext()) {
             var next = iterator.next();
@@ -69,9 +69,9 @@ public class ComponentGraph {
         return sortedComponents;
     }
 
-    public List<ComponentId> getSortedComponents() {
-        return getSortedComponents(new TopologicalOrderingComponentGraph(this))
-                .reversed();
+    public List<ComponentId> getTopologicalOrderingComponents() {
+        Iterator<ComponentId> iterator = new TopologicalOrderingComponentGraph(this);
+        return getTopologicalOrderingComponents(iterator).reversed();
     }
 
     public Map<Integer, List<Integer>> predecessors() {

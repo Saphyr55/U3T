@@ -2,7 +2,7 @@ package utours.ultimate.core.component;
 
 import utours.ultimate.core.steorotype.Component;
 
-@Component
+@Component(id = "Internal.CComponent")
 public class CComponent {
 
     private final AComponent aComponent;

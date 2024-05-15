@@ -2,9 +2,7 @@ package utours.ultimate.core.provider;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import utours.ultimate.core.ComponentGraph;
-import utours.ultimate.core.ComponentId;
-import utours.ultimate.core.ModuleEvaluator;
+import utours.ultimate.core.*;
 import utours.ultimate.core.component.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,8 +22,23 @@ class AnnotationModuleEvaluatorProviderTest {
     }
 
     @Test
-    void check_have_dependencies_in_graph() {
+    void check_identifier_in_container() {
 
+        ComponentProvider provider = evaluator.getComponents().get("Internal.CComponent");
+        assertNotNull(provider);
+
+        ComponentWrapper cw = provider.get();
+        assertNotNull(cw);
+
+        Object o = cw.getComponent();
+        Class<?> componentClass = cw.getComponentClass();
+
+        assertEquals(CComponent.class, componentClass);
+        assertInstanceOf(CComponent.class, o);
+    }
+
+    @Test
+    void check_have_dependencies_in_graph() {
         var indexAC = graph.indexOf(ComponentId.ofClass(AComponent.class));
         var indexBC = graph.indexOf(ComponentId.ofClass(BComponent.class));
 
@@ -74,7 +87,7 @@ class AnnotationModuleEvaluatorProviderTest {
         assertTrue(graph.getComponents().contains(ComponentId.ofClass(FactoryComponent.class)));
         assertTrue(graph.getComponents().contains(ComponentId.ofClass(AComponent.class)));
         assertTrue(graph.getComponents().contains(ComponentId.ofClass(BComponent.class)));
-        assertTrue(graph.getComponents().contains(ComponentId.ofClass(CComponent.class)));
+        assertTrue(graph.getComponents().contains(ComponentId.of(CComponent.class, "Internal.CComponent")));
     }
 
 }
