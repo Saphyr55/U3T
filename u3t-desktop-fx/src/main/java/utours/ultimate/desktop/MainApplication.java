@@ -3,7 +3,7 @@ package utours.ultimate.desktop;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import utours.ultimate.core.ContainerReadOnly;
+import utours.ultimate.core.ReadOnlyContainer;
 import utours.ultimate.core.ModuleContext;
 import utours.ultimate.core.ModuleEvaluatorProvider;
 import utours.ultimate.core.provider.AnnotationModuleEvaluatorProvider;
@@ -21,7 +21,7 @@ public class MainApplication extends Application {
     @Override
     public void start(Stage stage) {
 
-        ContainerReadOnly container = getContext().getContainerReadOnly();
+        ReadOnlyContainer container = getContext().getContainerReadOnly();
         Client client = container.getUniqueComponent(Client.class);
 
         client.messageSender().send("any.address", "Hello World!", message -> {

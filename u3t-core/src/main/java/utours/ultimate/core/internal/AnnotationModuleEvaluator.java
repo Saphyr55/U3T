@@ -31,7 +31,8 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
     @Override
     public void evaluate() {
 
-        for (var clazz : componentGraph.getSortedComponents()) {
+        for (ComponentId componentId : componentGraph.getSortedComponents()) {
+            Class<?> clazz = componentId.getClazz();
 
             System.out.println(clazz.getName());
 

@@ -11,6 +11,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,8 +23,8 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
     public AnnotationModuleEvaluatorProvider(String... packageNames) {
         this.componentGraph = new ComponentGraph();
         this.mappedInterfaces = new HashMap<>();
-        setupNodes(Arrays.stream(packageNames)
-                .flatMap(packageName -> ClassProvider.classesOf(packageName).stream())
+        this.setupNodes(Arrays.stream(packageNames)
+                .flatMap(packageName -> ClassProviderManager.classesOf(packageName).stream())
                 .collect(Collectors.toSet()));
     }
 
@@ -33,25 +34,28 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         Map<Class<?>, Map.Entry<Class<?>, MethodHandle>> factoryMethodHandlesMapped = new HashMap<>();
 
         var constructors = setupConstructorsDependencies();
-        for (var clazz : componentGraph.getComponents()) {
-            setFactoryMethods(factoryMethodHandlesMapped, clazz);
+
+        for (ComponentId componentId : componentGraph.getComponents()) {
+            setFactoryMethods(factoryMethodHandlesMapped, componentId);
         }
 
         return new AnnotationModuleEvaluator(componentGraph, factoryMethodHandlesMapped, constructors, mappedInterfaces);
     }
 
-    private void setFactoryMethods(Map<Class<?>, Map.Entry<Class<?>, MethodHandle>> factoryMethodHandlesMapped, Class<?> clazz) {
+    private void setFactoryMethods(Map<Class<?>, Map.Entry<Class<?>, MethodHandle>> factoryMethodHandlesMapped,
+                                   ComponentId componentId) {
 
         MethodHandles.Lookup lookup = MethodHandles.lookup();
         Exception exception = null;
+        Class<?> clazz = componentId.getClazz();
 
-        for (var method : clazz.getDeclaredMethods()) {
+        for (Method method : clazz.getDeclaredMethods()) {
             if (method.isAnnotationPresent(FactoryMethod.class)) {
                 try {
                     var mh = lookup.unreflect(method);
                     var returnType = mh.type().returnType();
                     factoryMethodHandlesMapped.put(returnType, Map.entry(clazz, mh));
-                    componentGraph.addDependency(returnType, clazz);
+                    componentGraph.addDependency(getComponentId(returnType), componentId);
                 } catch (Exception e) {
                     exception = Optional.ofNullable(exception).orElseGet(IllegalStateException::new);
                     exception.addSuppressed(e);
@@ -59,8 +63,9 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
             }
         }
 
-        if (Optional.ofNullable(exception).isPresent())
+        if (Optional.ofNullable(exception).isPresent()) {
             throw new RuntimeException(exception);
+        }
 
     }
 
@@ -70,20 +75,25 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         Map<Class<?>, MethodHandle> constructors = new HashMap<>();
         Exception exception = null;
 
-        for (var clazz : componentGraph.getComponents()) {
+        for (ComponentId componentId : componentGraph.getComponents()) {
 
-            if (clazz.isInterface()) continue;
+            Class<?> clazz = componentId.getClazz();
+
+            if (clazz.isInterface()) {
+                continue;
+            }
 
             if (clazz.isAnnotationPresent(Mapping.class)) {
                 setupMappingClass(clazz);
             }
 
-            var declaredConstructor = getConstructorProperties(clazz);
-            var paramTypes = declaredConstructor.getParameterTypes();
+            Constructor<?> declaredConstructor = getConstructorProperties(clazz);
+            Class<?>[] paramTypes = declaredConstructor.getParameterTypes();
 
             Arrays.stream(paramTypes)
+                    .map(this::getComponentId)
                     .filter(componentGraph::hasNode)
-                    .forEach(pt -> componentGraph.addDependency(clazz, pt));
+                    .forEach(id -> componentGraph.addDependency(componentId, id));
 
             try {
                 var mt = MethodType.methodType(void.class, paramTypes);
@@ -95,42 +105,64 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
 
         }
 
-        if (Optional.ofNullable(exception).isPresent())
+        if (Optional.ofNullable(exception).isPresent()) {
             throw new RuntimeException(exception);
+        }
 
         return constructors;
     }
 
     private void setupMappingClass(Class<?> clazz) {
+
+        ComponentId componentId = getComponentId(clazz);
         Mapping mapping = clazz.getAnnotation(Mapping.class);
+
         Class<?> interfaceClass;
-        if (mapping.clazz().equals(Class.class)) {
-            if (clazz.getInterfaces().length == 0) throw new IllegalStateException();
+
+        if (isDeterministicMapping(mapping)) {
+
+            if (!hasInterfaces(clazz)) {
+                throw new IllegalStateException("The " + clazz.getName() + " has any interface to map.");
+            }
+
             interfaceClass = clazz.getInterfaces()[0];
         } else {
             interfaceClass = mapping.clazz();
         }
-        componentGraph.addDependency(interfaceClass, clazz);
+
+        componentGraph.addDependency(getComponentId(interfaceClass), componentId);
         mappedInterfaces.put(interfaceClass, clazz);
+    }
+
+    private static boolean isDeterministicMapping(Mapping mapping) {
+        return mapping.clazz().equals(Class.class);
+    }
+
+    private static boolean hasInterfaces(Class<?> clazz) {
+        return clazz.getInterfaces().length > 0;
     }
 
     private void setupNodes(Set<Class<?>> classes) {
         for (var clazz : classes) {
             if (clazz.isAnnotationPresent(Component.class)) {
-                componentGraph.addComponent(clazz);
+                Component component = clazz.getAnnotation(Component.class);
+                componentGraph.addComponent(getComponentId(clazz, component));
             }
         }
     }
 
-    private boolean isInComponentGraph(Class<?> clazz) {
-        return componentGraph.getComponents().contains(clazz);
+    private ComponentId getComponentId(Class<?> clazz, Component component) {
+        if (component.id().isEmpty()) {
+            return ComponentId.ofClass(clazz);
+        }
+        return ComponentId.of(clazz, component.id());
     }
 
     private Constructor<?> getConstructorProperties(Class<?> clazz) {
 
-        var declaredConstructor = clazz.getDeclaredConstructors()[0];
-        var found = false;
-        for (var constructor : clazz.getDeclaredConstructors()) {
+        Constructor<?> declaredConstructor = clazz.getDeclaredConstructors()[0];
+        boolean found = false;
+        for (Constructor<?> constructor : clazz.getDeclaredConstructors()) {
             if (constructor.isAnnotationPresent(ConstructorProperties.class) && !found) {
                 declaredConstructor = constructor;
                 found = true;
@@ -142,6 +174,13 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
 
     public ComponentGraph getComponentGraph() {
         return componentGraph;
+    }
+
+    private ComponentId getComponentId(Class<?> clazz) {
+        return componentGraph.getComponents().stream()
+                .filter(componentId -> componentId.getClazz().equals(clazz))
+                .findFirst()
+                .orElseGet(() -> ComponentId.ofClass(clazz));
     }
 
 }

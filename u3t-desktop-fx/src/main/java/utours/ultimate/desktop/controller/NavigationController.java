@@ -2,7 +2,7 @@ package utours.ultimate.desktop.controller;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import utours.ultimate.core.ContainerReadOnly;
+import utours.ultimate.core.ReadOnlyContainer;
 import utours.ultimate.desktop.MainApplication;
 import utours.ultimate.desktop.view.DesktopNavButton;
 import utours.ultimate.desktop.view.DesktopNavButtonContainer;
@@ -25,7 +25,7 @@ public class NavigationController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        ContainerReadOnly container = MainApplication.getContext().getContainerReadOnly();
+        ReadOnlyContainer container = MainApplication.getContext().getContainerReadOnly();
 
         container.getAdditionalComponent(NavButton.class).forEach(this::addContainer);
 

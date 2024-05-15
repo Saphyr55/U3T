@@ -17,9 +17,9 @@ import java.util.function.Function;
 @Mapping(clazz = ControllerFactory.class, type = Mapping.Type.Unique)
 public class ControllerFactoryImpl implements ControllerFactory {
 
-    private final Function<Game, U3TGameController> u3tGameControllerFactory;
     private final Client client;
     private final ClientService clientService;
+    private final Function<Game, U3TGameController> u3tGameControllerFactory;
 
     public ControllerFactoryImpl(GameService service,
                                  ClientService clientService,
@@ -27,7 +27,7 @@ public class ControllerFactoryImpl implements ControllerFactory {
 
         this.clientService = clientService;
         this.client = client;
-        u3tGameControllerFactory = game -> new U3TGameController(service, game, client);
+        this.u3tGameControllerFactory = game -> new U3TGameController(service, game, client);
     }
 
     @Override

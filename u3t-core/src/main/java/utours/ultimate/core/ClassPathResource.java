@@ -7,7 +7,7 @@ import java.io.InputStream;
 import java.net.URL;
 
 
-public class ClassPathResource {
+public final class ClassPathResource {
 
     /**
      * Get url resource from the class path.

@@ -1,17 +1,18 @@
 package utours.ultimate.core.internal;
 
 import utours.ultimate.core.ComponentGraph;
+import utours.ultimate.core.ComponentId;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
-public class TopologicalOrderingComponentGraph implements Iterator<Class<?>> {
+public class TopologicalOrderingComponentGraph implements Iterator<ComponentId> {
 
     private final List<Integer> markedComponents;
-    private final List<Class<?>> components;
-    private final Stack<Class<?>> componentsStack;
+    private final List<ComponentId> components;
+    private final Stack<ComponentId> componentsStack;
     private final ComponentGraph componentGraph;
 
     public TopologicalOrderingComponentGraph(ComponentGraph componentGraph) {
@@ -24,12 +25,12 @@ public class TopologicalOrderingComponentGraph implements Iterator<Class<?>> {
         }
     }
 
-    private Class<?> getMinimalPredClass() {
+    private ComponentId getMinimalPredClass() {
 
         int lastMin = Integer.MAX_VALUE;
         int lastIdx = -1;
 
-        for (var pred : componentGraph.getPredecessors().entrySet()) {
+        for (var pred : componentGraph.predecessors().entrySet()) {
             if (pred.getValue().size() < lastMin) {
                 lastMin = pred.getValue().size();
                 lastIdx = pred.getKey();
@@ -49,10 +50,14 @@ public class TopologicalOrderingComponentGraph implements Iterator<Class<?>> {
     }
 
     @Override
-    public Class<?> next() {
+    public ComponentId next() {
 
         var clazz = componentsStack.pop();
         var s = componentGraph.indexOf(clazz);
+
+        if (s == -1) {
+            throw new IllegalStateException("The class '" + clazz + "' was not found in dependency graph.");
+        }
 
         if (!markedComponents.contains(s)) {
             markedComponents.add(s);

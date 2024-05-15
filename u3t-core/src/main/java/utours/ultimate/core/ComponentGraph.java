@@ -8,7 +8,7 @@ public class ComponentGraph {
 
     private final Map<Integer, List<Integer>> graph;
     private final Map<Integer, List<Integer>> predecessor;
-    private final List<Class<?>> components;
+    private final List<ComponentId> components;
 
     public ComponentGraph() {
         this.components = new LinkedList<>();
@@ -16,7 +16,7 @@ public class ComponentGraph {
         this.predecessor = new HashMap<>();
     }
 
-    public void addComponent(Class<?> component) {
+    public void addComponent(ComponentId component) {
         if (!components.contains(component)) {
             this.components.add(component);
             this.predecessor.putIfAbsent(indexOf(component), new LinkedList<>());
@@ -24,15 +24,15 @@ public class ComponentGraph {
         }
     }
 
-    public int indexOf(Class<?> component) {
+    public int indexOf(ComponentId component) {
         return components.indexOf(component);
     }
 
-    public Class<?> fromIndex(int index) {
+    public ComponentId fromIndex(int index) {
         return components.get(index);
     }
 
-    public void addDependency(Class<?> from, Class<?> to) {
+    public void addDependency(ComponentId from, ComponentId to) {
         var idxFrom = indexOf(from);
         var idxTo = indexOf(to);
         addDependency(idxFrom, idxTo);
@@ -43,7 +43,7 @@ public class ComponentGraph {
         graph.computeIfAbsent(from, k -> new LinkedList<>()).add(to);
     }
 
-    public boolean hasNode(Class<?> node) {
+    public boolean hasNode(ComponentId node) {
         return components.contains(node);
     }
 
@@ -51,7 +51,7 @@ public class ComponentGraph {
         return graph.containsKey(node);
     }
 
-    public List<Class<?>> getComponents() {
+    public List<ComponentId> getComponents() {
         return components;
     }
 
@@ -59,8 +59,8 @@ public class ComponentGraph {
         return graph;
     }
 
-    public List<Class<?>> getSortedComponents(Iterator<Class<?>> iterator) {
-        List<Class<?>> sortedComponents = new LinkedList<>();
+    public List<ComponentId> getSortedComponents(Iterator<ComponentId> iterator) {
+        List<ComponentId> sortedComponents = new ArrayList<>();
         while (iterator.hasNext()) {
             var next = iterator.next();
             if (!sortedComponents.contains(next))
@@ -69,11 +69,12 @@ public class ComponentGraph {
         return sortedComponents;
     }
 
-    public List<Class<?>> getSortedComponents() {
-        return getSortedComponents(new TopologicalOrderingComponentGraph(this)).reversed();
+    public List<ComponentId> getSortedComponents() {
+        return getSortedComponents(new TopologicalOrderingComponentGraph(this))
+                .reversed();
     }
 
-    public Map<Integer, List<Integer>> getPredecessors() {
+    public Map<Integer, List<Integer>> predecessors() {
         return predecessor;
     }
 
