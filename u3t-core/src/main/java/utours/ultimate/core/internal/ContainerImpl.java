@@ -4,7 +4,7 @@ import utours.ultimate.core.Container;
 
 import java.util.*;
 
-public class ContainerImpl implements Container {
+public final class ContainerImpl implements Container {
 
     private final Map<Class<?>, List<Object>> additionalComponents;
     private final Map<Class<?>, Object> uniqueComponents;
