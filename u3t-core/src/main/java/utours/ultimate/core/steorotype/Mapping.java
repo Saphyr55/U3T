@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Mapping {
-    
+
     Class<?> clazz() default Class.class;
 
     Type type() default Type.Unique;

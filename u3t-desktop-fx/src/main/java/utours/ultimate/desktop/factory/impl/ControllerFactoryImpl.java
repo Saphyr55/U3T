@@ -1,7 +1,6 @@
 package utours.ultimate.desktop.factory.impl;
 
 import utours.ultimate.core.steorotype.Component;
-import utours.ultimate.core.steorotype.ConstructorProperties;
 import utours.ultimate.core.steorotype.Mapping;
 import utours.ultimate.desktop.controller.ChatController;
 import utours.ultimate.desktop.controller.PartiesController;
