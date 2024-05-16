@@ -121,7 +121,7 @@ class AnnotationModuleEvaluatorProviderTest {
     }
 
     @Test
-    void check_have_all_components_in_graph() {
+    void check_have_every_components_in_graph() {
         assertTrue(graph.getComponents().contains(ComponentId.ofClass(FactoryComponent.class)));
         assertTrue(graph.getComponents().contains(ComponentId.ofClass(AComponent.class)));
         assertTrue(graph.getComponents().contains(ComponentId.ofClass(BComponent.class)));

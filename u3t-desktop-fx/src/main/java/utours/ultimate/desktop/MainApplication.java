@@ -7,12 +7,14 @@ import utours.ultimate.core.ReadOnlyContainer;
 import utours.ultimate.core.ModuleContext;
 import utours.ultimate.core.ModuleEvaluatorProvider;
 import utours.ultimate.core.provider.AnnotationModuleEvaluatorProvider;
+import utours.ultimate.core.provider.ClassPathXmlModuleEvaluatorProvider;
 import utours.ultimate.desktop.view.DesktopMainView;
 import utours.ultimate.net.Client;
 
 public class MainApplication extends Application {
 
-    private static final ModuleContext context = ModuleContext.createAndLoad(getModuleProvider());
+    private static final ModuleContext context =
+            ModuleContext.createAndLoad(getModuleProvider());
 
     private static final String TITLE = "U3T";
     private static final int WIDTH = 1084;
@@ -44,16 +46,19 @@ public class MainApplication extends Application {
     }
 
     private static ModuleEvaluatorProvider getModuleProvider() {
-        return new AnnotationModuleEvaluatorProvider("utours.ultimate.desktop",
-                "utours.ultimate.desktop.action",
-                "utours.ultimate.desktop.controller",
-                "utours.ultimate.desktop.factory",
-                "utours.ultimate.desktop.factory.impl",
-                "utours.ultimate.desktop.service",
-                "utours.ultimate.desktop.service.impl",
-                "utours.ultimate.desktop.view",
-                "utours.ultimate.desktop.view.u3t"
-        );
+
+        return new ClassPathXmlModuleEvaluatorProvider();
+
+//        return new AnnotationModuleEvaluatorProvider("utours.ultimate.desktop",
+//                "utours.ultimate.desktop.action",
+//                "utours.ultimate.desktop.controller",
+//                "utours.ultimate.desktop.factory",
+//                "utours.ultimate.desktop.factory.impl",
+//                "utours.ultimate.desktop.service",
+//                "utours.ultimate.desktop.service.impl",
+//                "utours.ultimate.desktop.view",
+//                "utours.ultimate.desktop.view.u3t"
+//        );
     }
 
 }
