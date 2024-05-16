@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.layout.*;
+import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.desktop.view.u3t.PrimitiveTile;
 import utours.ultimate.desktop.view.u3t.Tile;
 import utours.ultimate.game.feature.GameProvider;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+@Component
 public class U3TGameController implements Initializable {
 
     public static final int GRID_SIZE = 3;

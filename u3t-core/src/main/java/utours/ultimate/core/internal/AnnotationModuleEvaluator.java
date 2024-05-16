@@ -102,8 +102,17 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
             for (Class<?> param : parameters) {
                 var identifier = getComponentId(param).identifier();
                 var cwProvider = componentsById.get(identifier);
+
+                if (cwProvider == null) {
+                    throw new IllegalStateException(identifier + " was not found.");
+                }
+
                 var cw = cwProvider.get();
-                if (cw == null) throw new IllegalStateException();
+
+                if (cw == null) {
+                    throw new IllegalStateException("The provider of " + identifier + " provide nothing.");
+                }
+
                 args.add(cw.getComponent());
             }
 

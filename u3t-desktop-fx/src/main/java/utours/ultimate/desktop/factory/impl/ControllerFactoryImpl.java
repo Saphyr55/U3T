@@ -14,7 +14,8 @@ import utours.ultimate.net.Client;
 
 import java.util.function.Function;
 
-@Mapping(clazz = ControllerFactory.class, type = Mapping.Type.Unique)
+@Component
+@Mapping
 public class ControllerFactoryImpl implements ControllerFactory {
 
     private final Client client;
@@ -27,25 +28,30 @@ public class ControllerFactoryImpl implements ControllerFactory {
 
         this.clientService = clientService;
         this.client = client;
-        this.u3tGameControllerFactory = game -> new U3TGameController(service, game, client);
+        this.u3tGameControllerFactory = game ->
+                new U3TGameController(service, game, client);
     }
 
     @Override
+    @Component
     public PartiesController createPartiesController() {
         return new PartiesController(clientService, client);
     }
 
     @Override
+    @Component
     public U3TGameController createU3TGameController() {
         return u3tGameControllerFactory.apply(Game.Builder.newDefaultBuilder().build());
     }
 
     @Override
+    @Component
     public PolymorphicController createPolymorphicController() {
         return new PolymorphicController();
     }
 
     @Override
+    @Component
     public ChatController createChatController() {
         return new ChatController();
     }

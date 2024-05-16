@@ -6,6 +6,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
+import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.desktop.service.ClientService;
 import utours.ultimate.desktop.view.DesktopPartiesView;
 import utours.ultimate.game.model.Game;
@@ -14,6 +15,7 @@ import utours.ultimate.net.Client;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+@Component
 public class PartiesController implements Initializable {
 
     public static final int BUTTON_PADDING_SIZE = 30;

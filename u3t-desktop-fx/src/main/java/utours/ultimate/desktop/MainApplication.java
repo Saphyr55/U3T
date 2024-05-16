@@ -44,7 +44,8 @@ public class MainApplication extends Application {
     }
 
     private static ModuleEvaluatorProvider getModuleProvider() {
-        return new AnnotationModuleEvaluatorProvider("utours.ultimate.desktop",
+        return new AnnotationModuleEvaluatorProvider(
+                "utours.ultimate.desktop",
                 "utours.ultimate.desktop.action",
                 "utours.ultimate.desktop.controller",
                 "utours.ultimate.desktop.factory",

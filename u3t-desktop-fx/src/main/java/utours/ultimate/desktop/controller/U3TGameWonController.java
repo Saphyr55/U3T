@@ -4,11 +4,13 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.game.model.Player;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
+@Component
 public class U3TGameWonController implements Initializable {
 
     private final Player player;
@@ -20,7 +22,6 @@ public class U3TGameWonController implements Initializable {
     private Label winnerLabel;
 
     public U3TGameWonController(Player player) {
-
         this.player = player;
     }
 

@@ -5,16 +5,15 @@ import utours.ultimate.core.internal.AnnotationModuleEvaluator;
 import utours.ultimate.core.internal.ErrorManager;
 import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.core.steorotype.ConstructorProperties;
-import utours.ultimate.core.steorotype.FactoryMethod;
 import utours.ultimate.core.steorotype.Mapping;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -95,10 +94,13 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         for (Method method : clazz.getDeclaredMethods()) {
             try {
 
-                // We filter every method that not annotated by FactoryMethod.
-                if (!method.isAnnotationPresent(FactoryMethod.class)) {
+                // We filter every method that are annotated by Component.
+                if (!isComponent(method)) {
                     continue;
                 }
+
+                // We get the component annotation.
+                var component = method.getAnnotation(Component.class);
 
                 // We look up the method handle from the factory method.
                 var mh = lookup.unreflect(method);
@@ -112,7 +114,12 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
                         .put(componentId, mh);
 
                 // Add an eta dependency from the return component to the factory component.
+                componentGraph.addComponent(componentReturnTypeId);
                 componentGraph.addDependency(componentReturnTypeId, componentId);
+
+                if (!isMappedAndActivate(method)) {
+                    processMappedMethodComponent(method);
+                }
 
             } catch (Exception e) {
                 errors.add(e);
@@ -121,6 +128,26 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         }
 
         ErrorManager.throwErrorsOf(errors);
+    }
+
+    private void processMappedMethodComponent(Method method) {
+
+        Mapping mapping = method.getAnnotation(Mapping.class);
+        if (!mapping.activate()) return;
+
+        // Determine return type.
+        Class<?> componentReturnType = isDeterministicMapping(mapping)
+                ? method.getReturnType()
+                : mapping.clazz();
+
+        if (!componentReturnType.isAssignableFrom(mapping.clazz())) {
+            throw new IllegalStateException(componentReturnType + " is not ");
+        }
+
+        ComponentId componentId = getComponentId(componentReturnType);
+
+        // Process the mapping type.
+        onMappingType(mapping, componentId, componentReturnType);
     }
 
     /**
@@ -212,14 +239,14 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
     }
 
     /**
-     * Check if the class passing in parameter is annotated by Mapping and is activated.
+     * Check if the element passing in parameter is annotated by Mapping and is activated.
      *
-     * @param clazz the class.
+     * @param element the element to check.
      * @return return true if is activated and is annotated by Mapping.
      */
-    private static boolean isMappedAndActivate(Class<?> clazz) {
-        return clazz.isAnnotationPresent(Mapping.class) &&
-                clazz.getAnnotation(Mapping.class).activate();
+    private static boolean isMappedAndActivate(AnnotatedElement element) {
+        return element.isAnnotationPresent(Mapping.class) &&
+                element.getAnnotation(Mapping.class).activate();
     }
 
     /**
@@ -233,7 +260,8 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
 
         ComponentId componentId = getComponentId(clazz);
 
-        Class<?> interfaceClass = !isDeterministicMapping(mapping) ? mapping.clazz()
+        Class<?> interfaceClass = !isDeterministicMapping(mapping)
+                ? mapping.clazz()
                 // The default interface is the first interface implemented.
                 // Unable to determine the interface to map, if there are any interface implemented.
                 : ClassProviderManager.getFirstInterfaceImplemented(clazz)
@@ -241,14 +269,25 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
 
         ComponentId interfaceId = getComponentId(interfaceClass);
 
-        // Check the mapping type.
-        switch (mapping.type()) {
-            case Unique -> onUniqueMapping(mapping, componentId, interfaceClass);
-            case Additional -> onAdditionalMapping(componentId, interfaceClass);
-        }
+        // Process the mapping type.
+        onMappingType(mapping, componentId, interfaceClass);
 
         // We add a lambda dependency.
         componentGraph.addDependency(interfaceId, componentId);
+    }
+
+    /**
+     * The process by mapping type.
+     *
+     * @param mapping the mapping annotation.
+     * @param componentId the component id to map.
+     * @param clazz the interface clazz.
+     */
+    private void onMappingType(Mapping mapping, ComponentId componentId, Class<?> clazz) {
+        switch (mapping.type()) {
+            case Unique -> onUniqueMapping(mapping, componentId, clazz);
+            case Additional -> onAdditionalMapping(componentId, clazz);
+        }
     }
 
     /**
@@ -316,13 +355,13 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
     }
 
     /**
-     * Check if class passed in parameter is annotated by Component.
+     * Check if the element passed in parameter is annotated by Component.
      *
-     * @param clazz the class to check.
+     * @param element the element to check.
      * @return Return true if class passed in parameter is annotated by Component return false otherwise.
      */
-    private boolean isComponent(Class<?> clazz) {
-        return clazz.isAnnotationPresent(Component.class);
+    private boolean isComponent(AnnotatedElement element) {
+        return element.isAnnotationPresent(Component.class);
     }
 
     private ComponentId getComponentId(Class<?> clazz, Component component) {

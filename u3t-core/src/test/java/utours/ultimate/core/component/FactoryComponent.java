@@ -1,9 +1,10 @@
 package utours.ultimate.core.component;
 
 import utours.ultimate.core.steorotype.Component;
-import utours.ultimate.core.steorotype.FactoryMethod;
+import utours.ultimate.core.steorotype.Mapping;
 
 @Component
+@Mapping
 public class FactoryComponent implements IFactoryComponent {
 
     private final IDComponent dComponent;
@@ -13,11 +14,9 @@ public class FactoryComponent implements IFactoryComponent {
     }
 
     @Override
-    @FactoryMethod
     public AComponent getAComponent() {
         return new AComponent(dComponent, "aComponent");
     }
-
 
 
 }

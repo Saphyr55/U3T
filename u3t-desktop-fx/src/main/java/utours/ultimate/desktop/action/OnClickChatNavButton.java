@@ -1,5 +1,6 @@
 package utours.ultimate.desktop.action;
 
+import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.desktop.controller.PolymorphicController;
 import utours.ultimate.desktop.view.DesktopChatView;
 import utours.ultimate.ui.OnClickButton;

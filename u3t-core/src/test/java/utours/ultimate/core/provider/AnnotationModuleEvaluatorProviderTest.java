@@ -112,7 +112,7 @@ class AnnotationModuleEvaluatorProviderTest {
     void check_have_dependencies_with_factory() {
 
         var indexAC = graph.indexOf(ComponentId.ofClass(AComponent.class));
-        var indexFactoryC = graph.indexOf(ComponentId.ofClass(FactoryComponent.class));
+        var indexFactoryC = graph.indexOf(ComponentId.ofClass(IFactoryComponent.class));
 
         assertNotEquals(-1, indexAC);
         assertNotEquals(-1, indexFactoryC);
