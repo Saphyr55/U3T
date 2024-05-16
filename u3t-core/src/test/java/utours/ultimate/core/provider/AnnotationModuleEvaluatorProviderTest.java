@@ -51,6 +51,23 @@ class AnnotationModuleEvaluatorProviderTest {
     }
 
     @Test
+    void check_have_dependecies_additional_component() {
+
+        var indexIAddC = graph.indexOf(ComponentId.ofClass(IAddComponent.class));
+        assertNotEquals(-1, indexIAddC);
+
+        var indexAAdd = graph.indexOf(ComponentId.ofClass(AAddComponent.class));
+        assertNotEquals(-1, indexAAdd);
+
+        var indexBAdd = graph.indexOf(ComponentId.ofClass(BAddComponent.class));
+        assertNotEquals(-1, indexBAdd);
+
+        // var deps = graph.getGraph().get(indexIAddC);
+
+
+    }
+
+    @Test
     void check_can_access_to_an_interface() {
 
         var cwProvider = evaluator.getComponents().get(IDComponent.class.getName());

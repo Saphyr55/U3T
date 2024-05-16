@@ -5,7 +5,7 @@ import utours.ultimate.core.steorotype.FactoryMethod;
 
 @Component
 public class FactoryComponent implements IFactoryComponent {
-    
+
     private final IDComponent dComponent;
 
     public FactoryComponent(IDComponent dComponent) {
@@ -17,5 +17,7 @@ public class FactoryComponent implements IFactoryComponent {
     public AComponent getAComponent() {
         return new AComponent(dComponent, "aComponent");
     }
+
+
 
 }

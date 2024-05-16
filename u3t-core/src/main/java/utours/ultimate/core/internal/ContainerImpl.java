@@ -62,6 +62,11 @@ public final class ContainerImpl implements Container {
         components.put(id, component);
     }
 
+    @Override
+    public void removeComponent(String identifier) {
+        components.remove(identifier);
+    }
+
     private <T> List<Object> listSupplier(Class<T> componentClass) {
         return new LinkedList<>();
     }

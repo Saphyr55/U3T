@@ -2,6 +2,7 @@ package utours.ultimate.core.provider;
 
 import utours.ultimate.core.*;
 import utours.ultimate.core.internal.AnnotationModuleEvaluator;
+import utours.ultimate.core.internal.ErrorManager;
 import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.core.steorotype.ConstructorProperties;
 import utours.ultimate.core.steorotype.FactoryMethod;
@@ -13,6 +14,7 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,7 +33,10 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
                 .collect(Collectors.toSet()));
     }
 
-
+    /**
+     *
+     * @return
+     */
     @Override
     public ModuleEvaluator provideModuleEvaluator() {
 
@@ -46,7 +51,8 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
                 componentGraph,
                 factoryHandles,
                 constructors,
-                uniqueMap
+                uniqueMap,
+                additionalMap
         );
     }
 
@@ -58,7 +64,7 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
     private void setNodes(Set<Class<?>> classes) {
         // We filter every component, and add it in the graph as a node.
         classes.stream()
-                .filter(AnnotationModuleEvaluatorProvider::isComponent)
+                .filter(this::isComponent)
                 .forEach(this::addComponentInGraph);
     }
 
@@ -83,7 +89,7 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
                                    ComponentId componentId) {
 
         MethodHandles.Lookup lookup = MethodHandles.lookup();
-        Class<?> clazz = componentId.getClazz();
+        Class<?> clazz = componentId.clazz();
         List<Throwable> errors = new ArrayList<>();
 
         for (Method method : clazz.getDeclaredMethods()) {
@@ -114,7 +120,7 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
 
         }
 
-        throwOnErrors(errors);
+        ErrorManager.throwErrorsOf(errors);
     }
 
     /**
@@ -128,9 +134,9 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         Map<Class<?>, MethodHandle> constructors = new HashMap<>();
         List<Throwable> errors = new ArrayList<>();
 
-        for (ComponentId currentComponentId : componentGraph.getComponents()) {
+        for (ComponentId componentId : componentGraph.getComponents()) {
             try {
-                Class<?> clazz = currentComponentId.getClazz();
+                Class<?> clazz = componentId.clazz();
 
                 // We filter every component that are not an interface.
                 if (clazz.isInterface()) {
@@ -152,9 +158,7 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
                 Arrays.stream(paramTypes)
                         .map(this::getComponentId)
                         .filter(componentGraph::hasNode)
-                        .forEach(id -> {
-                            componentGraph.addDependency(currentComponentId, id);
-                        });
+                        .forEach(id -> componentGraph.addDependency(componentId, id));
 
                 // We get constructor method type, and we look up for it.
                 // Then it is added in constructors map.
@@ -168,7 +172,7 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
             }
         }
 
-        throwOnErrors(errors);
+        ErrorManager.throwErrorsOf(errors);
 
         return constructors;
     }
@@ -183,20 +187,28 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
      */
     private Constructor<?> getConstructorProperties(Class<?> clazz) {
 
-        boolean found = false;
+        Constructor<?> declaredConstructor;
 
-        Constructor<?> declaredConstructor = ClassProviderManager
+        declaredConstructor = ClassProviderManager
                 .getFirstDeclaredConstructor(clazz)
                 .orElseThrow(IllegalStateException::new);
 
-        for (Constructor<?> constructor : clazz.getDeclaredConstructors()) {
-            if (constructor.isAnnotationPresent(ConstructorProperties.class) && !found) {
-                declaredConstructor = constructor;
-                found = true;
-            }
-        }
+        declaredConstructor = Arrays.stream(clazz.getDeclaredConstructors())
+                .filter(this::isConstructorProperties)
+                .findFirst()
+                .orElse(declaredConstructor);
 
         return declaredConstructor;
+    }
+
+    /**
+     * Check if the constructor is annotated by ConstructorProperties.
+     *
+     * @param constructor the constructor to check.
+     * @return true if the constructor is annotated by ConstructorProperties, false otherwise.
+     */
+    private boolean isConstructorProperties(Constructor<?> constructor) {
+        return constructor.isAnnotationPresent(ConstructorProperties.class);
     }
 
     /**
@@ -285,7 +297,7 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
      * @return an exception.
      */
     private IllegalStateException getErrorUniqueMapping(Class<?> interfaceClass) {
-        String nameClassAlreadyImplemented = uniqueMap.get(interfaceClass).getClazz().getName();
+        String nameClassAlreadyImplemented = uniqueMap.get(interfaceClass).clazz().getName();
         String errorMsg = "Already have "
                 + interfaceClass.getName()
                 + " mapped with "
@@ -309,7 +321,7 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
      * @param clazz the class to check.
      * @return Return true if class passed in parameter is annotated by Component return false otherwise.
      */
-    private static boolean isComponent(Class<?> clazz) {
+    private boolean isComponent(Class<?> clazz) {
         return clazz.isAnnotationPresent(Component.class);
     }
 
@@ -326,7 +338,7 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
 
     public ComponentId getComponentId(Class<?> clazz) {
         return componentGraph.getComponents().stream()
-                .filter(componentId -> componentId.getClazz().equals(clazz))
+                .filter(componentId -> componentId.clazz().equals(clazz))
                 .findFirst()
                 .orElseGet(() -> ComponentId.ofClass(clazz));
     }
@@ -339,19 +351,6 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         return ClassProviderManager.classesOf(packageName).stream();
     }
 
-    private static void throwOnErrors(List<Throwable> errors) {
-        if (!errors.isEmpty()) {
-            throw errors.stream()
-                    .reduce(AnnotationModuleEvaluatorProvider::throwableReducer)
-                    .map(IllegalStateException::new)
-                    .orElseThrow();
-        }
-    }
-
-    private static Throwable throwableReducer(Throwable e, Throwable e2) {
-        e.addSuppressed(e2);
-        return e;
-    }
 
 
 }

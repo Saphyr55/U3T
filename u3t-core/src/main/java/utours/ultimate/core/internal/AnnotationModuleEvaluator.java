@@ -4,76 +4,89 @@ import utours.ultimate.core.*;
 
 import java.lang.invoke.MethodHandle;
 import java.util.*;
+import java.util.stream.IntStream;
 
 public class AnnotationModuleEvaluator implements ModuleEvaluator {
 
     private final Map<String, ComponentProvider> componentsById = new HashMap<>();
     private final Map<Class<?>, List<ComponentProvider>> additionalComponents = new HashMap<>();
-    private Map<Class<?>, ComponentProvider> uniqueComponents = new HashMap<>();
+    private final Map<Class<?>, ComponentProvider> uniqueComponents = new HashMap<>();
 
     private final Map<Class<?>, Map<ComponentId, MethodHandle>> factoryMethodHandlesMapped;
     private final Map<Class<?>, MethodHandle> constructors;
     private final Map<Class<?>, ComponentId> uniqueMap;
+    private final Map<Class<?>, List<ComponentId>> additionalMap;
     private final ComponentGraph componentGraph;
 
     public AnnotationModuleEvaluator(ComponentGraph componentGraph,
                                      Map<Class<?>, Map<ComponentId, MethodHandle>> factoryMethodHandlesMapped,
                                      Map<Class<?>, MethodHandle> constructors,
-                                     Map<Class<?>, ComponentId> uniqueMap) {
+                                     Map<Class<?>, ComponentId> uniqueMap,
+                                     Map<Class<?>, List<ComponentId>> additionalMap) {
 
         this.componentGraph = componentGraph;
         this.factoryMethodHandlesMapped = factoryMethodHandlesMapped;
         this.constructors = constructors;
         this.uniqueMap = uniqueMap;
+        this.additionalMap = additionalMap;
     }
 
     @Override
     public void evaluate() {
+        List<ComponentId> componentIds = componentGraph.getTopologicalOrderingComponents();
+        List<Throwable> errors = ErrorManager.forEachOf(componentIds, this::processComponentId);
+        ErrorManager.throwErrorsOf(errors);
+    }
 
-        for (ComponentId componentId : componentGraph.getTopologicalOrderingComponents()) {
-            Class<?> clazz = componentId.getClazz();
+    private void processComponentId(ComponentId componentId) {
+        Class<?> clazz = componentId.clazz();
 
-            System.out.println(clazz.getName());
+        System.out.println(clazz.getName());
 
-            if (uniqueMap.containsKey(clazz)) {
-
-                processUnique(clazz);
-
-            } else if (factoryMethodHandlesMapped.containsKey(clazz)) {
-
-                var handles = factoryMethodHandlesMapped.get(clazz);
-                handles.entrySet().stream().findFirst().ifPresent(e -> {
-                    processFactoryMethod(e.getKey(), e.getValue(), componentId);
-                });
-
-            } else if (constructors.containsKey(clazz)) {
-                processConstructor(constructors.get(clazz), componentId);
-            }
-
+        if (additionalMap.containsKey(clazz)) {
+            processAdditional(componentId);
+        } else if (uniqueMap.containsKey(clazz)) {
+            processUnique(componentId);
+        } else if (factoryMethodHandlesMapped.containsKey(clazz)) {
+            var handles = factoryMethodHandlesMapped.get(clazz);
+            handles.entrySet().stream().findFirst().ifPresent(e -> {
+                processFactoryMethod(e.getKey(), e.getValue(), componentId);
+            });
+        } else if (constructors.containsKey(clazz)) {
+            processConstructor(constructors.get(clazz), componentId);
         }
 
     }
 
-    private void processUnique(Class<?> interfaceClass) {
-        var clazz = uniqueMap.get(interfaceClass);
-        var cwProvider = componentsById.get(clazz.getId());
-        componentsById.put(interfaceClass.getName(), cwProvider);
-        uniqueComponents.put(interfaceClass, cwProvider);
+    private void processAdditional(ComponentId componentId) {
+        List<ComponentId> classes = additionalMap.get(componentId.clazz());
+        List<ComponentProvider> providers = classes.stream()
+                .map(aClass -> componentsById.get(aClass.identifier()))
+                .toList();
+        additionalComponents.put(componentId.clazz(), providers);
+    }
+
+    private void processUnique(ComponentId interfaceId) {
+        ComponentId componentId = uniqueMap.get(interfaceId.clazz());
+        ComponentProvider provider = componentsById.get(componentId.identifier());
+        componentsById.put(interfaceId.clazz().getName(), provider);
+        uniqueComponents.put(interfaceId.clazz(), provider);
     }
 
     private void processFactoryMethod(ComponentId componentIdFactory, MethodHandle mh, ComponentId componentId) {
         try {
-
-            var factory = componentsById
-                    .get(componentIdFactory.getId())
+            Object factory = componentsById
+                    .get(componentIdFactory.identifier())
                     .get()
                     .getComponent();
 
             mh = mh.bindTo(factory);
-            var obj = mh.invoke();
-            var cw = new ComponentWrapper(componentId.getClazz(), obj);
 
-            componentsById.put(componentId.getId(), ComponentProvider.singleton(cw));
+            Object result = mh.invoke();
+            ComponentWrapper cw = new ComponentWrapper(componentId.clazz(), result);
+            String identifier = componentId.identifier();
+
+            componentsById.put(identifier, ComponentProvider.singleton(cw));
 
         } catch (Throwable e) {
             throw new RuntimeException(e);
@@ -87,18 +100,18 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
             List<Class<?>> parameters = methodHandle.type().parameterList();
 
             for (Class<?> param : parameters) {
-                var id = getComponentId(param).getId();
-                var cwProvider = componentsById.get(id);
+                var identifier = getComponentId(param).identifier();
+                var cwProvider = componentsById.get(identifier);
                 var cw = cwProvider.get();
                 if (cw == null) throw new IllegalStateException();
                 args.add(cw.getComponent());
             }
 
             var object = methodHandle.invokeWithArguments(args);
-            var cw = new ComponentWrapper(componentId.getClazz(), object);
+            var cw = new ComponentWrapper(componentId.clazz(), object);
             var provider = ComponentProvider.singleton(cw);
 
-            componentsById.put(componentId.getId(), provider);
+            componentsById.put(componentId.identifier(), provider);
 
         } catch (Throwable e) {
             throw new RuntimeException(e);
@@ -108,15 +121,6 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
     @Override
     public Map<Class<?>, ComponentProvider> getUniqueComponents() {
         return uniqueComponents;
-    }
-
-    private Map.Entry<Class<?>, ComponentProvider> toUnique(Map.Entry<String, ComponentProvider> e) {
-        try {
-            var clazz = Class.forName(e.getKey());
-            return Map.entry(clazz, e.getValue());
-        } catch (ClassNotFoundException ex) {
-            throw new RuntimeException(ex);
-        }
     }
 
     @Override
@@ -131,7 +135,7 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
 
     public ComponentId getComponentId(Class<?> clazz) {
         return componentGraph.getComponents().stream()
-                .filter(componentId -> componentId.getClazz().equals(clazz))
+                .filter(componentId -> componentId.clazz().equals(clazz))
                 .findFirst()
                 .orElseGet(() -> ComponentId.ofClass(clazz));
     }
