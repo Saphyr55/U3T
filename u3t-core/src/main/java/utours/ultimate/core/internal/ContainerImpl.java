@@ -4,7 +4,7 @@ import utours.ultimate.core.Container;
 
 import java.util.*;
 
-public class ContainerImpl implements Container {
+public final class ContainerImpl implements Container {
 
     private final Map<Class<?>, List<Object>> additionalComponents;
     private final Map<Class<?>, Object> uniqueComponents;
@@ -60,6 +60,11 @@ public class ContainerImpl implements Container {
     @Override
     public <T> void storeComponent(String id, T component) {
         components.put(id, component);
+    }
+
+    @Override
+    public void removeComponent(String identifier) {
+        components.remove(identifier);
     }
 
     private <T> List<Object> listSupplier(Class<T> componentClass) {

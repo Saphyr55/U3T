@@ -2,14 +2,51 @@ package utours.ultimate.core;
 
 public interface Container extends ReadOnlyContainer {
 
-    <C> void storeUniqueComponent(Class<C> tClass, C component);
+    /**
+     * Store the unique component that are mapped with the current type passed in parameter.
+     *
+     * @param cClass Component type class.
+     * @param <C> Component type.
+     */
+    <C> void storeUniqueComponent(Class<C> cClass, C component);
 
-    <C> void removeUniqueComponent(Class<C> tClass);
+    /**
+     * Remove the unique component that are mapped with the current type passed in parameter.
+     *
+     * @param cClass Component type class.
+     * @param <C> Component type.
+     */
+    <C> void removeUniqueComponent(Class<C> cClass);
 
-    <C> void storeAdditionalComponent(Class<C> tClass, C component);
+    /**
+     * Store the additional component that are mapped with the current type passed in parameter.
+     *
+     * @param cClass Component type class.
+     * @param <C> Component type.
+     */
+    <C> void storeAdditionalComponent(Class<C> cClass, C component);
 
-    <C> void removeAdditionalComponents(Class<C> tClass);
+    /**
+     * Remove the additional component that are mapped with the current type passed in parameter.
+     *
+     * @param cClass Component type class.
+     * @param <C> Component type.
+     */
+    <C> void removeAdditionalComponents(Class<C> cClass);
 
-    <C> void storeComponent(String id, C component);
+    /**
+     * Store the component that are mapped with the current identifier passed in parameter.
+     *
+     * @param identifier the component identifier².
+     * @param <C> Component type.
+     */
+    <C> void storeComponent(String identifier, C component);
+
+    /**
+     * Remove the component that are mapped with the current identifier passed in parameter.
+     *
+     * @param identifier the component identifier².
+     */
+    void removeComponent(String identifier);
 
 }

@@ -63,8 +63,9 @@ public class ComponentGraph {
         List<ComponentId> sortedComponents = new ArrayList<>();
         while (iterator.hasNext()) {
             var next = iterator.next();
-            if (!sortedComponents.contains(next))
+            if (!sortedComponents.contains(next)) {
                 sortedComponents.add(next);
+            }
         }
         return sortedComponents;
     }
