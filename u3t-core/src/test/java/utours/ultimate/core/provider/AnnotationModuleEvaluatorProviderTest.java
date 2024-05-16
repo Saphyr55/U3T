@@ -51,7 +51,7 @@ class AnnotationModuleEvaluatorProviderTest {
     }
 
     @Test
-    void check_have_dependecies_additional_component() {
+    void check_additional_component_exist_in_graph() {
 
         var indexIAddC = graph.indexOf(ComponentId.ofClass(IAddComponent.class));
         assertNotEquals(-1, indexIAddC);
@@ -62,8 +62,31 @@ class AnnotationModuleEvaluatorProviderTest {
         var indexBAdd = graph.indexOf(ComponentId.ofClass(BAddComponent.class));
         assertNotEquals(-1, indexBAdd);
 
-        // var deps = graph.getGraph().get(indexIAddC);
+    }
 
+    @Test
+    void check_additional_component_in_evaluating() {
+
+        var componentsProvider = evaluator.getAdditionalComponents().get(IAddComponent.class);
+
+        var aAddProvider = evaluator.getComponents().get(AAddComponent.class.getName());
+        var bAddProvider = evaluator.getComponents().get(BAddComponent.class.getName());
+
+        assertTrue(componentsProvider.contains(aAddProvider));
+        assertTrue(componentsProvider.contains(bAddProvider));
+    }
+
+    @Test
+    void check_have_dependencies_additional_component() {
+
+        var indexIAddC = graph.indexOf(ComponentId.ofClass(IAddComponent.class));
+        var indexAAdd = graph.indexOf(ComponentId.ofClass(AAddComponent.class));
+        var indexBAdd = graph.indexOf(ComponentId.ofClass(BAddComponent.class));
+
+        var deps = graph.getGraph().get(indexIAddC);
+
+        assertTrue(deps.contains(indexAAdd));
+        assertTrue(deps.contains(indexBAdd));
 
     }
 
@@ -71,11 +94,9 @@ class AnnotationModuleEvaluatorProviderTest {
     void check_can_access_to_an_interface() {
 
         var cwProvider = evaluator.getComponents().get(IDComponent.class.getName());
-
         assertNotNull(cwProvider);
 
         var cw = cwProvider.get();
-
         assertNotNull(cw);
         assertNotNull(cw.getComponent());
 
@@ -83,7 +104,7 @@ class AnnotationModuleEvaluatorProviderTest {
         assertInstanceOf(DComponent.class, cw.getComponent());
 
         IDComponent dComponent = cw.getComponent();
-
+        assertNotNull(dComponent);
         assertEquals("Hello World", dComponent.giveHelloWorldString());
     }
 
