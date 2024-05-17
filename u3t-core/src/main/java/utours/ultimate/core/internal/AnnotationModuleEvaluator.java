@@ -54,9 +54,7 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
             factoryMethodHandlesMapped.get(clazz)
                     .entrySet().stream()
                     .findFirst()
-                    .ifPresent(e -> {
-                        processFactoryMethod(e.getKey(), e.getValue(), componentId);
-                    });
+                    .ifPresent(e -> processFactoryMethod(e.getKey(), e.getValue(), componentId));
 
         } else if (constructors.containsKey(clazz)) {
             processConstructor(constructors.get(clazz), componentId);

@@ -13,8 +13,7 @@ public class OnClickChatNavButton implements OnClickButton {
     private final Supplier<DesktopChatView> factory;
     private final PolymorphicController controller;
 
-    public OnClickChatNavButton(Supplier<DesktopChatView> factory,
-                                PolymorphicController controller) {
+    public OnClickChatNavButton(Supplier<DesktopChatView> factory, PolymorphicController controller) {
         this.factory = factory;
         this.controller = controller;
     }

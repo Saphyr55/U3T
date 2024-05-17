@@ -1,7 +1,6 @@
 package utours.ultimate.desktop.factory.impl;
 
 import utours.ultimate.core.steorotype.Component;
-import utours.ultimate.core.steorotype.ConstructorProperties;
 import utours.ultimate.core.steorotype.Mapping;
 import utours.ultimate.desktop.controller.ChatController;
 import utours.ultimate.desktop.controller.PartiesController;
@@ -30,6 +29,11 @@ public class ControllerFactoryImpl implements ControllerFactory {
         this.clientService = clientService;
         this.client = client;
         this.u3tGameControllerFactory = game -> new U3TGameController(service, game, client);
+    }
+
+    @Override
+    public PolymorphicController createPolymorphicController() {
+        return new PolymorphicController();
     }
 
     @Override

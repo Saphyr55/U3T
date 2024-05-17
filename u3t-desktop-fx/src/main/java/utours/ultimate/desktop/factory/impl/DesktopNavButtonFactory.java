@@ -18,9 +18,11 @@ import java.util.function.Supplier;
 public final class DesktopNavButtonFactory implements NavButtonFactory {
 
     private final Supplier<DesktopChatView> chatViewFactory;
+    private final PolymorphicController polymorphicController;
     private DesktopChatView chatView;
 
     public DesktopNavButtonFactory() {
+        this.polymorphicController = new PolymorphicController();
         this.chatViewFactory = () -> chatView = Optional.ofNullable(chatView).orElseGet(DesktopChatView::new);
     }
 
@@ -29,8 +31,7 @@ public final class DesktopNavButtonFactory implements NavButtonFactory {
     @Mapping(type = Mapping.Type.Additional)
     public NavButton createPartiesNavButton() {
         DesktopNavButton button = new DesktopNavButton("Parties", 0);
-        PolymorphicController controller = new PolymorphicController();
-        button.setOnClick(new OnClickPartiesNavButton(controller));
+        button.setOnClick(new OnClickPartiesNavButton(polymorphicController));
         return button;
     }
 
@@ -39,8 +40,7 @@ public final class DesktopNavButtonFactory implements NavButtonFactory {
     // @Mapping(type = Mapping.Type.Additional)
     public NavButton createChatNavButton() {
         DesktopNavButton button = new DesktopNavButton("Chat", 1);
-        PolymorphicController controller = new PolymorphicController();
-        button.setOnClick(new OnClickChatNavButton(chatViewFactory, controller));
+        button.setOnClick(new OnClickChatNavButton(chatViewFactory, polymorphicController));
         return button;
     }
 
