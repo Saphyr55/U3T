@@ -10,11 +10,6 @@ public interface IFactoryComponent {
     AComponent getAComponent();
 
     @Component
-    @Mapping(type = Mapping.Type.Additional)
-    IAddComponent getAAddComponent();
-
-    @Component
-    @Mapping(type = Mapping.Type.Additional)
-    IAddComponent getBAddComponent();
+    EComponent getEComponent();
 
 }

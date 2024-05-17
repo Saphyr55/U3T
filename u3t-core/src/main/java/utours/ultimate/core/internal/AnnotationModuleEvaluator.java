@@ -50,15 +50,16 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
 
         Class<?> clazz = componentId.clazz();
 
-        if (constructors.containsKey(clazz)) {
-            processConstructor(constructors.get(clazz), componentId);
-        } else if (factoryMethodHandlesMapped.containsKey(clazz)) {
+        if (factoryMethodHandlesMapped.containsKey(clazz)) {
             factoryMethodHandlesMapped.get(clazz)
                     .entrySet().stream()
                     .findFirst()
                     .ifPresent(e -> {
                         processFactoryMethod(e.getKey(), e.getValue(), componentId);
                     });
+
+        } else if (constructors.containsKey(clazz)) {
+            processConstructor(constructors.get(clazz), componentId);
         }
 
         if (additionalMap.containsKey(clazz)) {
@@ -102,8 +103,9 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
 
             ComponentProvider provider = componentsById.get(componentIdFactory.identifier());
             Object factory = Optional.ofNullable(provider)
-                    .orElseThrow(() -> new IllegalStateException("%s was not found in components on processing method component."
-                            .formatted(componentIdFactory.identifier())))
+                    .orElseThrow(() -> new IllegalStateException(
+                            "%s was not found in components on processing method of '%s'."
+                            .formatted(componentIdFactory.identifier(), componentId.identifier())))
                     .get()
                     .getComponent();
 
@@ -132,11 +134,16 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
 
                 ComponentProvider provider = Optional
                         .ofNullable(componentsById.get(identifier))
-                        .orElseThrow(() -> new IllegalStateException(identifier + " was not found on processing constructor component."));
+                        .orElseThrow(() -> new IllegalStateException(identifier
+                                + " was not found on processing constructor for the component '"
+                                + componentId.identifier() +"'."));
 
                 ComponentWrapper cw = Optional
                         .ofNullable(provider.get())
-                        .orElseThrow(() -> new IllegalStateException("The provider of '" + identifier + "' provide nothing."));
+                        .orElseThrow(() -> new IllegalStateException("The provider of '"
+                                + identifier
+                                + "' provide nothing for the component '"
+                                + componentId.identifier() +"'."));
 
                 args.add(cw.getComponent());
             }

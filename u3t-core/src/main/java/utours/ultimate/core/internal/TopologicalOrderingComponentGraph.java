@@ -5,21 +5,27 @@ import utours.ultimate.core.ComponentId;
 
 import java.util.*;
 
-public class TopologicalOrderingComponentGraph implements Iterator<ComponentId> {
-
+public class TopologicalOrderingComponentGraph implements OrderedComponentProvider {
+    
+    private final List<ComponentId> finalOrderedComponents;
+    private final List<List<ComponentId>> orderedComponents;
     private final Set<Integer> markedComponents;
     private final List<ComponentId> components;
     private final Stack<ComponentId> componentsStack;
     private final ComponentGraph componentGraph;
 
     public TopologicalOrderingComponentGraph(ComponentGraph componentGraph) {
+
         this.components = componentGraph.getComponents();
         this.componentGraph = componentGraph;
         this.markedComponents = new HashSet<>();
         this.componentsStack = new Stack<>();
+        this.orderedComponents = new ArrayList<>();
+        this.orderedComponents.add(new ArrayList<>());
         if (!components.isEmpty()) {
             this.componentsStack.push(getMinimalPredComponent());
         }
+        finalOrderedComponents = new ArrayList<>();
     }
 
     private ComponentId getMinimalPredComponent() {
@@ -41,14 +47,14 @@ public class TopologicalOrderingComponentGraph implements Iterator<ComponentId> 
         return componentGraph.fromIndex(lastIdx);
     }
 
-    @Override
-    public boolean hasNext() {
-        return !componentsStack.isEmpty();
+    public void run() {
+        while (!componentsStack.isEmpty()) {
+            append();
+        }
+        finalOrderedComponents.addAll(List.copyOf(orderedComponents.getLast()).reversed());
     }
 
-    @Override
-    public ComponentId next() {
-
+    public void append() {
         ComponentId componentId = componentsStack.pop();
         int index = componentGraph.indexOf(componentId);
 
@@ -61,16 +67,27 @@ public class TopologicalOrderingComponentGraph implements Iterator<ComponentId> 
             List<Integer> successors = componentGraph.getGraph().get(index);
             for (Integer t : successors) {
                 if (!markedComponents.contains(t)) {
-                    componentsStack.push(componentGraph.fromIndex(t));
+                    var s = componentGraph.fromIndex(t);
+                    componentsStack.push(s);
                 }
             }
         }
 
+        if (!finalOrderedComponents.contains(componentId))
+            orderedComponents.getLast().add(componentId);
+
         if (componentsStack.isEmpty() && markedComponents.size() != components.size()) {
             componentsStack.push(getMinimalPredComponent());
+            finalOrderedComponents.addAll(List.copyOf(orderedComponents.getLast()).reversed());
+            orderedComponents.add(new ArrayList<>());
         }
 
-        return componentId;
+
     }
 
+
+    @Override
+    public List<ComponentId> getOrderedComponents() {
+        return finalOrderedComponents;
+    }
 }

@@ -40,12 +40,21 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
     public ModuleEvaluator provideModuleEvaluator() {
 
         Map<Class<?>, Map<ComponentId, MethodHandle>> factoryHandles = new HashMap<>();
-        Map<Class<?>, MethodHandle> constructors = setupConstructorsDependencies();
 
         for (int i = 0; i < componentGraph.getComponents().size(); i++) {
             ComponentId componentId = componentGraph.getComponents().get(i);
             setFactoryMethods(factoryHandles, componentId);
         }
+
+        Map<Class<?>, MethodHandle> constructors = setupConstructorsDependencies();
+
+//        factoryHandles.forEach((clazz, map) -> {
+//            ComponentId returnId = ComponentId.ofClass(clazz);
+//            componentGraph.removeDependenciesOf(returnId);
+//            map.forEach((componentId, ignored) -> {
+//                componentGraph.addDependency(returnId, componentId);
+//            });
+//        });
 
         return new AnnotationModuleEvaluator(
                 componentGraph,
@@ -100,12 +109,9 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
                     continue;
                 }
 
-                /*
                 if (isMappedAndActivate(method)) {
-                    continue;
                     processMappedMethodComponent(method);
                  }
-                 */
 
                 // We get the component annotation.
                 var component = method.getAnnotation(Component.class);
@@ -153,8 +159,7 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         if (!method.getReturnType().isAssignableFrom(componentReturnType)) {
             throw new IllegalStateException("%s is not assignable from %s".formatted(
                     method.getReturnType().getName(),
-                    componentReturnType.getName())
-            );
+                    componentReturnType.getName()));
         }
 
         ComponentId componentId = getComponentId(componentReturnType);
@@ -200,10 +205,8 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
                 // We add the dependencies from params corresponding to the current component.
                 Arrays.stream(paramTypes)
                         .map(this::getComponentId)
-                        .forEach(paramId -> {
-                            componentGraph.addComponent(paramId);
-                            componentGraph.addDependency(componentId, paramId);
-                        });
+                        .filter(componentGraph::hasNode)
+                        .forEach(paramId -> componentGraph.addDependency(componentId, paramId));
 
                 // We get constructor method type, and we look up for it.
                 // Then it is added in constructors map.

@@ -5,6 +5,7 @@ import utours.ultimate.core.steorotype.Mapping;
 import utours.ultimate.desktop.action.OnClickChatNavButton;
 import utours.ultimate.desktop.action.OnClickPartiesNavButton;
 import utours.ultimate.desktop.controller.PolymorphicController;
+import utours.ultimate.desktop.factory.ControllerFactory;
 import utours.ultimate.desktop.view.DesktopChatView;
 import utours.ultimate.desktop.view.DesktopNavButton;
 import utours.ultimate.ui.NavButton;
@@ -20,8 +21,7 @@ public final class DesktopNavButtonFactory implements NavButtonFactory {
     private DesktopChatView chatView;
 
     public DesktopNavButtonFactory() {
-        this.chatViewFactory = () -> chatView = Optional.ofNullable(chatView)
-                .orElseGet(DesktopChatView::new);
+        this.chatViewFactory = () -> chatView = Optional.ofNullable(chatView).orElseGet(DesktopChatView::new);
     }
 
     @Override
@@ -35,8 +35,8 @@ public final class DesktopNavButtonFactory implements NavButtonFactory {
     }
 
     @Override
-    @Component
-    @Mapping(type = Mapping.Type.Additional)
+    // @Component
+    // @Mapping(type = Mapping.Type.Additional)
     public NavButton createChatNavButton() {
         DesktopNavButton button = new DesktopNavButton("Chat", 1);
         PolymorphicController controller = new PolymorphicController();
@@ -45,15 +45,15 @@ public final class DesktopNavButtonFactory implements NavButtonFactory {
     }
 
     @Override
-    @Component
-    @Mapping(type = Mapping.Type.Additional)
+    // @Component
+    // @Mapping(type = Mapping.Type.Additional)
     public NavButton createHistoryNavButton() {
         return new DesktopNavButton("History", 2);
     }
 
     @Override
-    @Component
-    @Mapping(type = Mapping.Type.Additional)
+    // @Component
+    // @Mapping(type = Mapping.Type.Additional)
     public NavButton createSettingsNavButton() {
         return new DesktopNavButton("Settings", 3);
     }

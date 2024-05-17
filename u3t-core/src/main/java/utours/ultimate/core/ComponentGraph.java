@@ -38,12 +38,11 @@ public class ComponentGraph {
     }
 
     public void addDependency(int from, int to) {
-        var p = predecessor.computeIfAbsent(to, k -> new ArrayList<>());
+        var p = predecessor.computeIfAbsent(to, ignored -> new ArrayList<>());
         if (!p.contains(from)) {
             p.add(from);
         }
-
-        var p2 = graph.computeIfAbsent(from, k -> new ArrayList<>());
+        var p2 = graph.computeIfAbsent(from, ignored -> new ArrayList<>());
         if (!p2.contains(to)) {
             p2.add(to);
         }
@@ -54,7 +53,14 @@ public class ComponentGraph {
     }
 
     public void removeDependenciesOf(int index) {
-        graph.remove(index);
+        var succeccors = graph.get(index);
+        for (int i = 0; i < succeccors.size(); i++) {
+            var preds = predecessor.get(succeccors.get(i));
+            if (preds.contains(index)) {
+                preds.remove((Object) index);
+            }
+        }
+        succeccors.clear();
     }
 
     public boolean hasNode(ComponentId node) {
@@ -73,20 +79,10 @@ public class ComponentGraph {
         return graph;
     }
 
-    public List<ComponentId> getTopologicalOrderingComponents(Iterator<ComponentId> iterator) {
-        List<ComponentId> sortedComponents = new ArrayList<>();
-        while (iterator.hasNext()) {
-            var next = iterator.next();
-            if (!sortedComponents.contains(next)) {
-                sortedComponents.add(next);
-            }
-        }
-        return sortedComponents;
-    }
-
     public List<ComponentId> getTopologicalOrderingComponents() {
-        Iterator<ComponentId> iterator = new TopologicalOrderingComponentGraph(this);
-        return getTopologicalOrderingComponents(iterator).reversed();
+        var orderer = new TopologicalOrderingComponentGraph(this);
+        orderer.run();
+        return orderer.getOrderedComponents();
     }
 
     public Map<Integer, List<Integer>> predecessors() {
@@ -96,10 +92,17 @@ public class ComponentGraph {
     public void printGraph() {
 
         for (ComponentId component : components) {
-            System.out.println(component.clazz());
+            System.out.println(component.clazz().getSimpleName());
+            System.out.println("SUCC {");
             for (Integer i : getGraph().get(indexOf(component))) {
-                System.out.println("\t" + components.get(i).clazz());
+                System.out.println("\t" + components.get(i).clazz().getSimpleName());
             }
+            System.out.println("}");
+            System.out.println("PRED {");
+            for (Integer i : predecessors().get(indexOf(component))) {
+                System.out.println("\t" + components.get(i).clazz().getSimpleName());
+            }
+            System.out.println("}");
         }
 
     }

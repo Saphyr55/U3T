@@ -29,7 +29,6 @@ public class U3TGameController implements Initializable {
 
     @FXML
     private GridPane u3tGrid;
-
     @FXML
     private Pane root;
 

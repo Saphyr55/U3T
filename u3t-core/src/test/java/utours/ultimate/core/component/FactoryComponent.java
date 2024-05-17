@@ -14,18 +14,13 @@ public class FactoryComponent implements IFactoryComponent {
     }
 
     @Override
-    public IAddComponent getAAddComponent() {
-        return new AAddComponent();
-    }
-
-    @Override
-    public IAddComponent getBAddComponent() {
-        return new BAddComponent();
-    }
-
-    @Override
     public AComponent getAComponent() {
         return new AComponent(dComponent, "aComponent");
+    }
+
+    @Override
+    public EComponent getEComponent() {
+        return new EComponent();
     }
 
 }
