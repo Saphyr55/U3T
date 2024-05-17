@@ -45,7 +45,10 @@ public interface Message extends Serializable {
     boolean isSuccess();
 
     /**
-     * Do not use this address.
+     * PRIVATE ADDRESS. <br/>
+     *
+     * Do not use this address. <br/>
+     * Address use to subscribe clients.
      */
     String SUBSCRIBE_ADDRESS = "internal.server.subscribe";
 

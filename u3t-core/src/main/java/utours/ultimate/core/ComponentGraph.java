@@ -17,11 +17,10 @@ public class ComponentGraph {
     }
 
     public void addComponent(ComponentId component) {
-        if (!components.contains(component)) {
-            this.components.add(component);
-            this.predecessor.putIfAbsent(indexOf(component), new LinkedList<>());
-            this.graph.putIfAbsent(indexOf(component), new LinkedList<>());
-        }
+        if (components.contains(component)) return;
+        this.components.add(component);
+        this.predecessor.putIfAbsent(indexOf(component), new ArrayList<>());
+        this.graph.putIfAbsent(indexOf(component), new ArrayList<>());
     }
 
     public int indexOf(ComponentId component) {
@@ -39,8 +38,23 @@ public class ComponentGraph {
     }
 
     public void addDependency(int from, int to) {
-        predecessor.computeIfAbsent(to, k -> new LinkedList<>()).add(from);
-        graph.computeIfAbsent(from, k -> new LinkedList<>()).add(to);
+        var p = predecessor.computeIfAbsent(to, k -> new ArrayList<>());
+        if (!p.contains(from)) {
+            p.add(from);
+        }
+
+        var p2 = graph.computeIfAbsent(from, k -> new ArrayList<>());
+        if (!p2.contains(to)) {
+            p2.add(to);
+        }
+    }
+
+    public void removeDependenciesOf(ComponentId id) {
+        removeDependenciesOf(indexOf(id));
+    }
+
+    public void removeDependenciesOf(int index) {
+        graph.remove(index);
     }
 
     public boolean hasNode(ComponentId node) {
@@ -77,6 +91,17 @@ public class ComponentGraph {
 
     public Map<Integer, List<Integer>> predecessors() {
         return predecessor;
+    }
+
+    public void printGraph() {
+
+        for (ComponentId component : components) {
+            System.out.println(component.clazz());
+            for (Integer i : getGraph().get(indexOf(component))) {
+                System.out.println("\t" + components.get(i).clazz());
+            }
+        }
+
     }
 
 

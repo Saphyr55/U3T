@@ -4,7 +4,7 @@ import utours.ultimate.core.*;
 
 import java.lang.invoke.MethodHandle;
 import java.util.*;
-import java.util.stream.IntStream;
+import java.util.function.Supplier;
 
 public class AnnotationModuleEvaluator implements ModuleEvaluator {
 
@@ -33,50 +33,77 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
 
     @Override
     public void evaluate() {
+
         List<ComponentId> componentIds = componentGraph.getTopologicalOrderingComponents();
+
+        componentGraph.printGraph();
+
+        for (ComponentId componentId : componentIds) {
+            System.out.println(componentId.clazz().getName());
+        }
+
         List<Throwable> errors = ErrorManager.forEachOf(componentIds, this::processComponentId);
         ErrorManager.throwErrorsOf(errors);
     }
 
     private void processComponentId(ComponentId componentId) {
+
         Class<?> clazz = componentId.clazz();
 
-        System.out.println(clazz.getName());
+        if (constructors.containsKey(clazz)) {
+            processConstructor(constructors.get(clazz), componentId);
+        } else if (factoryMethodHandlesMapped.containsKey(clazz)) {
+            factoryMethodHandlesMapped.get(clazz)
+                    .entrySet().stream()
+                    .findFirst()
+                    .ifPresent(e -> {
+                        processFactoryMethod(e.getKey(), e.getValue(), componentId);
+                    });
+        }
 
         if (additionalMap.containsKey(clazz)) {
             processAdditional(componentId);
         } else if (uniqueMap.containsKey(clazz)) {
             processUnique(componentId);
-        } else if (factoryMethodHandlesMapped.containsKey(clazz)) {
-            var handles = factoryMethodHandlesMapped.get(clazz);
-            handles.entrySet().stream().findFirst().ifPresent(e -> {
-                processFactoryMethod(e.getKey(), e.getValue(), componentId);
-            });
-        } else if (constructors.containsKey(clazz)) {
-            processConstructor(constructors.get(clazz), componentId);
         }
 
     }
 
     private void processAdditional(ComponentId componentId) {
-        List<ComponentId> classes = additionalMap.get(componentId.clazz());
+
+        List<ComponentId> classes = Optional.ofNullable(additionalMap.get(componentId.clazz()))
+                .orElseThrow(() -> new IllegalStateException(componentId.identifier() + "was not found in additional map."));
+
         List<ComponentProvider> providers = classes.stream()
                 .map(aClass -> componentsById.get(aClass.identifier()))
                 .toList();
+
         additionalComponents.put(componentId.clazz(), providers);
     }
 
     private void processUnique(ComponentId interfaceId) {
-        ComponentId componentId = uniqueMap.get(interfaceId.clazz());
-        ComponentProvider provider = componentsById.get(componentId.identifier());
+
+        ComponentId componentId = Optional
+                .ofNullable(uniqueMap.get(interfaceId.clazz()))
+                .orElseThrow(() -> new IllegalStateException(interfaceId.identifier() + " was not found in unique map."));
+
+        ComponentProvider provider = Optional
+                .ofNullable(componentsById.get(componentId.identifier()))
+                .orElseThrow(() -> new IllegalStateException(componentId.identifier() + " was not found in components on processing unique component."));
+
         componentsById.put(interfaceId.clazz().getName(), provider);
         uniqueComponents.put(interfaceId.clazz(), provider);
     }
 
-    private void processFactoryMethod(ComponentId componentIdFactory, MethodHandle mh, ComponentId componentId) {
+    private void processFactoryMethod(ComponentId componentIdFactory,
+                                      MethodHandle mh,
+                                      ComponentId componentId) {
         try {
-            Object factory = componentsById
-                    .get(componentIdFactory.identifier())
+
+            ComponentProvider provider = componentsById.get(componentIdFactory.identifier());
+            Object factory = Optional.ofNullable(provider)
+                    .orElseThrow(() -> new IllegalStateException("%s was not found in components on processing method component."
+                            .formatted(componentIdFactory.identifier())))
                     .get()
                     .getComponent();
 
@@ -100,18 +127,16 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
             List<Class<?>> parameters = methodHandle.type().parameterList();
 
             for (Class<?> param : parameters) {
-                var identifier = getComponentId(param).identifier();
-                var cwProvider = componentsById.get(identifier);
 
-                if (cwProvider == null) {
-                    throw new IllegalStateException(identifier + " was not found.");
-                }
+                String identifier = getComponentId(param).identifier();
 
-                var cw = cwProvider.get();
+                ComponentProvider provider = Optional
+                        .ofNullable(componentsById.get(identifier))
+                        .orElseThrow(() -> new IllegalStateException(identifier + " was not found on processing constructor component."));
 
-                if (cw == null) {
-                    throw new IllegalStateException("The provider of " + identifier + " provide nothing.");
-                }
+                ComponentWrapper cw = Optional
+                        .ofNullable(provider.get())
+                        .orElseThrow(() -> new IllegalStateException("The provider of '" + identifier + "' provide nothing."));
 
                 args.add(cw.getComponent());
             }

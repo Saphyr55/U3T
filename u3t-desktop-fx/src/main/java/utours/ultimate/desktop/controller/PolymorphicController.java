@@ -9,10 +9,14 @@ import utours.ultimate.desktop.view.PolymorphicView;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-@Component
+
 public class PolymorphicController implements Initializable {
 
     @FXML private PolymorphicView root;
+
+    public PolymorphicController() {
+
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {

@@ -44,8 +44,12 @@ public class PartiesController implements Initializable {
         button.setOnMouseClicked(mouseEvent -> clientService.joinGame(client, this::onJoinGame));
 
         container.getChildren().add(button);
-        button.prefWidthProperty().bind(container.widthProperty().subtract(BUTTON_PADDING_SIZE));
-        button.prefHeightProperty().bind(container.heightProperty().divide(BUTTON_HEIGHT_FACTOR_SIZE));
+
+        button.prefWidthProperty()
+                .bind(container.widthProperty().subtract(BUTTON_PADDING_SIZE));
+
+        button.prefHeightProperty()
+                .bind(container.heightProperty().divide(BUTTON_HEIGHT_FACTOR_SIZE));
     }
 
     private void onJoinGame(Game game) {

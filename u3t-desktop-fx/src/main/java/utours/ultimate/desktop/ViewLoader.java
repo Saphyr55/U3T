@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public class ViewLoader {
 
-    public static <T> T  load(T root, String path) {
+    public static <T> T load(T root, String path) {
         return load(root, ViewLoader.class.getResource(path));
     }
 
@@ -27,7 +27,7 @@ public class ViewLoader {
         return MainApplication
                 .getContext()
                 .getContainerReadOnly()
-                .getUniqueComponent(tClass);
+                .getComponent(tClass.getName());
     }
 
     private static Object getController(Class<?> clazz) {

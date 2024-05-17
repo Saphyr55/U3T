@@ -8,14 +8,14 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.util.*;
 
-public class NetServerApplication implements Application {
+public class NetServerNetApplication implements NetApplication {
 
     private final Map<String, List<Handler<Context>>> handlers;
     private final Map<String, List<Client>> subscribers;
     private final NetServer server;
     private boolean stopped = true;
 
-    public NetServerApplication(ApplicationConfiguration configuration) {
+    public NetServerNetApplication(NetApplicationConfiguration configuration) {
         this.handlers = new HashMap<>();
         this.server = new NetServerSocket(configuration);
         this.subscribers = new HashMap<>();

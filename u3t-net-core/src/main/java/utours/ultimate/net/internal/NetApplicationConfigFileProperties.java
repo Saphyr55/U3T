@@ -1,12 +1,12 @@
 package utours.ultimate.net.internal;
 
 import utours.ultimate.core.ClassPathResource;
-import utours.ultimate.net.ApplicationConfiguration;
+import utours.ultimate.net.NetApplicationConfiguration;
 
 import java.io.*;
 import java.util.Properties;
 
-public class ApplicationConfigFileProperties implements ApplicationConfiguration {
+public class NetApplicationConfigFileProperties implements NetApplicationConfiguration {
 
     public static final String KEY_SERVER_HOST_ADDRESS = "server.host-address";
     public static final String VALUE_SERVER_HOST_ADDRESS = "127.0.0.1";
@@ -20,13 +20,13 @@ public class ApplicationConfigFileProperties implements ApplicationConfiguration
     private final String address;
     private final int port;
 
-    public ApplicationConfigFileProperties(String filepath) {
+    public NetApplicationConfigFileProperties(String filepath) {
         this.properties = getAndLoadProperties(filepath);
         this.address = (String) properties.getOrDefault(KEY_SERVER_HOST_ADDRESS, VALUE_SERVER_HOST_ADDRESS);
         this.port = Integer.parseInt((String) properties.getOrDefault(KEY_SERVER_PORT, VALUE_SERVER_PORT));
     }
 
-    public ApplicationConfigFileProperties() {
+    public NetApplicationConfigFileProperties() {
         this(PROPERTIES_FILENAME);
     }
 

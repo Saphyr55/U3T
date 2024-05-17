@@ -69,7 +69,13 @@ public sealed interface ComponentId {
             return Objects.hash(id, clazz);
         }
 
+        @Override
+        public String toString() {
+            return "ComponentIdImpl{" +
+                    "id='" + id + '\'' +
+                    ", clazz=" + clazz +
+                    '}';
+        }
     }
-
 
 }

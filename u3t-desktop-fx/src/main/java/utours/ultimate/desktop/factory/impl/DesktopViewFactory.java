@@ -10,7 +10,6 @@ import utours.ultimate.ui.ViewFactory;
 public class DesktopViewFactory implements ViewFactory<DesktopNavButton> {
 
     @Override
-    @Component
     public NavButtonContainer<DesktopNavButton> createNavButtonContainer() {
         return new DesktopNavButtonContainer();
     }

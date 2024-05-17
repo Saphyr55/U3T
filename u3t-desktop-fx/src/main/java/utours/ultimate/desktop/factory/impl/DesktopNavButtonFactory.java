@@ -14,15 +14,12 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 @Component
-@Mapping
-public class DesktopNavButtonFactory implements NavButtonFactory {
+public final class DesktopNavButtonFactory implements NavButtonFactory {
 
     private final Supplier<DesktopChatView> chatViewFactory;
-    private final PolymorphicController controller;
     private DesktopChatView chatView;
 
-    public DesktopNavButtonFactory(PolymorphicController polymorphicController) {
-        this.controller = polymorphicController;
+    public DesktopNavButtonFactory() {
         this.chatViewFactory = () -> chatView = Optional.ofNullable(chatView)
                 .orElseGet(DesktopChatView::new);
     }
@@ -31,7 +28,8 @@ public class DesktopNavButtonFactory implements NavButtonFactory {
     @Component
     @Mapping(type = Mapping.Type.Additional)
     public NavButton createPartiesNavButton() {
-        NavButton button = new DesktopNavButton("Parties", 0);
+        DesktopNavButton button = new DesktopNavButton("Parties", 0);
+        PolymorphicController controller = new PolymorphicController();
         button.setOnClick(new OnClickPartiesNavButton(controller));
         return button;
     }
@@ -40,7 +38,8 @@ public class DesktopNavButtonFactory implements NavButtonFactory {
     @Component
     @Mapping(type = Mapping.Type.Additional)
     public NavButton createChatNavButton() {
-        NavButton button = new DesktopNavButton("Chat", 1);
+        DesktopNavButton button = new DesktopNavButton("Chat", 1);
+        PolymorphicController controller = new PolymorphicController();
         button.setOnClick(new OnClickChatNavButton(chatViewFactory, controller));
         return button;
     }

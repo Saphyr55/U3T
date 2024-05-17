@@ -10,7 +10,6 @@ import utours.ultimate.game.model.Player;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-@Component
 public class U3TGameWonController implements Initializable {
 
     private final Player player;

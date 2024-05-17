@@ -13,8 +13,8 @@
 
     <!-- Client -->
 
-    <component class="utours.ultimate.desktop.factory.ClientFactory"
-               derived="utours.ultimate.desktop.factory.impl.ClientFactoryImpl"
+    <component class="utours.ultimate.desktop.factory.ClientProvider"
+               derived="utours.ultimate.desktop.factory.impl.ClientProviderImpl"
                id="Desktop.Fx.ClientFactory" />
 
     <component class="utours.ultimate.net.Client" id="Desktop.Fx.Client">

@@ -3,8 +3,10 @@ package utours.ultimate.desktop.view;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.VBox;
+import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.ui.NavButtonContainer;
 
+@Component
 public class DesktopNavButtonContainer implements NavButtonContainer<DesktopNavButton> {
 
     private VBox vbox;
@@ -26,10 +28,11 @@ public class DesktopNavButtonContainer implements NavButtonContainer<DesktopNavB
 
     @Override
     public void add(DesktopNavButton navButton) {
-        if (navButton.getPosition() < 0)
+        if (navButton.getPosition() < 0) {
             vbox.getChildren().add(navButton);
-        else
+        } else {
             vbox.getChildren().add(navButton.getPosition(), navButton);
+        }
     }
 
     @Override

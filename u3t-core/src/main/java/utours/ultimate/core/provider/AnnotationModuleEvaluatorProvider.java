@@ -42,7 +42,8 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         Map<Class<?>, Map<ComponentId, MethodHandle>> factoryHandles = new HashMap<>();
         Map<Class<?>, MethodHandle> constructors = setupConstructorsDependencies();
 
-        for (ComponentId componentId : componentGraph.getComponents()) {
+        for (int i = 0; i < componentGraph.getComponents().size(); i++) {
+            ComponentId componentId = componentGraph.getComponents().get(i);
             setFactoryMethods(factoryHandles, componentId);
         }
 
@@ -99,13 +100,26 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
                     continue;
                 }
 
+                /*
+                if (isMappedAndActivate(method)) {
+                    continue;
+                    processMappedMethodComponent(method);
+                 }
+                 */
+
                 // We get the component annotation.
                 var component = method.getAnnotation(Component.class);
+
+                // When the component annotation presice the id,
+                // we get the id and replace the component id.
+                if (!component.id().isBlank()) {
+                    componentId = ComponentId.of(componentId.clazz(), component.id());
+                }
 
                 // We look up the method handle from the factory method.
                 var mh = lookup.unreflect(method);
                 var returnType = mh.type().returnType();
-                var componentReturnTypeId = getComponentId(returnType);
+                var returnTypeId = getComponentId(returnType);
 
                 // We add the factory method handle in the map factory handles,
                 // if not exist, we create the map.
@@ -114,12 +128,8 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
                         .put(componentId, mh);
 
                 // Add an eta dependency from the return component to the factory component.
-                componentGraph.addComponent(componentReturnTypeId);
-                componentGraph.addDependency(componentReturnTypeId, componentId);
-
-                if (!isMappedAndActivate(method)) {
-                    processMappedMethodComponent(method);
-                }
+                componentGraph.addComponent(returnTypeId);
+                componentGraph.addDependency(returnTypeId, componentId);
 
             } catch (Exception e) {
                 errors.add(e);
@@ -140,8 +150,11 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
                 ? method.getReturnType()
                 : mapping.clazz();
 
-        if (!componentReturnType.isAssignableFrom(mapping.clazz())) {
-            throw new IllegalStateException(componentReturnType + " is not ");
+        if (!method.getReturnType().isAssignableFrom(componentReturnType)) {
+            throw new IllegalStateException("%s is not assignable from %s".formatted(
+                    method.getReturnType().getName(),
+                    componentReturnType.getName())
+            );
         }
 
         ComponentId componentId = getComponentId(componentReturnType);
@@ -161,11 +174,14 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         Map<Class<?>, MethodHandle> constructors = new HashMap<>();
         List<Throwable> errors = new ArrayList<>();
 
-        for (ComponentId componentId : componentGraph.getComponents()) {
+        List<ComponentId> components = componentGraph.getComponents();
+        for (int i = 0; i < components.size(); i++) {
+            ComponentId componentId = components.get(i);
             try {
                 Class<?> clazz = componentId.clazz();
 
                 // We filter every component that are not an interface.
+                // Interfaces has any constructors; logic it's, an interface...
                 if (clazz.isInterface()) {
                     continue;
                 }
@@ -177,15 +193,17 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
                 }
 
                 // We get the constructor annotated by ConstructorProperties,
-                // if it's not found get the default constructor.
+                // if it's not found we the first constructor.
                 Constructor<?> declaredConstructor = getConstructorProperties(clazz);
                 Class<?>[] paramTypes = declaredConstructor.getParameterTypes();
 
-                // We add the dependencies corresponding to the current component.
+                // We add the dependencies from params corresponding to the current component.
                 Arrays.stream(paramTypes)
                         .map(this::getComponentId)
-                        .filter(componentGraph::hasNode)
-                        .forEach(id -> componentGraph.addDependency(componentId, id));
+                        .forEach(paramId -> {
+                            componentGraph.addComponent(paramId);
+                            componentGraph.addDependency(componentId, paramId);
+                        });
 
                 // We get constructor method type, and we look up for it.
                 // Then it is added in constructors map.

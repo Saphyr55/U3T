@@ -49,16 +49,17 @@ public class TopologicalOrderingComponentGraph implements Iterator<ComponentId> 
     @Override
     public ComponentId next() {
 
-        var clazz = componentsStack.pop();
-        var s = componentGraph.indexOf(clazz);
+        ComponentId componentId = componentsStack.pop();
+        int index = componentGraph.indexOf(componentId);
 
-        if (s == -1) {
-            throw new IllegalStateException("The class '" + clazz + "' was not found in dependency graph.");
+        if (index == -1) {
+            throw new IllegalStateException("The class '" + componentId + "' was not found in dependency graph.");
         }
 
-        if (!markedComponents.contains(s)) {
-            markedComponents.add(s);
-            for (Integer t : componentGraph.getGraph().get(s)) {
+        if (!markedComponents.contains(index)) {
+            markedComponents.add(index);
+            List<Integer> successors = componentGraph.getGraph().get(index);
+            for (Integer t : successors) {
                 if (!markedComponents.contains(t)) {
                     componentsStack.push(componentGraph.fromIndex(t));
                 }
@@ -69,7 +70,7 @@ public class TopologicalOrderingComponentGraph implements Iterator<ComponentId> 
             componentsStack.push(getMinimalPredComponent());
         }
 
-        return clazz;
+        return componentId;
     }
 
 }

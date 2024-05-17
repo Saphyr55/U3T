@@ -33,10 +33,7 @@ public class U3TGameController implements Initializable {
     @FXML
     private Pane root;
 
-    public U3TGameController(GameService gameService,
-                             Game game,
-                             Client client) {
-
+    public U3TGameController(GameService gameService, Game game, Client client) {
         this.gameService = gameService;
         this.game = game;
         this.client = client;
@@ -81,49 +78,50 @@ public class U3TGameController implements Initializable {
 
         Action action = new Action(game.currentPlayer(), tile.getPosOut(), tile.getPosIn());
 
-        if (gameService.isPlayableAction(game, action)) {
+        if (!gameService.isPlayableAction(game, action)) {
+            return;
+        }
 
-            game = gameService.placeMark(game, action);
-            IsWinGame isWinGameInner = gameService.checkInnerWinner(game, action);
-            game = isWinGameInner.game();
-            game = game.lastAction(action);
+        game = gameService.placeMark(game, action);
+        IsWinGame isWinGameInner = gameService.checkInnerWinner(game, action);
+        game = isWinGameInner.game();
+        game = game.lastAction(action);
 
-            game = gameService.oppositePlayer(game);
+        game = gameService.oppositePlayer(game);
 
-            Cell cell = gameService.cellAt(game, action.posOut(), action.posIn());
+        Cell cell = gameService.cellAt(game, action.posOut(), action.posIn());
 
-            tile.setCell(cell);
+        tile.setCell(cell);
 
-            onWinning(action, cell, isWinGameInner.isWin());
+        onWinning(action, cell, isWinGameInner.isWin());
 
-            // severing();
+        // severing();
 
-            if (gameService.checkOuterWinner(game, action.posOut())) {
-                finishGame();
-            }
-
+        if (gameService.checkOuterWinner(game, action.posOut())) {
+            finishGame();
         }
 
     }
 
     private void severing() {
         client.messageSender().send("u3t.game.%d".formatted(game.gameID()), game, message -> {
-            if (!message.isSuccess()) {
-                throw new IllegalStateException("Unexpected error: " + message.content());
-            }
+            if (message.isSuccess()) return;
+            throw new IllegalStateException("Unexpected error: " + message.content());
         });
     }
 
     private void onWinning(Action action, Cell cell, boolean isWin) {
-        if (isWin) {
-            int i = action.posOut().x();
-            int j = action.posOut().y();
-            var child = u3tGrid.getChildren().get(i * GRID_SIZE + j);
-            if (child instanceof GridPane) {
-                Tile tileOut = Tile.newTile(u3tGrid, cell, action.posOut());
-                u3tGrid.add(tileOut, i, j);
-            }
+        if (!isWin) return;
+
+        int i = action.posOut().x();
+        int j = action.posOut().y();
+
+        var child = u3tGrid.getChildren().get(i * GRID_SIZE + j);
+        if (child instanceof GridPane) {
+            Tile tileOut = Tile.newTile(u3tGrid, cell, action.posOut());
+            u3tGrid.add(tileOut, i, j);
         }
+
     }
 
     private void initBoard(Region[][] regions) {
