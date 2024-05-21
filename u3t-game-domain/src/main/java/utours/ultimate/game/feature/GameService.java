@@ -2,6 +2,8 @@ package utours.ultimate.game.feature;
 
 import utours.ultimate.game.model.*;
 
+import java.util.function.Consumer;
+
 public interface GameService {
 
     boolean isPlayableAction(Game game, Action action);

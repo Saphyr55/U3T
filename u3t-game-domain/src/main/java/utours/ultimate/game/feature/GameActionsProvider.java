@@ -4,7 +4,7 @@ import utours.ultimate.game.model.*;
 
 import java.util.List;
 
-public interface GameProvider {
+public interface GameActionsProvider {
 
     List<Action> actions();
 

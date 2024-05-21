@@ -10,8 +10,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class AnnotationModuleEvaluatorProviderTest {
 
     static AnnotationModuleEvaluatorProvider provider;
-    static ComponentGraph graph;
     static ModuleEvaluator evaluator;
+    static ComponentGraph graph;
 
     @BeforeAll
     static void beforeAll() {
@@ -39,6 +39,7 @@ class AnnotationModuleEvaluatorProviderTest {
 
     @Test
     void check_have_dependencies_in_graph() {
+
         var indexAC = graph.indexOf(ComponentId.ofClass(AComponent.class));
         var indexBC = graph.indexOf(ComponentId.ofClass(BComponent.class));
 
@@ -52,7 +53,6 @@ class AnnotationModuleEvaluatorProviderTest {
 
     @Test
     void check_additional_component_exist_in_graph() {
-
         var indexIAddC = graph.indexOf(ComponentId.ofClass(IAddComponent.class));
         assertNotEquals(-1, indexIAddC);
 
@@ -61,7 +61,6 @@ class AnnotationModuleEvaluatorProviderTest {
 
         var indexBAdd = graph.indexOf(ComponentId.ofClass(BAddComponent.class));
         assertNotEquals(-1, indexBAdd);
-
     }
 
     @Test
@@ -87,7 +86,6 @@ class AnnotationModuleEvaluatorProviderTest {
 
         assertTrue(deps.contains(indexAAdd));
         assertTrue(deps.contains(indexBAdd));
-
     }
 
     @Test
@@ -112,7 +110,7 @@ class AnnotationModuleEvaluatorProviderTest {
     void check_have_dependencies_with_factory() {
 
         var indexAC = graph.indexOf(ComponentId.ofClass(AComponent.class));
-        var indexFactoryC = graph.indexOf(ComponentId.ofClass(FactoryComponent.class));
+        var indexFactoryC = graph.indexOf(ComponentId.ofClass(IFactoryComponent.class));
 
         assertNotEquals(-1, indexAC);
         assertNotEquals(-1, indexFactoryC);

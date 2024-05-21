@@ -20,7 +20,6 @@ public class U3TGameWonController implements Initializable {
     private Label winnerLabel;
 
     public U3TGameWonController(Player player) {
-
         this.player = player;
     }
 

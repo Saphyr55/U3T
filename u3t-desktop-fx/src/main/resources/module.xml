@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<module
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<module xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="module.xsd">
 
     <!-- Services -->
@@ -14,8 +13,8 @@
 
     <!-- Client -->
 
-    <component class="utours.ultimate.desktop.factory.ClientFactory"
-               derived="utours.ultimate.desktop.factory.impl.ClientFactoryImpl"
+    <component class="utours.ultimate.desktop.factory.ClientProvider"
+               derived="utours.ultimate.desktop.factory.impl.ClientProviderImpl"
                id="Desktop.Fx.ClientFactory" />
 
     <component class="utours.ultimate.net.Client" id="Desktop.Fx.Client">
@@ -31,8 +30,8 @@
 
     <!-- Controller Factory -->
 
-    <component class="utours.ultimate.desktop.factory.ControllerFactory"
-               derived="utours.ultimate.desktop.factory.impl.ControllerFactoryImpl"
+    <component class="utours.ultimate.desktop.factory.ControllerProvider"
+               derived="utours.ultimate.desktop.factory.impl.ControllerProviderImpl"
                id="Desktop.Fx.ControllerFactory" >
         <constructor-args>
             <arg type="utours.ultimate.game.feature.GameService" value="U3T.GameService" />

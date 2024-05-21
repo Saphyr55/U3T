@@ -10,18 +10,12 @@ import java.util.ResourceBundle;
 
 public class PolymorphicController implements Initializable {
 
-    @FXML private PolymorphicView root;
+    public PolymorphicController() {
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-
     }
 
-    public void replaceRegion(Region region) {
-        root.getChildren().clear();
-        root.getChildren().add(region);
-        region.prefWidthProperty().bind(root.widthProperty());
-        region.prefHeightProperty().bind(root.heightProperty());
-    }
 
 }

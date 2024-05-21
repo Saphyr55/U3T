@@ -17,11 +17,10 @@ public class ComponentGraph {
     }
 
     public void addComponent(ComponentId component) {
-        if (!components.contains(component)) {
-            this.components.add(component);
-            this.predecessor.putIfAbsent(indexOf(component), new LinkedList<>());
-            this.graph.putIfAbsent(indexOf(component), new LinkedList<>());
-        }
+        if (components.contains(component)) return;
+        this.components.add(component);
+        this.predecessor.putIfAbsent(indexOf(component), new ArrayList<>());
+        this.graph.putIfAbsent(indexOf(component), new ArrayList<>());
     }
 
     public int indexOf(ComponentId component) {
@@ -39,8 +38,29 @@ public class ComponentGraph {
     }
 
     public void addDependency(int from, int to) {
-        predecessor.computeIfAbsent(to, k -> new LinkedList<>()).add(from);
-        graph.computeIfAbsent(from, k -> new LinkedList<>()).add(to);
+        var p = predecessor.computeIfAbsent(to, ignored -> new ArrayList<>());
+        if (!p.contains(from)) {
+            p.add(from);
+        }
+        var p2 = graph.computeIfAbsent(from, ignored -> new ArrayList<>());
+        if (!p2.contains(to)) {
+            p2.add(to);
+        }
+    }
+
+    public void removeDependenciesOf(ComponentId id) {
+        removeDependenciesOf(indexOf(id));
+    }
+
+    public void removeDependenciesOf(int index) {
+        var succeccors = graph.get(index);
+        for (int i = 0; i < succeccors.size(); i++) {
+            var preds = predecessor.get(succeccors.get(i));
+            if (preds.contains(index)) {
+                preds.remove((Object) index);
+            }
+        }
+        succeccors.clear();
     }
 
     public boolean hasNode(ComponentId node) {
@@ -59,24 +79,43 @@ public class ComponentGraph {
         return graph;
     }
 
-    public List<ComponentId> getTopologicalOrderingComponents(Iterator<ComponentId> iterator) {
-        List<ComponentId> sortedComponents = new ArrayList<>();
-        while (iterator.hasNext()) {
-            var next = iterator.next();
-            if (!sortedComponents.contains(next)) {
-                sortedComponents.add(next);
-            }
-        }
-        return sortedComponents;
-    }
-
     public List<ComponentId> getTopologicalOrderingComponents() {
-        Iterator<ComponentId> iterator = new TopologicalOrderingComponentGraph(this);
-        return getTopologicalOrderingComponents(iterator).reversed();
+        var orderer = new TopologicalOrderingComponentGraph(this);
+        orderer.run();
+        return orderer.getOrderedComponents();
     }
 
     public Map<Integer, List<Integer>> predecessors() {
         return predecessor;
+    }
+
+    public void printGraph() {
+
+        for (int j = 0; j < components.size(); j++) {
+
+            ComponentId component = components.get(j);
+
+            System.out.println(component.identifier());
+            System.out.println("SUCC {");
+
+            for (Integer i : getGraph().get(j)) {
+                if (i < 0) continue;
+                System.out.println("\t"
+                        + components.get(i).identifier()
+                        + " Class: " + components.get(i).clazz().getName());
+            }
+
+            System.out.println("}");
+            System.out.println("PRED {");
+            for (Integer i : predecessors().get(j)) {
+                if (i < 0) continue;
+                System.out.println("\t"
+                        + components.get(i).identifier()
+                        + " Class: " + components.get(i).clazz().getName());
+            }
+            System.out.println("}");
+        }
+
     }
 
 

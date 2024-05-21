@@ -1,22 +1,23 @@
 package utours.ultimate.desktop.action;
 
-import utours.ultimate.desktop.controller.PolymorphicController;
 import utours.ultimate.desktop.view.DesktopPartiesView;
-import utours.ultimate.desktop.view.U3TGameView;
+import utours.ultimate.desktop.view.PolymorphicView;
 import utours.ultimate.ui.OnClickButton;
 import utours.ultimate.ui.event.MouseEvent;
 
+import java.util.function.Supplier;
+
 public class OnClickPartiesNavButton implements OnClickButton {
 
-    private final PolymorphicController controller;
+    private final Supplier<PolymorphicView> polymorphicViewSupplier;
 
-    public OnClickPartiesNavButton(PolymorphicController controller) {
-        this.controller = controller;
+    public OnClickPartiesNavButton(Supplier<PolymorphicView> polymorphicViewSupplier) {
+        this.polymorphicViewSupplier = polymorphicViewSupplier;
     }
 
     @Override
     public void performClick(MouseEvent event) {
-        controller.replaceRegion(new U3TGameView());
+        polymorphicViewSupplier.get().replaceRegion(new DesktopPartiesView());
     }
 
 }

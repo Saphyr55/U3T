@@ -3,6 +3,7 @@ package utours.ultimate.desktop.controller;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import utours.ultimate.core.ReadOnlyContainer;
+import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.desktop.MainApplication;
 import utours.ultimate.desktop.view.DesktopNavButton;
 import utours.ultimate.desktop.view.DesktopNavButtonContainer;
@@ -10,8 +11,11 @@ import utours.ultimate.desktop.view.DesktopNavigationView;
 import utours.ultimate.ui.NavButton;
 
 import java.net.URL;
+import java.util.Comparator;
+import java.util.List;
 import java.util.ResourceBundle;
 
+@Component
 public class NavigationController implements Initializable {
 
     private final DesktopNavButtonContainer navButtonContainer;
@@ -26,9 +30,16 @@ public class NavigationController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
-        ReadOnlyContainer container = MainApplication.getContext().getContainerReadOnly();
+        ReadOnlyContainer container = MainApplication
+                .getContext()
+                .getContainerReadOnly();
 
-        container.getAdditionalComponent(NavButton.class).forEach(this::addContainer);
+        List<NavButton> buttons = container.getAdditionalComponent(NavButton.class)
+                .stream()
+                .sorted(Comparator.comparing(NavButton::getPosition))
+                .toList();
+
+        buttons.forEach(this::addContainer);
 
         nav.setContent(navButtonContainer.getVbox());
     }
