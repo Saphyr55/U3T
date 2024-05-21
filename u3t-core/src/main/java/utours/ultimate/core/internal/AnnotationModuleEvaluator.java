@@ -4,7 +4,6 @@ import utours.ultimate.core.*;
 
 import java.lang.invoke.MethodHandle;
 import java.util.*;
-import java.util.function.Supplier;
 
 public class AnnotationModuleEvaluator implements ModuleEvaluator {
 
@@ -12,20 +11,20 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
     private final Map<Class<?>, List<ComponentProvider>> additionalComponents = new HashMap<>();
     private final Map<Class<?>, ComponentProvider> uniqueComponents = new HashMap<>();
 
-    private final Map<Class<?>, Map<ComponentId, MethodHandle>> factoryMethodHandlesMapped;
+    private final Map<ComponentId, List<ComponentMethodHandle>> factoryHandles;
     private final Map<Class<?>, MethodHandle> constructors;
     private final Map<Class<?>, ComponentId> uniqueMap;
     private final Map<Class<?>, List<ComponentId>> additionalMap;
     private final ComponentGraph componentGraph;
 
     public AnnotationModuleEvaluator(ComponentGraph componentGraph,
-                                     Map<Class<?>, Map<ComponentId, MethodHandle>> factoryMethodHandlesMapped,
+                                     Map<ComponentId, List<ComponentMethodHandle>> factoryHandles,
                                      Map<Class<?>, MethodHandle> constructors,
                                      Map<Class<?>, ComponentId> uniqueMap,
                                      Map<Class<?>, List<ComponentId>> additionalMap) {
 
         this.componentGraph = componentGraph;
-        this.factoryMethodHandlesMapped = factoryMethodHandlesMapped;
+        this.factoryHandles = factoryHandles;
         this.constructors = constructors;
         this.uniqueMap = uniqueMap;
         this.additionalMap = additionalMap;
@@ -50,12 +49,10 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
 
         Class<?> clazz = componentId.clazz();
 
-        if (factoryMethodHandlesMapped.containsKey(clazz)) {
-            factoryMethodHandlesMapped.get(clazz)
-                    .entrySet().stream()
-                    .findFirst()
-                    .ifPresent(e -> processFactoryMethod(e.getKey(), e.getValue(), componentId));
-
+        if (factoryHandles.containsKey(componentId)) {
+            factoryHandles
+                    .get(componentId)
+                    .forEach(cMh -> processFactoryMethod(componentId, cMh.componentId(), cMh.method()));
         } else if (constructors.containsKey(clazz)) {
             processConstructor(constructors.get(clazz), componentId);
         }
@@ -94,9 +91,9 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
         uniqueComponents.put(interfaceId.clazz(), provider);
     }
 
-    private void processFactoryMethod(ComponentId componentIdFactory,
-                                      MethodHandle mh,
-                                      ComponentId componentId) {
+    private void processFactoryMethod(ComponentId componentId,
+                                      ComponentId componentIdFactory,
+                                      MethodHandle mh) {
         try {
 
             ComponentProvider provider = componentsById.get(componentIdFactory.identifier());

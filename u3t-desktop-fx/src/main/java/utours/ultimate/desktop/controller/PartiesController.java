@@ -15,7 +15,6 @@ import utours.ultimate.net.Client;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-@Component
 public class PartiesController implements Initializable {
 
     public static final int BUTTON_PADDING_SIZE = 30;

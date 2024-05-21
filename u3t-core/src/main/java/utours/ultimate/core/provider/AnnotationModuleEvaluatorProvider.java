@@ -25,8 +25,8 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
 
     public AnnotationModuleEvaluatorProvider(String... packageNames) {
         this.componentGraph = new ComponentGraph();
-        this.uniqueMap = new HashMap<>();
-        this.additionalMap = new HashMap<>();
+        this.uniqueMap = defaultMap();
+        this.additionalMap = defaultMap();
         this.setNodes(Arrays.stream(packageNames)
                 .flatMap(this::classesOfPackageName)
                 .collect(Collectors.toSet()));
@@ -39,7 +39,7 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
     @Override
     public ModuleEvaluator provideModuleEvaluator() {
 
-        Map<Class<?>, Map<ComponentId, MethodHandle>> factoryHandles = new HashMap<>();
+        Map<ComponentId, List<ComponentMethodHandle>> factoryHandles = defaultMap();
 
         for (int i = 0; i < componentGraph.getComponents().size(); i++) {
             ComponentId componentId = componentGraph.getComponents().get(i);
@@ -47,14 +47,6 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         }
 
         Map<Class<?>, MethodHandle> constructors = setupConstructorsDependencies();
-
-//        factoryHandles.forEach((clazz, map) -> {
-//            ComponentId returnId = ComponentId.ofClass(clazz);
-//            componentGraph.removeDependenciesOf(returnId);
-//            map.forEach((componentId, ignored) -> {
-//                componentGraph.addDependency(returnId, componentId);
-//            });
-//        });
 
         return new AnnotationModuleEvaluator(
                 componentGraph,
@@ -91,15 +83,14 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
     /**
      * Set all factory method, and the eta dependency.
      *
-     * @param factoryHandles factory method handle map.
-     * @param componentId component id.
+     * @param factoryHandles the factory method handle map.
+     * @param componentId the current component id.
      */
-    private void setFactoryMethods(Map<Class<?>, Map<ComponentId, MethodHandle>> factoryHandles,
-                                   ComponentId componentId) {
+    private void setFactoryMethods(Map<ComponentId, List<ComponentMethodHandle>> factoryHandles, ComponentId componentId) {
 
         MethodHandles.Lookup lookup = MethodHandles.lookup();
         Class<?> clazz = componentId.clazz();
-        List<Throwable> errors = new ArrayList<>();
+        List<Throwable> errors = defaultList();
 
         for (Method method : clazz.getDeclaredMethods()) {
             try {
@@ -109,12 +100,8 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
                     continue;
                 }
 
-                if (isMappedAndActivate(method)) {
-                    processMappedMethodComponent(method);
-                 }
-
                 // We get the component annotation.
-                var component = method.getAnnotation(Component.class);
+                Component component = method.getAnnotation(Component.class);
 
                 // When the component annotation presice the id,
                 // we get the id and replace the component id.
@@ -125,17 +112,21 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
                 // We look up the method handle from the factory method.
                 var mh = lookup.unreflect(method);
                 var returnType = mh.type().returnType();
-                var returnTypeId = getComponentId(returnType);
+                var returnTypeId = ComponentId.of(returnType, method.getName());
 
                 // We add the factory method handle in the map factory handles,
                 // if not exist, we create the map.
                 factoryHandles
-                        .computeIfAbsent(returnType, c -> new HashMap<>())
-                        .put(componentId, mh);
+                        .computeIfAbsent(returnTypeId, this::defaultList)
+                        .add(ComponentMethodHandle.of(componentId, mh));
 
                 // Add an eta dependency from the return component to the factory component.
                 componentGraph.addComponent(returnTypeId);
                 componentGraph.addDependency(returnTypeId, componentId);
+
+                if (isMappedAndActivate(method)) {
+                    processMappedMethodComponent(method);
+                }
 
             } catch (Exception e) {
                 errors.add(e);
@@ -162,7 +153,7 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
                     componentReturnType.getName()));
         }
 
-        ComponentId componentId = getComponentId(componentReturnType);
+        ComponentId componentId = ComponentId.of(componentReturnType, method.getName());
 
         // Process the mapping type.
         onMappingType(mapping, componentId, componentReturnType);
@@ -176,8 +167,8 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
     private Map<Class<?>, MethodHandle> setupConstructorsDependencies() {
 
         MethodHandles.Lookup lookup = MethodHandles.lookup();
-        Map<Class<?>, MethodHandle> constructors = new HashMap<>();
-        List<Throwable> errors = new ArrayList<>();
+        Map<Class<?>, MethodHandle> constructors = defaultMap();
+        List<Throwable> errors = defaultList();
 
         List<ComponentId> components = componentGraph.getComponents();
         for (int i = 0; i < components.size(); i++) {
@@ -314,11 +305,13 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
     /**
      * The processus with an additional mapping.
      *
-     * @param componentId
-     * @param interfaceClass
+     * @param componentId the component id.
+     * @param interfaceClass the class to interface.
      */
     private void onAdditionalMapping(ComponentId componentId, Class<?> interfaceClass) {
-        additionalMap.computeIfAbsent(interfaceClass, k -> new ArrayList<>()).add(componentId);
+        additionalMap
+                .computeIfAbsent(interfaceClass, this::defaultList)
+                .add(componentId);
     }
 
     /**
@@ -411,6 +404,20 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         return ClassProviderManager.classesOf(packageName).stream();
     }
 
+    private <K, V> Map<K, V> defaultMap() {
+        return new HashMap<>();
+    }
 
+    private <K, V> Map<K, V> defaultMap(Object o) {
+        return new HashMap<>();
+    }
+
+    private <T> List<T> defaultList() {
+        return new ArrayList<>();
+    }
+
+    private <T> List<T> defaultList(Object o) {
+        return new ArrayList<>();
+    }
 
 }

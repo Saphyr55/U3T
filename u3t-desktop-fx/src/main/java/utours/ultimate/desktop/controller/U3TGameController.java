@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-@Component
 public class U3TGameController implements Initializable {
 
     public static final int GRID_SIZE = 3;

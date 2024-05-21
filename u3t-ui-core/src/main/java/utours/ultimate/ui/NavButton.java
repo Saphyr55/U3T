@@ -1,5 +1,7 @@
 package utours.ultimate.ui;
 
+import java.util.Comparator;
+
 public interface NavButton {
 
     String getName();
@@ -7,8 +9,6 @@ public interface NavButton {
     void setName(String name);
 
     int getPosition();
-
-    void setPosition(int position);
 
     void setOnClick(OnClickButton onClickButton);
 

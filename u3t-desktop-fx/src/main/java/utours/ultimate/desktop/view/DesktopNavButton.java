@@ -11,16 +11,16 @@ public class DesktopNavButton extends Button implements NavButton {
     public static final int SIZE = 70;
 
     private String text;
-    private int position;
     private OnClickButton onClickButton;
+    private int position;
 
     public DesktopNavButton(String text, int index) {
-        this.setName(text);
-        this.setPosition(index);
-        this.setOnClick(e -> { });
-        this.setPrefWidth(SIZE);
-        this.setPrefHeight(SIZE);
-        this.setText(text);
+        setName(text);
+        setPosition(index);
+        setOnClick(e -> { });
+        setPrefWidth(SIZE);
+        setPrefHeight(SIZE);
+        setText(text);
     }
 
     public DesktopNavButton() {
@@ -46,7 +46,6 @@ public class DesktopNavButton extends Button implements NavButton {
         return position;
     }
 
-    @Override
     public void setPosition(int position) {
         this.position = position;
     }

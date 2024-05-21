@@ -2,6 +2,7 @@ package utours.ultimate.core.internal;
 
 import utours.ultimate.core.ComponentGraph;
 import utours.ultimate.core.ComponentId;
+import utours.ultimate.core.OrderedComponentProvider;
 
 import java.util.*;
 

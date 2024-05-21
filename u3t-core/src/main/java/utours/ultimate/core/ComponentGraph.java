@@ -91,16 +91,27 @@ public class ComponentGraph {
 
     public void printGraph() {
 
-        for (ComponentId component : components) {
-            System.out.println(component.clazz().getSimpleName());
+        for (int j = 0; j < components.size(); j++) {
+
+            ComponentId component = components.get(j);
+
+            System.out.println(component.identifier());
             System.out.println("SUCC {");
-            for (Integer i : getGraph().get(indexOf(component))) {
-                System.out.println("\t" + components.get(i).clazz().getSimpleName());
+
+            for (Integer i : getGraph().get(j)) {
+                if (i < 0) continue;
+                System.out.println("\t"
+                        + components.get(i).identifier()
+                        + " Class: " + components.get(i).clazz().getName());
             }
+
             System.out.println("}");
             System.out.println("PRED {");
-            for (Integer i : predecessors().get(indexOf(component))) {
-                System.out.println("\t" + components.get(i).clazz().getSimpleName());
+            for (Integer i : predecessors().get(j)) {
+                if (i < 0) continue;
+                System.out.println("\t"
+                        + components.get(i).identifier()
+                        + " Class: " + components.get(i).clazz().getName());
             }
             System.out.println("}");
         }
