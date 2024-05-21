@@ -6,6 +6,7 @@ import utours.ultimate.core.internal.ErrorManager;
 import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.core.steorotype.ConstructorProperties;
 import utours.ultimate.core.steorotype.Mapping;
+import utours.ultimate.core.steorotype.Ref;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -13,6 +14,7 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -47,6 +49,11 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         }
 
         Map<Class<?>, MethodHandle> constructors = setupConstructorsDependencies();
+
+        factoryHandles.forEach((cId, map) -> {
+            componentGraph.removeDependenciesOf(cId);
+            map.forEach(cMh -> componentGraph.addDependency(cId, cMh.componentId()));
+        });
 
         return new AnnotationModuleEvaluator(
                 componentGraph,
@@ -192,10 +199,12 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
                 // if it's not found we the first constructor.
                 Constructor<?> declaredConstructor = getConstructorProperties(clazz);
                 Class<?>[] paramTypes = declaredConstructor.getParameterTypes();
+                Parameter[] parameters = declaredConstructor.getParameters();
+
 
                 // We add the dependencies from params corresponding to the current component.
-                Arrays.stream(paramTypes)
-                        .map(this::getComponentId)
+                Arrays.stream(parameters)
+                        .map(p -> setupParamConstructors(p))
                         .filter(componentGraph::hasNode)
                         .forEach(paramId -> componentGraph.addDependency(componentId, paramId));
 
@@ -214,6 +223,16 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         ErrorManager.throwErrorsOf(errors);
 
         return constructors;
+    }
+
+    private ComponentId setupParamConstructors(Parameter p) {
+
+        Ref ref = p.getAnnotation(Ref.class);
+        if (ref == null) {
+            return getComponentId(p.getType());
+        }
+
+        return ComponentId.of(p.getType(), ref.id());
     }
 
     /**

@@ -30,8 +30,8 @@
 
     <!-- Controller Factory -->
 
-    <component class="utours.ultimate.desktop.factory.ControllerFactory"
-               derived="utours.ultimate.desktop.factory.impl.ControllerFactoryImpl"
+    <component class="utours.ultimate.desktop.factory.ControllerProvider"
+               derived="utours.ultimate.desktop.factory.impl.ControllerProviderImpl"
                id="Desktop.Fx.ControllerFactory" >
         <constructor-args>
             <arg type="utours.ultimate.game.feature.GameService" value="U3T.GameService" />

@@ -7,9 +7,10 @@ import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.ui.NavButtonContainer;
 
 @Component
-public class DesktopNavButtonContainer implements NavButtonContainer<DesktopNavButton> {
+public class DesktopNavButtonContainer
+        implements NavButtonContainer<DesktopNavButton> {
 
-    private VBox vbox;
+    private final VBox vbox;
 
     public DesktopNavButtonContainer() {
         this.vbox = new VBox();
@@ -22,27 +23,24 @@ public class DesktopNavButtonContainer implements NavButtonContainer<DesktopNavB
         return vbox;
     }
 
-    public void setVbox(VBox vbox) {
-        this.vbox = vbox;
-    }
-
     @Override
     public void add(DesktopNavButton navButton) {
-        if (navButton.getPosition() < 0) {
+        int pos = navButton.getPosition();
+        if (pos < 0) {
             vbox.getChildren().add(navButton);
-        } else {
-            vbox.getChildren().add(navButton.getPosition(), navButton);
+            return;
         }
+        vbox.getChildren().add(pos, navButton);
     }
 
     @Override
     public void remove(DesktopNavButton navButton) {
-
+        vbox.getChildren().remove(navButton);
     }
 
     @Override
     public void remove(int index) {
-
+        vbox.getChildren().remove(index);
     }
 
 

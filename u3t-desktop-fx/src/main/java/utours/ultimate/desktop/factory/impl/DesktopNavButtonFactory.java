@@ -1,10 +1,13 @@
 package utours.ultimate.desktop.factory.impl;
 
+import utours.ultimate.core.ComponentProvider;
 import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.core.steorotype.Mapping;
 import utours.ultimate.desktop.action.OnClickChatNavButton;
 import utours.ultimate.desktop.action.OnClickPartiesNavButton;
+import utours.ultimate.desktop.controller.MainController;
 import utours.ultimate.desktop.controller.PolymorphicController;
+import utours.ultimate.desktop.factory.ControllerProvider;
 import utours.ultimate.desktop.view.DesktopChatView;
 import utours.ultimate.desktop.view.DesktopNavButton;
 import utours.ultimate.ui.NavButton;
@@ -18,11 +21,11 @@ import java.util.function.Supplier;
 public final class DesktopNavButtonFactory implements NavButtonFactory {
 
     private final Supplier<DesktopChatView> chatViewFactory;
-    private final PolymorphicController polymorphicController;
+    private final MainController mainController;
     private DesktopChatView chatView;
 
-    public DesktopNavButtonFactory(PolymorphicController polymorphicController) {
-        this.polymorphicController = polymorphicController;
+    public DesktopNavButtonFactory(MainController mainController) {
+        this.mainController = mainController;
         this.chatViewFactory = () -> chatView = Optional.ofNullable(chatView).orElseGet(DesktopChatView::new);
     }
 
@@ -31,7 +34,7 @@ public final class DesktopNavButtonFactory implements NavButtonFactory {
     @Mapping(type = Mapping.Type.Additional)
     public NavButton createPartiesNavButton() {
         DesktopNavButton button = new DesktopNavButton("Parties", 0);
-        button.setOnClick(new OnClickPartiesNavButton(polymorphicController));
+        button.setOnClick(new OnClickPartiesNavButton(mainController::getMainLeftPolymorphic));
         return button;
     }
 
@@ -40,7 +43,7 @@ public final class DesktopNavButtonFactory implements NavButtonFactory {
     @Mapping(type = Mapping.Type.Additional)
     public NavButton createChatNavButton() {
         DesktopNavButton button = new DesktopNavButton("Chat", 1);
-        button.setOnClick(new OnClickChatNavButton(chatViewFactory, polymorphicController));
+        button.setOnClick(new OnClickChatNavButton(chatViewFactory, mainController::getMainLeftPolymorphic));
         return button;
     }
 

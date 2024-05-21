@@ -1,37 +1,50 @@
 package utours.ultimate.desktop;
 
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import utours.ultimate.desktop.factory.ControllerProvider;
 
 import java.net.URL;
 import java.util.Optional;
 
 public class ViewLoader {
 
-    public static <T> T load(T root, String path) {
-        return load(root, ViewLoader.class.getResource(path));
+    public static <T extends Node> T load(T root, String path) {
+        return load(root, path, "");
     }
 
-    public static <T> T load(T root, URL url) {
+    public static <T extends Node> T load(T root, String path, String controllerIdentifier) {
+        return load(root, ViewLoader.class.getResource(path), controllerIdentifier);
+    }
+
+    public static <T extends Node> T load(T root, URL url, String id) {
         try {
+
             FXMLLoader loader = new FXMLLoader();
+
+            if (id.isBlank()) {
+                loader.setControllerFactory(ViewLoader::getController);
+            } else {
+                loader.setControllerFactory(ignored -> getComponent(id));
+            }
+
             loader.setLocation(url);
-            loader.setControllerFactory(ViewLoader::getController);
             loader.setRoot(root);
+
             return loader.load();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static <T> T getComponent(Class<T> tClass) {
-        return MainApplication
-                .getContext()
-                .getContainerReadOnly()
-                .getComponent(tClass.getName());
+    private static <T> T getComponent(String name) {
+        var context = MainApplication.getContext();
+        var container = context.getContainerReadOnly();
+        return container.getComponent(name);
     }
 
     private static Object getController(Class<?> clazz) {
-        return Optional.ofNullable(getComponent(clazz))
+        return Optional.ofNullable(getComponent(clazz.getName()))
                 .orElseGet(() -> instantiate(clazz));
     }
 
