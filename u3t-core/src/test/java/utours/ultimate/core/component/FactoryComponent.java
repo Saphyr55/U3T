@@ -18,5 +18,9 @@ public class FactoryComponent implements IFactoryComponent {
         return new AComponent(dComponent, "aComponent");
     }
 
+    @Override
+    public EComponent getEComponent() {
+        return new EComponent();
+    }
 
 }

@@ -3,7 +3,6 @@ package utours.ultimate.net;
 import org.junit.jupiter.api.*;
 import utours.ultimate.net.internal.NetServerApplicationTest;
 
-import java.util.List;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -67,7 +66,7 @@ public class ClientSideTest extends NetServerApplicationTest {
             client.close();
         });
 
-        application.sendMessage("baz.server.address", "baz");
+        netApplication.sendMessage("baz.server.address", "baz");
     }
 
 

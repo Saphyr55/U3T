@@ -1,17 +1,27 @@
 package utours.ultimate.desktop.controller;
 
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import utours.ultimate.core.steorotype.Component;
+import utours.ultimate.desktop.view.PolymorphicView;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
-@Component
 public class MainController implements Initializable {
+
+    @FXML private PolymorphicView mainLeftPolymorphic;
+    @FXML private PolymorphicView mainRightPolymorphic;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
     }
 
+    public PolymorphicView getMainLeftPolymorphic() {
+        return mainLeftPolymorphic;
+    }
+
+    public PolymorphicView getMainRightPolymorphic() {
+        return mainRightPolymorphic;
+    }
 }

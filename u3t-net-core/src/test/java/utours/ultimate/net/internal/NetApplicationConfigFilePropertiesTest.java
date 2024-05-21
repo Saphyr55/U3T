@@ -6,15 +6,15 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ApplicationConfigFilePropertiesTest {
+class NetApplicationConfigFilePropertiesTest {
 
     String FILEPATH = "test.properties";
 
-    ApplicationConfigFileProperties appConfigFileProperties;
+    NetApplicationConfigFileProperties appConfigFileProperties;
 
     @BeforeEach
     void setUp() {
-        appConfigFileProperties = new ApplicationConfigFileProperties(FILEPATH);
+        appConfigFileProperties = new NetApplicationConfigFileProperties(FILEPATH);
     }
 
     @AfterEach

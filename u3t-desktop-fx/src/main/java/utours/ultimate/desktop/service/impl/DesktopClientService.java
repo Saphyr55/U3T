@@ -14,7 +14,7 @@ public class DesktopClientService implements ClientService {
 
     @Override
     public void joinGame(Client client, Consumer<Game> onJoinGame) {
-
+        onJoinGame.accept(Game.newDefaultGame());
     }
 
 }

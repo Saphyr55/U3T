@@ -1,12 +1,12 @@
 package utours.ultimate.net;
 
-import utours.ultimate.net.internal.NetServerApplication;
+import utours.ultimate.net.internal.NetServerNetApplication;
 
-public interface Application {
+public interface NetApplication {
 
-    static Application ofServer(ApplicationConfiguration configuration) {
+    static NetApplication ofServer(NetApplicationConfiguration configuration) {
         try {
-            return new NetServerApplication(configuration);
+            return new NetServerNetApplication(configuration);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

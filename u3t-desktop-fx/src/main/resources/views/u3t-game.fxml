@@ -3,14 +3,16 @@
 <?import javafx.scene.layout.*?>
 <?import utours.ultimate.desktop.view.U3TGameView?>
 
+<?import utours.ultimate.desktop.view.GameGridView?>
 <fx:root xmlns="http://javafx.com/javafx"
          xmlns:fx="http://javafx.com/fxml"
          type="utours.ultimate.desktop.view.U3TGameView"
          fx:id="root"
          fx:controller="utours.ultimate.desktop.controller.U3TGameController">
 
-    <GridPane fx:id="u3tGrid"
-              prefWidth="${root.width / 1.2}"
-              prefHeight="${root.height / 1.2}"/>
+    <GameGridView
+            fx:id="gameGridView"
+            prefWidth="${root.width / 1.2}"
+            prefHeight="${root.height / 1.2}"/>
 
 </fx:root>

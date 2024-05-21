@@ -8,4 +8,7 @@ public interface IFactoryComponent {
     @Component
     AComponent getAComponent();
 
+    @Component
+    EComponent getEComponent();
+
 }

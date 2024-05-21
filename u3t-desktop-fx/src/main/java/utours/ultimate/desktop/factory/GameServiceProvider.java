@@ -6,10 +6,16 @@ import utours.ultimate.game.feature.internal.GameServiceInternal;
 
 @Component
 public final class GameServiceProvider {
+    
+    public GameService service;
+
+    public GameServiceProvider() {
+        this.service = new GameServiceInternal();
+    }
 
     @Component
     public GameService getGameService() {
-        return new GameServiceInternal();
+        return service;
     }
 
 }

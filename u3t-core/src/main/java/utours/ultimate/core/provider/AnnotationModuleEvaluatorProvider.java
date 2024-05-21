@@ -6,6 +6,7 @@ import utours.ultimate.core.internal.ErrorManager;
 import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.core.steorotype.ConstructorProperties;
 import utours.ultimate.core.steorotype.Mapping;
+import utours.ultimate.core.steorotype.Ref;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -13,6 +14,7 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -25,8 +27,8 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
 
     public AnnotationModuleEvaluatorProvider(String... packageNames) {
         this.componentGraph = new ComponentGraph();
-        this.uniqueMap = new HashMap<>();
-        this.additionalMap = new HashMap<>();
+        this.uniqueMap = defaultMap();
+        this.additionalMap = defaultMap();
         this.setNodes(Arrays.stream(packageNames)
                 .flatMap(this::classesOfPackageName)
                 .collect(Collectors.toSet()));
@@ -39,12 +41,19 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
     @Override
     public ModuleEvaluator provideModuleEvaluator() {
 
-        Map<Class<?>, Map<ComponentId, MethodHandle>> factoryHandles = new HashMap<>();
-        Map<Class<?>, MethodHandle> constructors = setupConstructorsDependencies();
+        Map<ComponentId, List<ComponentMethodHandle>> factoryHandles = defaultMap();
 
-        for (ComponentId componentId : componentGraph.getComponents()) {
+        for (int i = 0; i < componentGraph.getComponents().size(); i++) {
+            ComponentId componentId = componentGraph.getComponents().get(i);
             setFactoryMethods(factoryHandles, componentId);
         }
+
+        Map<Class<?>, MethodHandle> constructors = setupConstructorsDependencies();
+
+        factoryHandles.forEach((cId, map) -> {
+            componentGraph.removeDependenciesOf(cId);
+            map.forEach(cMh -> componentGraph.addDependency(cId, cMh.componentId()));
+        });
 
         return new AnnotationModuleEvaluator(
                 componentGraph,
@@ -81,15 +90,14 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
     /**
      * Set all factory method, and the eta dependency.
      *
-     * @param factoryHandles factory method handle map.
-     * @param componentId component id.
+     * @param factoryHandles the factory method handle map.
+     * @param componentId the current component id.
      */
-    private void setFactoryMethods(Map<Class<?>, Map<ComponentId, MethodHandle>> factoryHandles,
-                                   ComponentId componentId) {
+    private void setFactoryMethods(Map<ComponentId, List<ComponentMethodHandle>> factoryHandles, ComponentId componentId) {
 
         MethodHandles.Lookup lookup = MethodHandles.lookup();
         Class<?> clazz = componentId.clazz();
-        List<Throwable> errors = new ArrayList<>();
+        List<Throwable> errors = defaultList();
 
         for (Method method : clazz.getDeclaredMethods()) {
             try {
@@ -100,24 +108,30 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
                 }
 
                 // We get the component annotation.
-                var component = method.getAnnotation(Component.class);
+                Component component = method.getAnnotation(Component.class);
+
+                // When the component annotation presice the id,
+                // we get the id and replace the component id.
+                if (!component.id().isBlank()) {
+                    componentId = ComponentId.of(componentId.clazz(), component.id());
+                }
 
                 // We look up the method handle from the factory method.
                 var mh = lookup.unreflect(method);
                 var returnType = mh.type().returnType();
-                var componentReturnTypeId = getComponentId(returnType);
+                var returnTypeId = ComponentId.of(returnType, method.getName());
 
                 // We add the factory method handle in the map factory handles,
                 // if not exist, we create the map.
                 factoryHandles
-                        .computeIfAbsent(returnType, c -> new HashMap<>())
-                        .put(componentId, mh);
+                        .computeIfAbsent(returnTypeId, this::defaultList)
+                        .add(ComponentMethodHandle.of(componentId, mh));
 
                 // Add an eta dependency from the return component to the factory component.
-                componentGraph.addComponent(componentReturnTypeId);
-                componentGraph.addDependency(componentReturnTypeId, componentId);
+                componentGraph.addComponent(returnTypeId);
+                componentGraph.addDependency(returnTypeId, componentId);
 
-                if (!isMappedAndActivate(method)) {
+                if (isMappedAndActivate(method)) {
                     processMappedMethodComponent(method);
                 }
 
@@ -140,11 +154,13 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
                 ? method.getReturnType()
                 : mapping.clazz();
 
-        if (!componentReturnType.isAssignableFrom(mapping.clazz())) {
-            throw new IllegalStateException(componentReturnType + " is not ");
+        if (!method.getReturnType().isAssignableFrom(componentReturnType)) {
+            throw new IllegalStateException("%s is not assignable from %s".formatted(
+                    method.getReturnType().getName(),
+                    componentReturnType.getName()));
         }
 
-        ComponentId componentId = getComponentId(componentReturnType);
+        ComponentId componentId = ComponentId.of(componentReturnType, method.getName());
 
         // Process the mapping type.
         onMappingType(mapping, componentId, componentReturnType);
@@ -158,14 +174,17 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
     private Map<Class<?>, MethodHandle> setupConstructorsDependencies() {
 
         MethodHandles.Lookup lookup = MethodHandles.lookup();
-        Map<Class<?>, MethodHandle> constructors = new HashMap<>();
-        List<Throwable> errors = new ArrayList<>();
+        Map<Class<?>, MethodHandle> constructors = defaultMap();
+        List<Throwable> errors = defaultList();
 
-        for (ComponentId componentId : componentGraph.getComponents()) {
+        List<ComponentId> components = componentGraph.getComponents();
+        for (int i = 0; i < components.size(); i++) {
+            ComponentId componentId = components.get(i);
             try {
                 Class<?> clazz = componentId.clazz();
 
                 // We filter every component that are not an interface.
+                // Interfaces has any constructors; logic it's, an interface...
                 if (clazz.isInterface()) {
                     continue;
                 }
@@ -177,15 +196,17 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
                 }
 
                 // We get the constructor annotated by ConstructorProperties,
-                // if it's not found get the default constructor.
+                // if it's not found we the first constructor.
                 Constructor<?> declaredConstructor = getConstructorProperties(clazz);
                 Class<?>[] paramTypes = declaredConstructor.getParameterTypes();
+                Parameter[] parameters = declaredConstructor.getParameters();
 
-                // We add the dependencies corresponding to the current component.
-                Arrays.stream(paramTypes)
-                        .map(this::getComponentId)
+
+                // We add the dependencies from params corresponding to the current component.
+                Arrays.stream(parameters)
+                        .map(p -> setupParamConstructors(p))
                         .filter(componentGraph::hasNode)
-                        .forEach(id -> componentGraph.addDependency(componentId, id));
+                        .forEach(paramId -> componentGraph.addDependency(componentId, paramId));
 
                 // We get constructor method type, and we look up for it.
                 // Then it is added in constructors map.
@@ -202,6 +223,16 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         ErrorManager.throwErrorsOf(errors);
 
         return constructors;
+    }
+
+    private ComponentId setupParamConstructors(Parameter p) {
+
+        Ref ref = p.getAnnotation(Ref.class);
+        if (ref == null) {
+            return getComponentId(p.getType());
+        }
+
+        return ComponentId.of(p.getType(), ref.id());
     }
 
     /**
@@ -293,11 +324,13 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
     /**
      * The processus with an additional mapping.
      *
-     * @param componentId
-     * @param interfaceClass
+     * @param componentId the component id.
+     * @param interfaceClass the class to interface.
      */
     private void onAdditionalMapping(ComponentId componentId, Class<?> interfaceClass) {
-        additionalMap.computeIfAbsent(interfaceClass, k -> new ArrayList<>()).add(componentId);
+        additionalMap
+                .computeIfAbsent(interfaceClass, this::defaultList)
+                .add(componentId);
     }
 
     /**
@@ -390,6 +423,20 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         return ClassProviderManager.classesOf(packageName).stream();
     }
 
+    private <K, V> Map<K, V> defaultMap() {
+        return new HashMap<>();
+    }
 
+    private <K, V> Map<K, V> defaultMap(Object o) {
+        return new HashMap<>();
+    }
+
+    private <T> List<T> defaultList() {
+        return new ArrayList<>();
+    }
+
+    private <T> List<T> defaultList(Object o) {
+        return new ArrayList<>();
+    }
 
 }

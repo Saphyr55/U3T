@@ -11,7 +11,11 @@ public record Game(Long gameID,
                    Action lastAction,
                    int size
 ) {
-
+    
+    public static Game newDefaultGame() {
+        return Builder.newDefaultBuilder().build();
+    }
+    
     public Game lastAction(Action action) {
         return Game.Builder.copyOf(this)
                 .lastAction(action)
