@@ -21,8 +21,8 @@ public final class DesktopNavButtonFactory implements NavButtonFactory {
     private final PolymorphicController polymorphicController;
     private DesktopChatView chatView;
 
-    public DesktopNavButtonFactory() {
-        this.polymorphicController = new PolymorphicController();
+    public DesktopNavButtonFactory(PolymorphicController polymorphicController) {
+        this.polymorphicController = polymorphicController;
         this.chatViewFactory = () -> chatView = Optional.ofNullable(chatView).orElseGet(DesktopChatView::new);
     }
 

@@ -20,7 +20,7 @@ public class PolymorphicController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-
+        System.out.println("PolymorphicController Init");
     }
 
     public void replaceRegion(Region region) {

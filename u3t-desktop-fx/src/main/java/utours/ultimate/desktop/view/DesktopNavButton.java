@@ -54,7 +54,7 @@ public class DesktopNavButton extends Button implements NavButton {
     @Override
     public void setOnClick(OnClickButton onClickButton) {
         this.onClickButton = onClickButton;
-        setOnMouseClicked(event -> this.onClickButton.performClick(new MouseEvent()));
+        setOnMouseClicked(event -> onClick().performClick(new MouseEvent()));
     }
 
     @Override
