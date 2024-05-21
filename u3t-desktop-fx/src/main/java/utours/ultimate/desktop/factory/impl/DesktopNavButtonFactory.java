@@ -26,7 +26,9 @@ public final class DesktopNavButtonFactory implements NavButtonFactory {
 
     public DesktopNavButtonFactory(MainController mainController) {
         this.mainController = mainController;
-        this.chatViewFactory = () -> chatView = Optional.ofNullable(chatView).orElseGet(DesktopChatView::new);
+        this.chatViewFactory = () -> chatView = Optional
+                .ofNullable(chatView)
+                .orElseGet(DesktopChatView::new);
     }
 
     @Override

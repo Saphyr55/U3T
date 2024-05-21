@@ -9,6 +9,7 @@ import javafx.scene.layout.VBox;
 import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.desktop.service.ClientService;
 import utours.ultimate.desktop.view.DesktopPartiesView;
+import utours.ultimate.desktop.view.U3TGameView;
 import utours.ultimate.game.model.Game;
 import utours.ultimate.net.Client;
 
@@ -23,12 +24,16 @@ public class PartiesController implements Initializable {
     private final Client client;
     private final ClientService clientService;
 
+    private final MainController mainController;
+
     @FXML private DesktopPartiesView partiesView;
     @FXML private VBox container;
 
-    public PartiesController(ClientService clientService, Client client) {
+    public PartiesController(MainController mainController,
+                             ClientService clientService, Client client) {
         this.client = client;
         this.clientService = clientService;
+        this.mainController = mainController;
     }
 
     @Override
@@ -52,7 +57,7 @@ public class PartiesController implements Initializable {
     }
 
     private void onJoinGame(Game game) {
-
+        mainController.getMainRightPolymorphic().replaceRegion(new U3TGameView());
     }
 
 }

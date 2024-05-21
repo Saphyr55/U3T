@@ -6,6 +6,7 @@ import utours.ultimate.desktop.controller.*;
 import utours.ultimate.desktop.factory.ControllerProvider;
 import utours.ultimate.desktop.service.ClientService;
 import utours.ultimate.game.feature.GameService;
+import utours.ultimate.game.feature.internal.GameAlmostFinishActionsProvider;
 import utours.ultimate.game.model.Game;
 import utours.ultimate.net.Client;
 
@@ -22,10 +23,10 @@ public class ControllerProviderImpl implements ControllerProvider {
                                   ClientService clientService,
                                   Client client) {
 
-        partiesController = new PartiesController(clientService, client);
-        u3TGameController = new U3TGameController(service, Game.newDefaultGame(), client);
-        chatController = new ChatController();
         mainController = new MainController();
+        partiesController = new PartiesController(mainController, clientService, client);
+        u3TGameController = new U3TGameController(service, new GameAlmostFinishActionsProvider(), client);
+        chatController = new ChatController();
     }
 
     @Override

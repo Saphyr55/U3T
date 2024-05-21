@@ -13,7 +13,7 @@ public record Game(Long gameID,
 ) {
     
     public static Game newDefaultGame() {
-        return Builder.newBuilder().build();
+        return Builder.newDefaultBuilder().build();
     }
     
     public Game lastAction(Action action) {
