@@ -30,10 +30,10 @@ public class U3TGameController implements Initializable {
     private @FXML GameGridView gameGridView;
     private @FXML Pane root;
 
-    public U3TGameController(GameService gameService,
+    public U3TGameController(GameService gameService, Game game,
                              GameActionsProvider gameActionsProvider,
                              Client client) {
-
+        this.game = game;
         this.gameService = gameService;
         this.gameActionsProvider = gameActionsProvider;
         this.client = client;

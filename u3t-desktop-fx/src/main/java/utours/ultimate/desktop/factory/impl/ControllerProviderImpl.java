@@ -23,9 +23,11 @@ public class ControllerProviderImpl implements ControllerProvider {
                                   ClientService clientService,
                                   Client client) {
 
+        var game = Game.newDefaultGame();
+
         mainController = new MainController();
         partiesController = new PartiesController(mainController, clientService, client);
-        u3TGameController = new U3TGameController(service, new GameAlmostFinishActionsProvider(), client);
+        u3TGameController = new U3TGameController(service, game, new GameAlmostFinishActionsProvider(game), client);
         chatController = new ChatController();
     }
 

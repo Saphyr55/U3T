@@ -26,11 +26,12 @@ public class PartiesController implements Initializable {
 
     private final MainController mainController;
 
-    @FXML private DesktopPartiesView partiesView;
-    @FXML private VBox container;
+    private @FXML DesktopPartiesView partiesView;
+    private @FXML VBox container;
 
     public PartiesController(MainController mainController,
-                             ClientService clientService, Client client) {
+                             ClientService clientService,
+                             Client client) {
         this.client = client;
         this.clientService = clientService;
         this.mainController = mainController;
