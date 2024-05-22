@@ -26,7 +26,7 @@ public class NetServerNetApplication implements NetApplication {
         stopped = false;
         handler(Message.SUBSCRIBE_ADDRESS, this::onClientSubscribe);
         while (!stopped) {
-            Client client = server.client();
+            Client client = server.acceptClient();
             Thread.ofPlatform().start(() -> processClient(client));
         }
     }

@@ -12,6 +12,6 @@ public interface NetServer {
      *
      * @return A client.
      */
-    Client client();
+    Client acceptClient();
 
 }

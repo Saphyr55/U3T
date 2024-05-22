@@ -52,7 +52,7 @@ public class TopologicalOrderingComponentGraph implements OrderedComponentProvid
         while (!componentsStack.isEmpty()) {
             append();
         }
-        finalOrderedComponents.addAll(List.copyOf(orderedComponents.getLast()).reversed());
+        finalOrderedComponents.addAll(List.copyOf(orderedComponents.getLast()));
     }
 
     public void append() {

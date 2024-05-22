@@ -1,11 +1,11 @@
 package utours.ultimate.game.port;
 
-
-import utours.ultimate.game.model.Game;
-
+import java.util.List;
 import java.util.Optional;
 
 public interface Inventory<T, ID> {
+
+    List<T> findAll();
 
     Optional<T> findById(ID id);
 

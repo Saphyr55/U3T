@@ -24,7 +24,7 @@ public class NetServerSocket implements NetServer {
     }
 
     @Override
-    public Client client() {
+    public Client acceptClient() {
         try {
             return new ClientSocket(serverSocket.accept());
         } catch (IOException e) {

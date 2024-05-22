@@ -304,6 +304,7 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         onMappingType(mapping, componentId, interfaceClass);
 
         // We add a lambda dependency.
+        componentGraph.addComponent(interfaceId);
         componentGraph.addDependency(interfaceId, componentId);
     }
 
