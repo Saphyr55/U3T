@@ -7,7 +7,7 @@ import utours.ultimate.net.MessageReceiver;
 
 public class NetClientMessageReceiver implements MessageReceiver {
 
-    private Client client;
+    private final Client client;
 
     public NetClientMessageReceiver(Client client) {
         this.client = client;

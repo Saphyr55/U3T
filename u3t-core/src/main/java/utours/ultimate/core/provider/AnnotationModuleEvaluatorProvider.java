@@ -49,12 +49,12 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         }
 
         Map<Class<?>, MethodHandle> constructors = setupConstructorsDependencies();
-
+        /*
         factoryHandles.forEach((cId, map) -> {
             componentGraph.removeDependenciesOf(cId);
             map.forEach(cMh -> componentGraph.addDependency(cId, cMh.componentId()));
         });
-
+        */
         return new AnnotationModuleEvaluator(
                 componentGraph,
                 factoryHandles,
@@ -85,6 +85,13 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         Component component =  clazz.getAnnotation(Component.class);
         ComponentId componentId = getComponentId(clazz, component);
         componentGraph.addComponent(componentId);
+
+        // When it's a mapping, we set up the class in the interfaces map.
+        // And if the mapping is activate.
+        if (isMappedAndActivate(clazz)) {
+            setupMappingClass(clazz);
+        }
+
     }
 
     /**
@@ -98,8 +105,9 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         MethodHandles.Lookup lookup = MethodHandles.lookup();
         Class<?> clazz = componentId.clazz();
         List<Throwable> errors = defaultList();
+        Method[] declaredMethods = clazz.getDeclaredMethods();
 
-        for (Method method : clazz.getDeclaredMethods()) {
+        for (Method method : declaredMethods) {
             try {
 
                 // We filter every method that are annotated by Component.
@@ -189,22 +197,15 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
                     continue;
                 }
 
-                // When it's a mapping, we set up the class in the interfaces map.
-                // And if the mapping is activate.
-                if (isMappedAndActivate(clazz)) {
-                    setupMappingClass(clazz);
-                }
-
                 // We get the constructor annotated by ConstructorProperties,
                 // if it's not found we the first constructor.
                 Constructor<?> declaredConstructor = getConstructorProperties(clazz);
                 Class<?>[] paramTypes = declaredConstructor.getParameterTypes();
                 Parameter[] parameters = declaredConstructor.getParameters();
 
-
                 // We add the dependencies from params corresponding to the current component.
                 Arrays.stream(parameters)
-                        .map(p -> setupParamConstructors(p))
+                        .map(this::setupParamConstructors)
                         .filter(componentGraph::hasNode)
                         .forEach(paramId -> componentGraph.addDependency(componentId, paramId));
 
@@ -295,7 +296,8 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
                 ? mapping.clazz()
                 // The default interface is the first interface implemented.
                 // Unable to determine the interface to map, if there are any interface implemented.
-                : ClassProviderManager.getFirstInterfaceImplemented(clazz)
+                : ClassProviderManager
+                    .getFirstInterfaceImplemented(clazz)
                     .orElseThrow(() -> getErrorMissingInterface(clazz));
 
         ComponentId interfaceId = getComponentId(interfaceClass);
@@ -304,6 +306,7 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         onMappingType(mapping, componentId, interfaceClass);
 
         // We add a lambda dependency.
+        componentGraph.addComponent(interfaceId);
         componentGraph.addDependency(interfaceId, componentId);
     }
 

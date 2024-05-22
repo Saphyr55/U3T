@@ -1,4 +1,4 @@
-package utours.ultimate.core.internal;
+package utours.ultimate.core.internal.topological;
 
 import utours.ultimate.core.ComponentGraph;
 import utours.ultimate.core.ComponentId;
@@ -8,7 +8,7 @@ import java.util.*;
 
 public class TopologicalOrderingComponentGraph implements OrderedComponentProvider {
     
-    private final List<ComponentId> finalOrderedComponents;
+    private List<ComponentId> finalOrderedComponents;
     private final List<List<ComponentId>> orderedComponents;
     private final Set<Integer> markedComponents;
     private final List<ComponentId> components;
@@ -48,11 +48,15 @@ public class TopologicalOrderingComponentGraph implements OrderedComponentProvid
         return componentGraph.fromIndex(lastIdx);
     }
 
-    public void run() {
+    /**
+     * TODO: Fix bug when ordering by group.
+     */
+    public void normalAlgorithm() {
+        finalOrderedComponents.clear();
         while (!componentsStack.isEmpty()) {
             append();
         }
-        finalOrderedComponents.addAll(List.copyOf(orderedComponents.getLast()).reversed());
+        finalOrderedComponents.addAll(List.copyOf(orderedComponents.getLast()));
     }
 
     public void append() {
@@ -65,7 +69,7 @@ public class TopologicalOrderingComponentGraph implements OrderedComponentProvid
 
         if (!markedComponents.contains(index)) {
             markedComponents.add(index);
-            List<Integer> successors = componentGraph.getGraph().get(index);
+            List<Integer> successors = componentGraph.successors().get(index);
             for (Integer t : successors) {
                 if (!markedComponents.contains(t)) {
                     var s = componentGraph.fromIndex(t);
@@ -74,21 +78,23 @@ public class TopologicalOrderingComponentGraph implements OrderedComponentProvid
             }
         }
 
-        if (!finalOrderedComponents.contains(componentId))
+        if (!orderedComponents.stream().flatMap(Collection::stream).toList().contains(componentId)) {
             orderedComponents.getLast().add(componentId);
+        }
 
         if (componentsStack.isEmpty() && markedComponents.size() != components.size()) {
             componentsStack.push(getMinimalPredComponent());
-            finalOrderedComponents.addAll(List.copyOf(orderedComponents.getLast()).reversed());
+            var reversedOrderedComponents = List.copyOf(orderedComponents.getLast()).reversed();
+            finalOrderedComponents.addAll(reversedOrderedComponents);
             orderedComponents.add(new ArrayList<>());
         }
 
-
     }
-
 
     @Override
     public List<ComponentId> getOrderedComponents() {
+        normalAlgorithm();
         return finalOrderedComponents;
     }
+
 }

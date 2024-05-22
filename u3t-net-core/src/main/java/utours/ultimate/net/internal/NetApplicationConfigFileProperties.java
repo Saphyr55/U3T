@@ -10,18 +10,16 @@ public class NetApplicationConfigFileProperties implements NetApplicationConfigu
 
     public static final String KEY_SERVER_HOST_ADDRESS = "server.host-address";
     public static final String VALUE_SERVER_HOST_ADDRESS = "127.0.0.1";
-
     public static final String KEY_SERVER_PORT = "server.port";
     public static final int VALUE_SERVER_PORT = 6667;
 
     public static final String PROPERTIES_FILENAME = "application.properties";
 
-    private final Properties properties;
     private final String address;
     private final int port;
 
     public NetApplicationConfigFileProperties(String filepath) {
-        this.properties = getAndLoadProperties(filepath);
+        Properties properties = getAndLoadProperties(filepath);
         this.address = (String) properties.getOrDefault(KEY_SERVER_HOST_ADDRESS, VALUE_SERVER_HOST_ADDRESS);
         this.port = Integer.parseInt((String) properties.getOrDefault(KEY_SERVER_PORT, VALUE_SERVER_PORT));
     }

@@ -1,34 +1,46 @@
 package utours.ultimate.server.internal;
 
+import utours.ultimate.core.steorotype.Component;
+import utours.ultimate.core.steorotype.Mapping;
 import utours.ultimate.game.model.Game;
-import utours.ultimate.game.port.Inventory;
+import utours.ultimate.game.port.GameInventory;
+import utours.ultimate.server.common.MapHelper;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class GameMemoryInventory implements Inventory<Game, Long> {
+@Mapping
+@Component
+public class GameMemoryInventory implements GameInventory {
 
-    private final Map<Long, Game> parties = new HashMap<>();
+    private final Map<Long, Game> games = MapHelper.emptyMap();
+
+    public GameMemoryInventory() { }
+
+    @Override
+    public List<Game> findAll() {
+        return games.values().stream().toList();
+    }
 
     @Override
     public Optional<Game> findById(Long id) {
-        return Optional.ofNullable(parties.get(id));
+        return Optional.ofNullable(games.get(id));
     }
 
     @Override
     public void add(Game party) {
-        parties.put(party.gameID(), party);
+        games.put(party.gameID(), party);
     }
 
     @Override
     public void update(Game party) {
-        parties.put(party.gameID(), party);
+        games.put(party.gameID(), party);
     }
 
     @Override
     public void remove(Game party) {
-        parties.remove(party.gameID());
+        games.remove(party.gameID());
     }
 
 }

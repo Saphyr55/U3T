@@ -1,6 +1,7 @@
 package utours.ultimate.core;
 
-import utours.ultimate.core.internal.TopologicalOrderingComponentGraph;
+import utours.ultimate.core.internal.topological.KahnAlgorithmComponentGraph;
+import utours.ultimate.core.internal.topological.TopologicalOrderingComponentGraph;
 
 import java.util.*;
 
@@ -75,14 +76,16 @@ public class ComponentGraph {
         return components;
     }
 
-    public Map<Integer, List<Integer>> getGraph() {
+    public Map<Integer, List<Integer>> successors() {
         return graph;
     }
 
     public List<ComponentId> getTopologicalOrderingComponents() {
-        var orderer = new TopologicalOrderingComponentGraph(this);
-        orderer.run();
-        return orderer.getOrderedComponents();
+        return getTopologicalOrderingComponents(new KahnAlgorithmComponentGraph(this));
+    }
+
+    public List<ComponentId> getTopologicalOrderingComponents(OrderedComponentProvider provider) {
+        return provider.getOrderedComponents();
     }
 
     public Map<Integer, List<Integer>> predecessors() {
@@ -98,7 +101,7 @@ public class ComponentGraph {
             System.out.println(component.identifier());
             System.out.println("SUCC {");
 
-            for (Integer i : getGraph().get(j)) {
+            for (Integer i : successors().get(j)) {
                 if (i < 0) continue;
                 System.out.println("\t"
                         + components.get(i).identifier()

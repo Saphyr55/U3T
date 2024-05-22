@@ -11,17 +11,20 @@ import java.util.function.Consumer;
 public class GameGridView extends GridPane {
 
     public static final int GRID_SIZE = 3;
-    private Region[][] regions;
+
+    private int gridSize;
+    private final Region[][] regions;
     private Consumer<PrimitiveTile> onPressedTile;
 
     public GameGridView() {
+        this.gridSize = GRID_SIZE;
         this.onPressedTile = ignored -> { };
-        this.regions = new Region[GRID_SIZE][GRID_SIZE];
+        this.regions = new Region[gridSize][gridSize];
     }
 
     public void fillGridPanes() {
-        for (int i = 0; i < GRID_SIZE; i++) {
-            for (int j = 0; j < GRID_SIZE; j++) {
+        for (int i = 0; i < getGridSize(); i++) {
+            for (int j = 0; j < getGridSize(); j++) {
                 var gridPane = new GridPane();
                 add(gridPane, i, j);
                 regions[i][j] = gridPane;
@@ -31,14 +34,14 @@ public class GameGridView extends GridPane {
 
     public void initBoard() {
 
-        this.fillGridPanes();
+        fillGridPanes();
 
         for (int i = 0; i < regions.length; i++) {
             Region[] pane = regions[i];
             for (int j = 0; j < pane.length; j++) {
                 Region region = pane[j];
-                for (int k = 0; k < GRID_SIZE; k++) {
-                    for (int l = 0; l < GRID_SIZE; l++) {
+                for (int k = 0; k < getGridSize(); k++) {
+                    for (int l = 0; l < getGridSize(); l++) {
                         if (region instanceof GridPane gridPane) {
                             var tile = Tile.newEmptyPrimitiveTile(this, Cell.pos(i, j), Cell.pos(k, l));
                             tile.setOnMouseClicked(e -> onPressedTile.accept(tile));
@@ -60,5 +63,13 @@ public class GameGridView extends GridPane {
 
     public Region[][] getRegions() {
         return regions;
+    }
+
+    public int getGridSize() {
+        return gridSize;
+    }
+
+    public void setGridSize(int gridSize) {
+        this.gridSize = gridSize;
     }
 }
