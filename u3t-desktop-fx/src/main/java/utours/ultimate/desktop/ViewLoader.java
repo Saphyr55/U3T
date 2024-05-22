@@ -2,12 +2,11 @@ package utours.ultimate.desktop;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import utours.ultimate.desktop.factory.ControllerProvider;
 
 import java.net.URL;
 import java.util.Optional;
 
-public class ViewLoader {
+public final class ViewLoader {
 
     public static <T extends Node> T load(T root, String path) {
         return load(root, path, "");
@@ -19,7 +18,6 @@ public class ViewLoader {
 
     public static <T extends Node> T load(T root, URL url, String id) {
         try {
-
             FXMLLoader loader = new FXMLLoader();
 
             if (id.isBlank()) {

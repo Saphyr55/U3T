@@ -35,11 +35,9 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
 
         List<ComponentId> componentIds = componentGraph.getTopologicalOrderingComponents();
 
+        // Debug thing.
         componentGraph.printGraph();
-
-        for (ComponentId componentId : componentIds) {
-            System.out.println(componentId.clazz().getName());
-        }
+        componentIds.forEach(componentId -> System.out.println(componentId.clazz().getName()));
 
         List<Throwable> errors = ErrorManager.forEachOf(componentIds, this::processComponentId);
         ErrorManager.throwErrorsOf(errors);
@@ -50,9 +48,9 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
         Class<?> clazz = componentId.clazz();
 
         if (factoryHandles.containsKey(componentId)) {
-            factoryHandles
-                    .get(componentId)
-                    .forEach(cMh -> processFactoryMethod(componentId, cMh.componentId(), cMh.method()));
+            factoryHandles.get(componentId).forEach(cMh -> {
+                processFactoryMethod(componentId, cMh.componentId(), cMh.method());
+            });
         } else if (constructors.containsKey(clazz)) {
             processConstructor(constructors.get(clazz), componentId);
         }
