@@ -1,4 +1,4 @@
-package utours.ultimate.core.internal;
+package utours.ultimate.core.internal.topological;
 
 import utours.ultimate.core.ComponentGraph;
 import utours.ultimate.core.ComponentId;
@@ -8,7 +8,7 @@ import java.util.*;
 
 public class TopologicalOrderingComponentGraph implements OrderedComponentProvider {
     
-    private final List<ComponentId> finalOrderedComponents;
+    private List<ComponentId> finalOrderedComponents;
     private final List<List<ComponentId>> orderedComponents;
     private final Set<Integer> markedComponents;
     private final List<ComponentId> components;
@@ -48,7 +48,11 @@ public class TopologicalOrderingComponentGraph implements OrderedComponentProvid
         return componentGraph.fromIndex(lastIdx);
     }
 
-    public void run() {
+    /**
+     * TODO: Fix bug when ordering by group.
+     */
+    public void normalAlgorithm() {
+        finalOrderedComponents.clear();
         while (!componentsStack.isEmpty()) {
             append();
         }
@@ -65,7 +69,7 @@ public class TopologicalOrderingComponentGraph implements OrderedComponentProvid
 
         if (!markedComponents.contains(index)) {
             markedComponents.add(index);
-            List<Integer> successors = componentGraph.getGraph().get(index);
+            List<Integer> successors = componentGraph.successors().get(index);
             for (Integer t : successors) {
                 if (!markedComponents.contains(t)) {
                     var s = componentGraph.fromIndex(t);
@@ -85,12 +89,12 @@ public class TopologicalOrderingComponentGraph implements OrderedComponentProvid
             orderedComponents.add(new ArrayList<>());
         }
 
-
     }
-
 
     @Override
     public List<ComponentId> getOrderedComponents() {
+        normalAlgorithm();
         return finalOrderedComponents;
     }
+
 }

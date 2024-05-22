@@ -78,7 +78,7 @@ class AnnotationModuleEvaluatorProviderTest {
         var indexAAdd = graph.indexOf(ComponentId.ofClass(AAddComponent.class));
         var indexBAdd = graph.indexOf(ComponentId.ofClass(BAddComponent.class));
 
-        var deps = graph.getGraph().get(indexIAddC);
+        var deps = graph.successors().get(indexIAddC);
 
         assertTrue(deps.contains(indexAAdd));
         assertTrue(deps.contains(indexBAdd));
