@@ -74,12 +74,14 @@ public class TopologicalOrderingComponentGraph implements OrderedComponentProvid
             }
         }
 
-        if (!finalOrderedComponents.contains(componentId))
+        if (!orderedComponents.stream().flatMap(Collection::stream).toList().contains(componentId)) {
             orderedComponents.getLast().add(componentId);
+        }
 
         if (componentsStack.isEmpty() && markedComponents.size() != components.size()) {
             componentsStack.push(getMinimalPredComponent());
-            finalOrderedComponents.addAll(List.copyOf(orderedComponents.getLast()).reversed());
+            var reversedOrderedComponents = List.copyOf(orderedComponents.getLast()).reversed();
+            finalOrderedComponents.addAll(reversedOrderedComponents);
             orderedComponents.add(new ArrayList<>());
         }
 

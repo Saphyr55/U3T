@@ -204,7 +204,7 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
 
                 // We add the dependencies from params corresponding to the current component.
                 Arrays.stream(parameters)
-                        .map(p -> setupParamConstructors(p))
+                        .map(this::setupParamConstructors)
                         .filter(componentGraph::hasNode)
                         .forEach(paramId -> componentGraph.addDependency(componentId, paramId));
 
