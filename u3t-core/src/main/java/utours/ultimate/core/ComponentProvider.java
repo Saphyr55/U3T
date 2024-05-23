@@ -9,6 +9,10 @@ public interface ComponentProvider {
         return new Singleton(cw);
     }
 
+    static ComponentProvider prototype(ComponentWrapper cw) {
+        throw new IllegalStateException("Not implemented yet.");
+    }
+
     class Singleton implements ComponentProvider {
 
         private final ComponentWrapper componentWrapper;
@@ -23,4 +27,5 @@ public interface ComponentProvider {
         }
 
     }
+
 }

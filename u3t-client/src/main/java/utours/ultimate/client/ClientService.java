@@ -1,4 +1,4 @@
-package utours.ultimate.desktop.service;
+package utours.ultimate.client;
 
 import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.game.model.Game;

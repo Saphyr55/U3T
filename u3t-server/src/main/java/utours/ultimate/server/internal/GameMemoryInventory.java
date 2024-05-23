@@ -1,10 +1,10 @@
 package utours.ultimate.server.internal;
 
+import utours.ultimate.common.MapHelper;
 import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.core.steorotype.Mapping;
 import utours.ultimate.game.model.Game;
 import utours.ultimate.game.port.GameInventory;
-import utours.ultimate.server.common.MapHelper;
 
 import java.util.List;
 import java.util.Map;

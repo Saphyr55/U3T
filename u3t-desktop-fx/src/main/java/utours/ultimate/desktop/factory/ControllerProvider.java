@@ -9,10 +9,6 @@ public interface ControllerProvider {
 
     @Mapping
     @Component
-    PolymorphicController getPolymorphicController();
-
-    @Mapping
-    @Component
     PartiesController getPartiesController();
 
     @Mapping

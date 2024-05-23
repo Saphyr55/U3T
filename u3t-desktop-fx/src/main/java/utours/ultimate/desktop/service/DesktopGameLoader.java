@@ -1,4 +1,4 @@
-package utours.ultimate.desktop.service.impl;
+package utours.ultimate.desktop.service;
 
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;

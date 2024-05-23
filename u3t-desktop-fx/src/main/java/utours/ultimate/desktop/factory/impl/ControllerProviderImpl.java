@@ -4,7 +4,7 @@ import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.core.steorotype.Mapping;
 import utours.ultimate.desktop.controller.*;
 import utours.ultimate.desktop.factory.ControllerProvider;
-import utours.ultimate.desktop.service.ClientService;
+import utours.ultimate.client.ClientService;
 import utours.ultimate.game.feature.GameService;
 import utours.ultimate.game.feature.internal.GameAlmostFinishActionsProvider;
 import utours.ultimate.game.model.Game;
@@ -29,11 +29,6 @@ public class ControllerProviderImpl implements ControllerProvider {
         partiesController = new PartiesController(mainController, clientService, client);
         u3TGameController = new U3TGameController(service, game, new GameAlmostFinishActionsProvider(game), client);
         chatController = new ChatController();
-    }
-
-    @Override
-    public PolymorphicController getPolymorphicController() {
-        return new PolymorphicController();
     }
 
     @Override

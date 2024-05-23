@@ -25,13 +25,17 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
     private final Map<Class<?>, ComponentId> uniqueMap;
     private final Map<Class<?>, List<ComponentId>> additionalMap;
 
-    public AnnotationModuleEvaluatorProvider(String... packageNames) {
+    public AnnotationModuleEvaluatorProvider(List<String> packageNames) {
         this.componentGraph = new ComponentGraph();
         this.uniqueMap = defaultMap();
         this.additionalMap = defaultMap();
-        this.setNodes(Arrays.stream(packageNames)
+        this.setNodes(packageNames.stream()
                 .flatMap(this::classesOfPackageName)
                 .collect(Collectors.toSet()));
+    }
+    
+    public AnnotationModuleEvaluatorProvider(String... packageNames) {
+        this(Arrays.stream(packageNames).toList());
     }
 
     /**

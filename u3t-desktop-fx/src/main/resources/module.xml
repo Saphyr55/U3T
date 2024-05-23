@@ -4,7 +4,7 @@
 
     <!-- Services -->
 
-    <component class="utours.ultimate.desktop.service.impl.DesktopClientService" id="Desktop.Fx.ClientService" />
+    <component class="utours.ultimate.desktop.service.DesktopClientService" id="Desktop.Fx.ClientService" />
 
 
     <component class="utours.ultimate.game.feature.GameService"
@@ -13,8 +13,8 @@
 
     <!-- Client -->
 
-    <component class="utours.ultimate.desktop.factory.ClientProvider"
-               derived="utours.ultimate.desktop.factory.impl.ClientProviderImpl"
+    <component class="utours.ultimate.client.ClientProvider"
+               derived="utours.ultimate.client.impl.ClientProviderImpl"
                id="Desktop.Fx.ClientFactory" />
 
     <component class="utours.ultimate.net.Client" id="Desktop.Fx.Client">
@@ -35,7 +35,7 @@
                id="Desktop.Fx.ControllerFactory" >
         <constructor-args>
             <arg type="utours.ultimate.game.feature.GameService" value="U3T.GameService" />
-            <arg type="utours.ultimate.desktop.service.ClientService" value="Desktop.Fx.ClientService" />
+            <arg type="utours.ultimate.client.ClientService" value="Desktop.Fx.ClientService" />
             <arg type="utours.ultimate.net.Client" value="Desktop.Fx.Client" />
         </constructor-args>
     </component>

@@ -1,13 +1,10 @@
 package utours.ultimate.desktop.factory.impl;
 
-import utours.ultimate.core.ComponentProvider;
 import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.core.steorotype.Mapping;
 import utours.ultimate.desktop.action.OnClickChatNavButton;
 import utours.ultimate.desktop.action.OnClickPartiesNavButton;
 import utours.ultimate.desktop.controller.MainController;
-import utours.ultimate.desktop.controller.PolymorphicController;
-import utours.ultimate.desktop.factory.ControllerProvider;
 import utours.ultimate.desktop.view.DesktopChatView;
 import utours.ultimate.desktop.view.DesktopNavButton;
 import utours.ultimate.ui.NavButton;

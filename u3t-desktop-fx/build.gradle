@@ -37,6 +37,7 @@ dependencies {
   implementation project(':u3t-ui-core')
   implementation project(':u3t-net-core')
   implementation project(':u3t-game-domain')
+  implementation project(':u3t-client')
 
   testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")

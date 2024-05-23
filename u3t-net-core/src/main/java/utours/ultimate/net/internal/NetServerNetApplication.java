@@ -15,7 +15,7 @@ public class NetServerNetApplication implements NetApplication {
     private final NetServer server;
     private boolean stopped = true;
 
-    public NetServerNetApplication(NetApplicationConfiguration configuration) {
+    public NetServerNetApplication(NetServerConfiguration configuration) {
         this.handlers = new HashMap<>();
         this.server = new NetServerSocket(configuration);
         this.subscribers = new HashMap<>();

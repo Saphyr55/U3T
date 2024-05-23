@@ -9,8 +9,8 @@ import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
 
-    @FXML private PolymorphicView mainLeftPolymorphic;
-    @FXML private PolymorphicView mainRightPolymorphic;
+    private @FXML PolymorphicView mainLeftPolymorphic;
+    private @FXML PolymorphicView mainRightPolymorphic;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {

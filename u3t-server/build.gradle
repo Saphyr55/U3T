@@ -22,6 +22,7 @@ dependencies {
     implementation project(':u3t-core')
     implementation project(':u3t-net-core')
     implementation project(':u3t-game-domain')
+    implementation project(':u3t-common')
 
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'

@@ -1,4 +1,4 @@
-package utours.ultimate.server.common;
+package utours.ultimate.common;
 
 import java.util.HashMap;
 import java.util.Map;

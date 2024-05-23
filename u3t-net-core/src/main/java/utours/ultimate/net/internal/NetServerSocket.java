@@ -10,7 +10,7 @@ public class NetServerSocket implements NetServer {
 
     private final ServerSocket serverSocket;
 
-    public NetServerSocket(NetApplicationConfiguration configuration) {
+    public NetServerSocket(NetServerConfiguration configuration) {
         this.serverSocket = createServerSocket(configuration);
     }
 
@@ -32,7 +32,7 @@ public class NetServerSocket implements NetServer {
         }
     }
 
-    private ServerSocket createServerSocket(NetApplicationConfiguration configuration) {
+    private ServerSocket createServerSocket(NetServerConfiguration configuration) {
         try {
             return ServerSocketFactory
                     .getDefault()

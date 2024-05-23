@@ -2,8 +2,6 @@
 
 <fx:root xmlns="http://javafx.com/javafx"
          xmlns:fx="http://javafx.com/fxml"
-         type="utours.ultimate.desktop.view.PolymorphicView"
-         fx:id="root"
-         fx:controller="utours.ultimate.desktop.controller.PolymorphicController">
+         type="utours.ultimate.desktop.view.PolymorphicView">
 
 </fx:root>
