@@ -9,18 +9,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AnnotationModuleEvaluatorProviderTest {
 
-    static AnnotationComponentAnalyser provider;
+    static AnnotationComponentAnalyser analyser;
     static ComponentEvaluator evaluator;
     static ComponentGraph graph;
     static ModuleContext context;
 
     @BeforeAll
     static void beforeAll() {
-        provider = new AnnotationComponentAnalyser();
-        context = ModuleContext.of(AnnotationModuleEvaluatorProviderTest.class);
-        evaluator = provider.evaluator(context);
+        analyser = new AnnotationComponentAnalyser();
+        context = ModuleContext.of(ContextTest.class);
+        analyser.addModuleContext(context);
+        evaluator = analyser.evaluator();
         evaluator.evaluate();
-        graph = provider.getComponentGraph();
+        graph = analyser.getComponentGraph();
     }
 
     @Test
