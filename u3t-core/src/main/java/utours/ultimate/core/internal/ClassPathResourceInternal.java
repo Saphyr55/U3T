@@ -1,33 +1,31 @@
 package utours.ultimate.core.internal;
 
 import java.io.*;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.FileSystems;
+import java.nio.file.Paths;
+import java.util.Objects;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class ClassPathResourceInternal {
 
-    public static InputStream getResourceAsStream(String filepath) throws IOException {
+    public static InputStream getResourceAsStream(String filepath) {
+        try {
+            File file = new File(Objects.requireNonNull(ClassPathResourceInternal.class.getResource(filepath)).toURI());
 
-        var classLoader = Thread.currentThread().getContextClassLoader();
-        var resource = classLoader.getResource(filepath);
+            System.out.println("-------- " +  file + " ----------");
 
-        if (resource == null) {
-            throw new FileNotFoundException(filepath);
+            return new FileInputStream(file);
+        } catch (URISyntaxException | FileNotFoundException e) {
+            throw new RuntimeException(e);
         }
-
-        return new FileInputStream(resource.getPath());
     }
 
     public static String readAllLines(String path) throws IOException {
 
-        var applicationPropertiesInput = ClassPathResourceInternal.class
-                .getClassLoader()
-                .getResourceAsStream(path);
-
-        if (applicationPropertiesInput == null) {
-            throw new FileNotFoundException(path);
-        }
+        var applicationPropertiesInput = getResourceAsStream(path);
 
         var reader = new InputStreamReader(applicationPropertiesInput);
         var buffer = new BufferedReader(reader);
@@ -38,10 +36,8 @@ public class ClassPathResourceInternal {
         return content;
     }
 
-    public static URL getResource(String path) throws IOException {
-        return Thread.currentThread()
-                .getContextClassLoader()
-                .getResource(path);
+    public static URL getResource(String path) {
+        return ClassPathResourceInternal.class.getClassLoader().getResource(path);
     }
 
 }

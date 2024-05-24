@@ -1,6 +1,5 @@
 package utours.ultimate.server;
 
-import utours.ultimate.core.settings.Settings;
 import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.core.steorotype.Mapping;
 import utours.ultimate.net.NetApplication;
@@ -10,9 +9,13 @@ import utours.ultimate.net.internal.NetServerConfigurationSettings;
 public class NetApplicationProvider {
 
     private final NetApplication netApplication;
-    
+
     public NetApplicationProvider() {
-        netApplication = NetApplication.ofServer(new NetServerConfigurationSettings(Main.getContext().settings()));
+
+        var settings = Main.getContext().settings();
+        var configuration = new NetServerConfigurationSettings(settings);
+
+        this.netApplication = NetApplication.ofServer(configuration);
     }
 
     @Mapping

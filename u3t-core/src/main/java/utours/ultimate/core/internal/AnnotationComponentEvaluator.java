@@ -5,7 +5,7 @@ import utours.ultimate.core.*;
 import java.lang.invoke.MethodHandle;
 import java.util.*;
 
-public class AnnotationModuleEvaluator implements ModuleEvaluator {
+public class AnnotationComponentEvaluator implements ComponentEvaluator {
 
     private final Map<String, ComponentProvider> componentsById = new HashMap<>();
     private final Map<Class<?>, List<ComponentProvider>> additionalComponents = new HashMap<>();
@@ -17,11 +17,11 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
     private final Map<Class<?>, List<ComponentId>> additionalMap;
     private final ComponentGraph componentGraph;
 
-    public AnnotationModuleEvaluator(ComponentGraph componentGraph,
-                                     Map<ComponentId, List<ComponentMethodHandle>> factoryHandles,
-                                     Map<Class<?>, MethodHandle> constructors,
-                                     Map<Class<?>, ComponentId> uniqueMap,
-                                     Map<Class<?>, List<ComponentId>> additionalMap) {
+    public AnnotationComponentEvaluator(ComponentGraph componentGraph,
+                                        Map<ComponentId, List<ComponentMethodHandle>> factoryHandles,
+                                        Map<Class<?>, MethodHandle> constructors,
+                                        Map<Class<?>, ComponentId> uniqueMap,
+                                        Map<Class<?>, List<ComponentId>> additionalMap) {
 
         this.componentGraph = componentGraph;
         this.factoryHandles = factoryHandles;
@@ -36,8 +36,8 @@ public class AnnotationModuleEvaluator implements ModuleEvaluator {
         List<ComponentId> componentIds = componentGraph.getTopologicalOrderingComponents();
 
         // Debug thing.
-        componentGraph.printGraph();
-        componentIds.forEach(componentId -> System.out.println(componentId.clazz().getName()));
+        // componentGraph.printGraph();
+        // componentIds.forEach(componentId -> System.out.println(componentId.clazz().getName()));
 
         List<Throwable> errors = ErrorManager.forEachOf(componentIds, this::processComponentId);
         ErrorManager.throwErrorsOf(errors);

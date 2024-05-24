@@ -14,9 +14,8 @@ public final class ClassPathResource {
      *
      * @param path path
      * @return url
-     * @throws IOException IO exception.
      */
-    public static URL getResource(String path) throws IOException {
+    public static URL getResource(String path){
         return ClassPathResourceInternal.getResource(path);
     }
 
@@ -27,7 +26,7 @@ public final class ClassPathResource {
      * @return url
      * @throws IOException IO exception.
      */
-    public static InputStream getResourceAsStream(String filepath) throws IOException {
+    public static InputStream getResourceAsStream(String filepath) {
         return ClassPathResourceInternal.getResourceAsStream(filepath);
     }
 

@@ -5,9 +5,6 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import utours.ultimate.client.ClientContext;
 import utours.ultimate.core.ModuleContext;
-import utours.ultimate.core.ModuleContextRegistry;
-import utours.ultimate.core.ModuleEvaluatorProvider;
-import utours.ultimate.core.provider.AnnotationModuleEvaluatorProvider;
 import utours.ultimate.core.steorotype.ModuleRegister;
 import utours.ultimate.desktop.view.DesktopMainView;
 
@@ -31,8 +28,8 @@ public final class MainApplication extends Application {
 
     public static void main(String[] args) {
 
-        context = ModuleContext.of(MODULE_IDENTIFIER, getModuleProvider());
-        context.mergeModule(ClientContext.getContext().identifier());
+        context = ModuleContext.of(MainApplication.class);
+        context.mergeModule(ClientContext.getContext());
         context.load();
 
         launch(args);
@@ -41,19 +38,6 @@ public final class MainApplication extends Application {
     @ModuleRegister
     public static ModuleContext getContext() {
         return context;
-    }
-
-    private static ModuleEvaluatorProvider getModuleProvider() {
-        return new AnnotationModuleEvaluatorProvider(
-                "utours.ultimate.desktop",
-                "utours.ultimate.desktop.action",
-                "utours.ultimate.desktop.controller",
-                "utours.ultimate.desktop.factory",
-                "utours.ultimate.desktop.factory.impl",
-                "utours.ultimate.desktop.service",
-                "utours.ultimate.desktop.view",
-                "utours.ultimate.desktop.view.u3t"
-        );
     }
 
 }

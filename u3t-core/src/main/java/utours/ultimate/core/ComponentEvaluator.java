@@ -3,7 +3,7 @@ package utours.ultimate.core;
 import java.util.List;
 import java.util.Map;
 
-public interface ModuleEvaluator {
+public interface ComponentEvaluator {
 
     /**
      * Evaluate the module, fill all mapping.

@@ -43,31 +43,34 @@ public interface ModuleContext {
     /**
      * Can merge the current module context instance with the module context identifier.
      *
-     * @param identifier the identifier of the module to merge.
+     * @param context the module context to merge.
      */
-    void mergeModule(String identifier);
+    void mergeModule(ModuleContext context);
+
+    /**
+     * Return the current context class.
+     *
+     * @return the context class.
+     */
+    Class<?> getContextClass();
 
     /**
      * Instantiate a module context.
      *
-     * @param identifier the identifier of the module to instanciate must be unique.
-     * @param evaluatorProvider the module provider.
      * @return the module context.
      */
-    static ModuleContext of(String identifier, ModuleEvaluatorProvider evaluatorProvider) {
-        return new ModuleContextImpl(identifier, evaluatorProvider);
+    static ModuleContext of(Class<?> contextClass) {
+        return new ModuleContextImpl(contextClass);
     }
 
     /**
      * Instantiate a module context.
      *
-     * @param identifier the identifier of the module to instanciate must be unique.
-     * @param evaluatorProvider the module provider.
      * @param settingsLoader the settings loader.
      * @return the module context.
      */
-    static ModuleContext of(String identifier, ModuleEvaluatorProvider evaluatorProvider, SettingsLoader settingsLoader) {
-        return new ModuleContextImpl(identifier, evaluatorProvider, settingsLoader);
+    static ModuleContext of(Class<?> contextClass, SettingsLoader settingsLoader) {
+        return new ModuleContextImpl(contextClass, settingsLoader);
     }
 
 }

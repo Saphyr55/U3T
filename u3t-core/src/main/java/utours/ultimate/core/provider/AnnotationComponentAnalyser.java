@@ -1,7 +1,7 @@
 package utours.ultimate.core.provider;
 
 import utours.ultimate.core.*;
-import utours.ultimate.core.internal.AnnotationModuleEvaluator;
+import utours.ultimate.core.internal.AnnotationComponentEvaluator;
 import utours.ultimate.core.internal.ErrorManager;
 import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.core.steorotype.ConstructorProperties;
@@ -16,34 +16,26 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvider {
+public class AnnotationComponentAnalyser implements ComponentAnalyser {
 
     private final ComponentGraph componentGraph;
     private final Map<Class<?>, ComponentId> uniqueMap;
     private final Map<Class<?>, List<ComponentId>> additionalMap;
 
-    public AnnotationModuleEvaluatorProvider(List<String> packageNames) {
+    public AnnotationComponentAnalyser() {
         this.componentGraph = new ComponentGraph();
         this.uniqueMap = defaultMap();
         this.additionalMap = defaultMap();
-        this.setNodes(packageNames.stream()
-                .flatMap(this::classesOfPackageName)
-                .collect(Collectors.toSet()));
-    }
-    
-    public AnnotationModuleEvaluatorProvider(String... packageNames) {
-        this(Arrays.stream(packageNames).toList());
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
-    public ModuleEvaluator provideModuleEvaluator() {
+    public void addModuleContext(ModuleContext moduleContext) {
+        addNodes(ClassProviderManager.classesOfContext(moduleContext));
+    }
+
+    @Override
+    public ComponentEvaluator evaluator() {
 
         Map<ComponentId, List<ComponentMethodHandle>> factoryHandles = defaultMap();
 
@@ -53,13 +45,8 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
         }
 
         Map<Class<?>, MethodHandle> constructors = setupConstructorsDependencies();
-        /*
-        factoryHandles.forEach((cId, map) -> {
-            componentGraph.removeDependenciesOf(cId);
-            map.forEach(cMh -> componentGraph.addDependency(cId, cMh.componentId()));
-        });
-        */
-        return new AnnotationModuleEvaluator(
+
+        return new AnnotationComponentEvaluator(
                 componentGraph,
                 factoryHandles,
                 constructors,
@@ -73,7 +60,7 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
      *
      * @param classes classes.
      */
-    private void setNodes(Set<Class<?>> classes) {
+    private void addNodes(Set<Class<?>> classes) {
         // We filter every component, and add it in the graph as a node.
         classes.stream()
                 .filter(this::isComponent)
@@ -424,10 +411,6 @@ public class AnnotationModuleEvaluatorProvider implements ModuleEvaluatorProvide
 
     public ComponentGraph getComponentGraph() {
         return componentGraph;
-    }
-
-    private Stream<? extends Class<?>> classesOfPackageName(String packageName) {
-        return ClassProviderManager.classesOf(packageName).stream();
     }
 
     private <K, V> Map<K, V> defaultMap() {

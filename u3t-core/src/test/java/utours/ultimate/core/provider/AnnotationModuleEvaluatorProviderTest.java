@@ -9,14 +9,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AnnotationModuleEvaluatorProviderTest {
 
-    static AnnotationModuleEvaluatorProvider provider;
-    static ModuleEvaluator evaluator;
+    static AnnotationComponentAnalyser provider;
+    static ComponentEvaluator evaluator;
     static ComponentGraph graph;
+    static ModuleContext context;
 
     @BeforeAll
     static void beforeAll() {
-        provider = new AnnotationModuleEvaluatorProvider("utours.ultimate.core.component");
-        evaluator = provider.provideModuleEvaluator();
+        provider = new AnnotationComponentAnalyser();
+        context = ModuleContext.of(AnnotationModuleEvaluatorProviderTest.class);
+        evaluator = provider.evaluator(context);
         evaluator.evaluate();
         graph = provider.getComponentGraph();
     }

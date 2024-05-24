@@ -2,6 +2,7 @@ package utours.ultimate.core;
 
 import utours.ultimate.core.internal.ClassProviderManagerInternal;
 
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.Optional;
 import java.util.Set;
@@ -49,12 +50,13 @@ public class ClassProviderManager {
     }
 
     /**
+     * Return classes from the current module context.
      *
-     * @param packageName
+     * @param context the current module context.
      * @return
      */
-    public static Set<Class<?>> classesOf(String packageName) {
-        return ClassProviderManagerInternal.classesOf(packageName);
+    public static Set<Class<?>> classesOfContext(ModuleContext context) {
+        return ClassProviderManagerInternal.classesOf(context);
     }
 
     /**

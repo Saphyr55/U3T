@@ -2,47 +2,40 @@ package utours.ultimate.core.internal;
 
 import utours.ultimate.core.*;
 import utours.ultimate.core.settings.ClassPathSettingsLoader;
+import utours.ultimate.core.settings.ModuleContextSettings;
 import utours.ultimate.core.settings.Settings;
 import utours.ultimate.core.settings.SettingsLoader;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
-public class ModuleContextImpl implements ModuleContext {
+public final class ModuleContextImpl implements ModuleContext {
 
-    private final String identifier;
+    private final ComponentAnalyser analyser;
+    private final ModuleContextSettings settings;
     private final Container container;
-    private final ModuleEvaluatorProvider moduleEvaluatorProvider;
-    private final Settings settings = new Settings();
+    private final Class<?> contextClass;
+    private final String identifier;
 
-    public ModuleContextImpl(ModuleEvaluatorProvider moduleEvaluatorProvider) {
-        this(UUID.randomUUID().toString(), moduleEvaluatorProvider);
+    public ModuleContextImpl(Class<?> contextClass) {
+        this(contextClass, defaultSettingsLoader(contextClass));
     }
 
-    public ModuleContextImpl(String identifier,
-                             ModuleEvaluatorProvider moduleEvaluatorProvider) {
-
-        this(identifier, moduleEvaluatorProvider, defaultSettingsLoader());
+    public ModuleContextImpl(Class<?> contextClass, SettingsLoader settingsLoader) {
+        this(contextClass, settingsLoader, defaultContainer());
     }
 
-    public ModuleContextImpl(String identifier,
-                             ModuleEvaluatorProvider moduleEvaluatorProvider,
-                             SettingsLoader settingsLoader) {
-
-        this(identifier, moduleEvaluatorProvider, settingsLoader, defaultContainer());
-    }
-
-    private ModuleContextImpl(String identifier,
-                              ModuleEvaluatorProvider moduleEvaluatorProvider,
+    private ModuleContextImpl(Class<?> contextClass,
                               SettingsLoader settingsLoader,
                               Container container) {
 
-        this.identifier = identifier;
-        this.moduleEvaluatorProvider = moduleEvaluatorProvider;
+        this.settings = new ModuleContextSettings(settingsLoader);
+        this.contextClass = contextClass;
         this.container = container;
+        this.identifier = settings.getIdentifier();
+        this.analyser = settings.getComponentEvaluator();
+        this.analyser.addModuleContext(this);
 
-        settingsLoader.load(settings);
+        ModuleContextRegistry.getDefault().register(this);
     }
 
     @Override
@@ -52,16 +45,15 @@ public class ModuleContextImpl implements ModuleContext {
 
     @Override
     public Settings settings() {
-        return settings;
+        return settings.getSettings();
     }
 
     @Override
     public void load() {
-        ModuleEvaluator evaluator = moduleEvaluatorProvider.provideModuleEvaluator();
-        load(container, evaluator);
+        loadContainer(container, analyser.evaluator());
     }
 
-    private void load(Container container, ModuleEvaluator evaluator) {
+    private static void loadContainer(Container container, ComponentEvaluator evaluator) {
         try {
 
             evaluator.evaluate();
@@ -99,20 +91,21 @@ public class ModuleContextImpl implements ModuleContext {
     }
 
     @Override
-    public void mergeModule(String identifier) {
-        ModuleContext context = ModuleContextRegistry.getDefault().get(identifier);
-        if (context instanceof ModuleContextImpl impl) {
-            ModuleEvaluator evaluator = impl.moduleEvaluatorProvider.provideModuleEvaluator();
-            load(container, evaluator);
-        }
+    public void mergeModule(ModuleContext context) {
+        analyser.addModuleContext(context);
+    }
+
+    @Override
+    public Class<?> getContextClass() {
+        return contextClass;
     }
 
     private static Container defaultContainer() {
         return new ContainerImpl();
     }
 
-    private static SettingsLoader defaultSettingsLoader() {
-        return new ClassPathSettingsLoader();
+    private static SettingsLoader defaultSettingsLoader(Class<?> contextClass) {
+        return new ClassPathSettingsLoader(contextClass);
     }
 
 }

@@ -2,7 +2,7 @@ package utours.ultimate.core.internal;
 
 import utours.ultimate.core.ComponentProvider;
 import utours.ultimate.core.ComponentWrapper;
-import utours.ultimate.core.ModuleEvaluator;
+import utours.ultimate.core.ComponentEvaluator;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -10,7 +10,7 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.util.*;
 
-public class XmlModuleEvaluator implements ModuleEvaluator {
+public class XmlComponentEvaluator implements ComponentEvaluator {
 
     private final Map<String, ComponentProvider> componentsById = new HashMap<>();
     private final Map<Class<?>, List<ComponentProvider>> additionalComponents = new HashMap<>();
@@ -18,7 +18,7 @@ public class XmlModuleEvaluator implements ModuleEvaluator {
     private final XmlModule xmlModule;
     private Throwable error = null;
 
-    public XmlModuleEvaluator(XmlModule xmlModule) {
+    public XmlComponentEvaluator(XmlModule xmlModule) {
         this.xmlModule = xmlModule;
     }
 

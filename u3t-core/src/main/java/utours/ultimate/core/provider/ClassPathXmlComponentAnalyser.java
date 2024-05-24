@@ -4,10 +4,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import utours.ultimate.core.ClassPathResource;
+import utours.ultimate.core.ModuleContext;
 import utours.ultimate.core.internal.XmlModule;
-import utours.ultimate.core.ModuleEvaluator;
-import utours.ultimate.core.ModuleEvaluatorProvider;
-import utours.ultimate.core.internal.XmlModuleEvaluator;
+import utours.ultimate.core.ComponentEvaluator;
+import utours.ultimate.core.ComponentAnalyser;
+import utours.ultimate.core.internal.XmlComponentEvaluator;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -20,11 +21,11 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
-public class ClassPathXmlModuleEvaluatorProvider implements ModuleEvaluatorProvider {
+public class ClassPathXmlComponentAnalyser implements ComponentAnalyser {
 
     public static final String MODULE_XML_FILENAME = "module.xml";
 
-    public ClassPathXmlModuleEvaluatorProvider() { }
+    public ClassPathXmlComponentAnalyser() { }
 
     private XmlModule interpretXmlModule() throws Exception {
 
@@ -307,9 +308,14 @@ public class ClassPathXmlModuleEvaluatorProvider implements ModuleEvaluatorProvi
     }
 
     @Override
-    public ModuleEvaluator provideModuleEvaluator() {
+    public void addModuleContext(ModuleContext moduleContext) {
+
+    }
+
+    @Override
+    public ComponentEvaluator evaluator() {
         try {
-            return new XmlModuleEvaluator(interpretXmlModule());
+            return new XmlComponentEvaluator(interpretXmlModule());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
