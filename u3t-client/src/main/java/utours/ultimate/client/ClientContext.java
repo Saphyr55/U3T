@@ -22,15 +22,4 @@ public enum ClientContext {
         return DEFAULT.moduleContext;
     }
 
-    private static ComponentAnalyser getModuleEvaluator() {
-        return new AnnotationComponentAnalyser();
-    }
-
-    private static List<String> getPackageNames() {
-        return List.of(
-                "utours.ultimate.client",
-                "utours.ultimate.client.impl"
-        );
-    }
-
 }

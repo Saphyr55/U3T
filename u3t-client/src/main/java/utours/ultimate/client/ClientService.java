@@ -7,8 +7,17 @@ import utours.ultimate.net.Client;
 import java.util.function.Consumer;
 
 @Component
-public interface ClientService {
+public class ClientService {
 
-    void joinGame(Client client, Consumer<Game> onJoinGame);
+    public void joinGame(Client client, Consumer<Game> onJoinGame) {
+
+        Game game = Game.newDefaultGame();
+
+        client.messageSender().send("server.game.add-game", game, message -> {
+            if (message.isSuccess()) {
+                onJoinGame.accept(game);
+            }
+        });
+    }
 
 }

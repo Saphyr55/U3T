@@ -18,4 +18,12 @@ public interface MessageSender {
      */
     MessageSender send(String address, Object message, Handler<Message> handler);
 
+    /**
+     *
+     * @param address
+     * @param message
+     * @return
+     */
+    MessageSender send(String address, Object message);
+
 }

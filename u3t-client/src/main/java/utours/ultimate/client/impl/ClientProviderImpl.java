@@ -9,10 +9,10 @@ import utours.ultimate.net.NetServerConfiguration;
 import utours.ultimate.net.Client;
 import utours.ultimate.net.internal.NetServerConfigurationSettings;
 
-@Component
 @Mapping
+@Component
 public class ClientProviderImpl implements ClientProvider {
-    
+
     private final Client client;
 
     public ClientProviderImpl() {

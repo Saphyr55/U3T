@@ -17,7 +17,9 @@ public final class DesktopGameLoader implements GameLoader {
     private final GameGridView gridView;
     private final Consumer<PrimitiveTile> onAcceptTile;
 
-    public DesktopGameLoader(GameGridView gridView, Consumer<PrimitiveTile> onAcceptTile) {
+    public DesktopGameLoader(GameGridView gridView,
+                             Consumer<PrimitiveTile> onAcceptTile) {
+
         this.gridView = gridView;
         this.onAcceptTile = onAcceptTile;
     }

@@ -30,9 +30,9 @@ public class GameMemoryInventory implements GameInventory {
 
     @Override
     public void add(Game party) {
-        games.put(party.gameID(), party);
+        games.putIfAbsent(party.gameID(), party);
     }
-
+    
     @Override
     public void update(Game party) {
         games.put(party.gameID(), party);

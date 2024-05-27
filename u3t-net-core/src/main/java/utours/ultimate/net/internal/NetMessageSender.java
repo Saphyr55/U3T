@@ -24,6 +24,14 @@ public class NetMessageSender implements MessageSender {
         return this;
     }
 
+    @Override
+    public MessageSender send(String address, Object message) {
+
+        CompletableFuture.supplyAsync(() -> client.sendMessage(address, message));
+
+        return this;
+    }
+
     private Void acceptError(String address, Throwable throwable, Handler<Message> onReceive) {
         try {
             onReceive.handle(Message.error(address));
