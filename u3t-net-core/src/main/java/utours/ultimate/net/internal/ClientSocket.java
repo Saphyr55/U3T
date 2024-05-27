@@ -7,7 +7,10 @@ import utours.ultimate.net.data.MessageData;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class ClientSocket implements Client {
@@ -15,12 +18,17 @@ public class ClientSocket implements Client {
     private final Socket clientSocket;
     private final ObjectOutputStream out;
     private final ObjectInputStream in;
+    private final Map<String, List<Handler<Message>>> onReceiveMessageHandlers;
+    private Thread clientThread;
 
     public ClientSocket(Socket clientSocket) throws IOException {
         this.clientSocket = clientSocket;
         this.out = new ObjectOutputStream(clientSocket.getOutputStream());
         this.in = new ObjectInputStream(clientSocket.getInputStream());
+        this.onReceiveMessageHandlers = new HashMap<>();
+        // this.clientThread = Thread.ofPlatform().start(this::onReceiveMessages);
     }
+
 
     public ClientSocket(String address, int port) throws IOException {
         this(new Socket(address, port));
@@ -65,9 +73,12 @@ public class ClientSocket implements Client {
         CompletableFuture.runAsync(() -> {
             try {
                 Message message = (Message) in.readObject();
-                handler.handle(message);
+                while (message != null && message.address().equals(address)) {
+                    handler.handle(message);
+                    message = (Message) in.readObject();
+                }
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
         });
     }
@@ -80,6 +91,21 @@ public class ClientSocket implements Client {
     @Override
     public ObjectInputStream input() {
         return in;
+    }
+
+    private void onReceiveMessages() {
+        try {
+            /*
+            while (true) {
+                Message message = (Message) in.readObject();
+                for (Handler<Message> messageHandler : onReceiveMessageHandlers.get(message.address())) {
+                    messageHandler.handle(message);
+                }
+            }
+             */
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
     }
 
 

@@ -1,6 +1,8 @@
 package utours.ultimate.game.model;
 
-public enum GameState {
+import java.io.Serializable;
+
+public enum GameState implements Serializable {
 
     Ready {
         @Override

@@ -15,7 +15,7 @@ public class NetApplicationProvider {
         var settings = Main.getContext().settings();
         var configuration = new NetServerConfigurationSettings(settings);
 
-        this.netApplication = NetApplication.ofServer(configuration);
+        this.netApplication = NetApplication.serverOf(configuration);
     }
 
     @Mapping

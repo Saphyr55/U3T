@@ -25,7 +25,7 @@ public class NetServerApplicationTest {
         if (isSetup) return;
 
         isSetup = true;
-        netApplication = NetApplication.ofServer(configuration);
+        netApplication = NetApplication.serverOf(configuration);
 
         netApplication.handler("an.address", NetServerApplicationTest::defaultTreatment);
         netApplication.handler("foo.address", NetServerApplicationTest::fooTreatment);

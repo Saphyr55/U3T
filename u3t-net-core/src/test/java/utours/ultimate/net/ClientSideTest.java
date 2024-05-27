@@ -63,10 +63,10 @@ public class ClientSideTest extends NetServerApplicationTest {
 
         client.onReceiveMessage("baz.server.address", msg -> {
             assertEquals("baz", msg.content());
-            client.close();
         });
 
         netApplication.sendMessage("baz.server.address", "baz");
+        netApplication.sendMessage("baz.server.address", "bar");
     }
 
 

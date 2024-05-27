@@ -39,7 +39,9 @@ public class NetServerNetApplication implements NetApplication {
                 .computeIfAbsent(subAddress, s -> new ArrayList<>())
                 .add(context.client());
 
-        context.writer().writeObject(new MessageData(context.address(), true, true));
+        var message = new MessageData(context.address(), true, true);
+
+        context.writer().writeObject(message);
         context.writer();
     }
 
@@ -49,12 +51,12 @@ public class NetServerNetApplication implements NetApplication {
             var in = client.input();
             var out = client.output();
 
-            Message message = (Message) in.readObject();
+            var message = (Message) in.readObject();
             while (message != null) {
                 var address = message.address();
                 if (hasAddress(address)) {
-                    for (Handler<Context> contextHandler : handlers.get(address)) {
-                        Context context = new ContextData(out, in, message, client, address);
+                    for (var contextHandler : handlers.get(address)) {
+                        var context = new ContextData(out, in, message, client, address);
                         contextHandler.handle(context);
                     }
                 } else {
@@ -89,15 +91,20 @@ public class NetServerNetApplication implements NetApplication {
     @Override
     public void sendMessage(String address, Object content) {
         try {
-            if (!subscribers.containsKey(address)) return;
+
+            if (!subscribers.containsKey(address)) {
+                return;
+            }
+
             for (Client client : subscribers.get(address)) {
                 client.output().writeObject(new MessageData(address, content, true));
                 client.output().flush();
             }
+
         } catch (IOException e) {
             e.printStackTrace();
-            throw new RuntimeException(e);
         }
+
     }
 
     boolean hasAddress(String address) {

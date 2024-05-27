@@ -1,5 +1,6 @@
 package utours.ultimate.desktop.controller;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -7,6 +8,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import utours.ultimate.client.ClientService;
+import utours.ultimate.desktop.MainApplication;
 import utours.ultimate.desktop.view.DesktopPartiesView;
 import utours.ultimate.desktop.view.U3TGameView;
 import utours.ultimate.game.model.Game;
@@ -57,7 +59,9 @@ public class PartiesController implements Initializable {
     }
 
     private void onJoinGame(Game game) {
-        mainController.getMainRightPolymorphic().replaceRegion(new U3TGameView());
+        Platform.runLater(() -> mainController
+                .getMainRightPolymorphic()
+                .replaceRegion(new U3TGameView()));
     }
 
 }

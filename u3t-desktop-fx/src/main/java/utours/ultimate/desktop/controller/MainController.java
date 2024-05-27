@@ -24,4 +24,7 @@ public class MainController implements Initializable {
     public PolymorphicView getMainRightPolymorphic() {
         return mainRightPolymorphic;
     }
+
+
+
 }

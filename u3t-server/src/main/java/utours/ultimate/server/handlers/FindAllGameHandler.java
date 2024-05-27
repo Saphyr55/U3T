@@ -17,9 +17,7 @@ public class FindAllGameHandler implements Handler<Context> {
     private final NetApplication application;
     private final GameInventory gameMemoryInventory;
 
-    public FindAllGameHandler(NetApplication application,
-                              GameInventory gameInventory) {
-
+    public FindAllGameHandler(NetApplication application, GameInventory gameInventory) {
         this.application = application;
         this.gameMemoryInventory = gameInventory;
     }

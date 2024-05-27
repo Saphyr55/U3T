@@ -1,10 +1,12 @@
 package utours.ultimate.game.model;
 
+import java.io.Serializable;
+
 public record Player(
         String id,
         String name,
         Integer score
-) {
+) implements Serializable {
 
     @Override
     public boolean equals(Object obj) {

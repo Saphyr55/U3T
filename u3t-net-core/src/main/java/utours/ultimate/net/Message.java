@@ -27,7 +27,6 @@ public interface Message extends Serializable {
     }
 
     /**
-     *
      * @return
      */
     Object content();

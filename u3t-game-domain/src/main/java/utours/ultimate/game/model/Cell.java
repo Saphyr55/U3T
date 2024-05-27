@@ -1,6 +1,8 @@
 package utours.ultimate.game.model;
 
-public sealed interface Cell {
+import java.io.Serializable;
+
+public sealed interface Cell extends Serializable {
 
     record Board(Cell[][] cells) implements Cell { }
 
@@ -9,7 +11,6 @@ public sealed interface Cell {
     record Cross() implements Cell { }
 
     record Round() implements Cell { }
-
 
     record Pos(int x, int y) { }
 

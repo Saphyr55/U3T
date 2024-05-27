@@ -14,6 +14,7 @@ public class OnClickChatNavButton implements OnClickButton {
 
     public OnClickChatNavButton(Supplier<DesktopChatView> factory,
                                 Supplier<PolymorphicView> polymorphicViewSupplier) {
+
         this.factory = factory;
         this.polymorphicViewSupplier = polymorphicViewSupplier;
     }

@@ -4,7 +4,7 @@ import utours.ultimate.net.internal.NetServerNetApplication;
 
 public interface NetApplication {
 
-    static NetApplication ofServer(NetServerConfiguration configuration) {
+    static NetApplication serverOf(NetServerConfiguration configuration) {
         try {
             return new NetServerNetApplication(configuration);
         } catch (Exception e) {

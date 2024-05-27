@@ -1,10 +1,11 @@
 package utours.ultimate.game.model;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 public record Board(
     Cell[][] cells
-) {
+) implements Serializable {
 
     public static Board newEmptyBoard() {
         return newEmptyBoard(3);

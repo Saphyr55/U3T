@@ -1,5 +1,6 @@
 package utours.ultimate.game.model;
 
+import java.io.Serializable;
 import java.util.Optional;
 
 public record Game(Long gameID,
@@ -10,7 +11,7 @@ public record Game(Long gameID,
                    GameState state,
                    Action lastAction,
                    int size
-) {
+) implements Serializable {
     
     public static Game newDefaultGame() {
         return Builder.newDefaultBuilder().build();

@@ -25,9 +25,12 @@ public class NetMessageSender implements MessageSender {
     }
 
     @Override
-    public MessageSender send(String address, Object message) {
+    public MessageSender send(String address, Object content) {
 
-        CompletableFuture.supplyAsync(() -> client.sendMessage(address, message));
+        CompletableFuture
+                .supplyAsync(() -> client.sendMessage(address, content))
+                .thenAccept(response -> { })
+                .exceptionally(throwable -> null);
 
         return this;
     }

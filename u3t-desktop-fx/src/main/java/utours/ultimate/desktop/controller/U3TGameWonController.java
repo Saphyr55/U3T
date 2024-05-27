@@ -13,11 +13,8 @@ public class U3TGameWonController implements Initializable {
 
     private final Player player;
 
-    @FXML
-    private Button resetButton;
-
-    @FXML
-    private Label winnerLabel;
+    private @FXML Button resetButton;
+    private @FXML Label winnerLabel;
 
     public U3TGameWonController(Player player) {
         this.player = player;
