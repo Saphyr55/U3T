@@ -22,9 +22,10 @@ public record ContextData(
             for (Object o : content) {
                 writer.writeObject(o);
             }
+            writer.flush();
             writer.close();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 

@@ -34,8 +34,7 @@ public class NetServerSocket implements NetServer {
 
     private ServerSocket createServerSocket(NetServerConfiguration configuration) {
         try {
-            return ServerSocketFactory
-                    .getDefault()
+            return ServerSocketFactory.getDefault()
                     .createServerSocket(configuration.port());
         } catch (IOException e) {
             throw new RuntimeException(e);

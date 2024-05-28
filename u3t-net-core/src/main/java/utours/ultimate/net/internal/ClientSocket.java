@@ -7,7 +7,6 @@ import utours.ultimate.net.data.MessageData;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,19 +15,22 @@ import java.util.concurrent.CompletableFuture;
 public class ClientSocket implements Client {
 
     private final Socket clientSocket;
-    private final ObjectOutputStream out;
-    private final ObjectInputStream in;
+    private final OutputStream out;
+    private final InputStream in;
+    private final ObjectOutputStream oos;
     private final Map<String, List<Handler<Message>>> onReceiveMessageHandlers;
+    private final ObjectInputStream ois;
     private Thread clientThread;
 
     public ClientSocket(Socket clientSocket) throws IOException {
         this.clientSocket = clientSocket;
-        this.out = new ObjectOutputStream(clientSocket.getOutputStream());
-        this.in = new ObjectInputStream(clientSocket.getInputStream());
+        this.out = clientSocket.getOutputStream();
+        this.in = clientSocket.getInputStream();
         this.onReceiveMessageHandlers = new HashMap<>();
         // this.clientThread = Thread.ofPlatform().start(this::onReceiveMessages);
+        this.oos = new ObjectOutputStream(out);
+        this.ois = new ObjectInputStream(in);
     }
-
 
     public ClientSocket(String address, int port) throws IOException {
         this(new Socket(address, port));
@@ -37,12 +39,15 @@ public class ClientSocket implements Client {
     @Override
     public Message sendMessage(String address, Object content) {
         try {
-            Message messageWrapper = new MessageData(address, content, true);
-            out.writeObject(messageWrapper);
-            out.flush();
-            return (Message) in.readObject();
+
+            Message messageWrapper = Message.success(address, content);
+            oos.writeObject(messageWrapper);
+            oos.flush();
+
+            return (Message) ois.readObject();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            return Message.error(address);
         }
     }
 
@@ -68,14 +73,29 @@ public class ClientSocket implements Client {
     }
 
     @Override
+    public boolean isConnected() {
+        return clientSocket.isConnected();
+    }
+
+    @Override
+    public boolean isClosed() {
+        return clientSocket.isClosed();
+    }
+
+    @Override
+    public Socket socket() {
+        return clientSocket;
+    }
+
+    @Override
     public void onReceiveMessage(String address, Handler<Message> handler) {
         sendMessage(Message.SUBSCRIBE_ADDRESS, address);
         CompletableFuture.runAsync(() -> {
             try {
-                Message message = (Message) in.readObject();
+                Message message = (Message) ois.readObject();
                 while (message != null && message.address().equals(address)) {
                     handler.handle(message);
-                    message = (Message) in.readObject();
+                    message = (Message) ois.readObject();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -84,28 +104,33 @@ public class ClientSocket implements Client {
     }
 
     @Override
-    public ObjectOutputStream output() {
-        return out;
+    public OutputStream output() {
+        try {
+            return clientSocket.getOutputStream();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
-    public ObjectInputStream input() {
-        return in;
+    public InputStream input() {
+        try {
+            return clientSocket.getInputStream();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
-    private void onReceiveMessages() {
-        try {
-            /*
-            while (true) {
-                Message message = (Message) in.readObject();
-                for (Handler<Message> messageHandler : onReceiveMessageHandlers.get(message.address())) {
-                    messageHandler.handle(message);
-                }
-            }
-             */
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
+    @Override
+    public ObjectOutputStream oos() {
+        return oos;
+    }
+
+    @Override
+    public ObjectInputStream ois() {
+        return ois;
     }
 
 

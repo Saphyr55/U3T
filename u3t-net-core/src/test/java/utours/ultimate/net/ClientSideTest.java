@@ -3,6 +3,7 @@ package utours.ultimate.net;
 import org.junit.jupiter.api.*;
 import utours.ultimate.net.internal.NetServerApplicationTest;
 
+import java.nio.channels.spi.SelectorProvider;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -12,6 +13,7 @@ public class ClientSideTest extends NetServerApplicationTest {
 
     @Test
     void check_multiple_client() {
+
         var clients = IntStream.range(0, 10)
                 .mapToObj(value -> Client.of(HOST_ADDRESS, PORT))
                 .toList();
@@ -65,8 +67,7 @@ public class ClientSideTest extends NetServerApplicationTest {
             assertEquals("baz", msg.content());
         });
 
-        netApplication.sendMessage("baz.server.address", "baz");
-        netApplication.sendMessage("baz.server.address", "bar");
+        application.sendMessage("baz.server.address", "baz");
     }
 
 

@@ -3,6 +3,7 @@ package utours.ultimate.net;
 import utours.ultimate.net.internal.ClientSocket;
 
 import java.io.*;
+import java.net.Socket;
 
 /**
  *
@@ -29,14 +30,25 @@ public interface Client {
      *
      * @return A writer from the client.
      */
-    ObjectOutputStream output();
+    OutputStream output();
 
     /**
      * Give the reader from the client.
      *
      * @return A reader from the client.
      */
-    ObjectInputStream input();
+    InputStream input();
+
+    /**
+     *
+     * @return
+     */
+    ObjectOutputStream oos();
+
+    /**
+     *
+     */
+    ObjectInputStream ois();
 
     /**
      * Send a message to an address, and return a response from the server.
@@ -64,6 +76,27 @@ public interface Client {
      * @return Server host address.
      */
     String hostAddress();
+
+    /**
+     * Check if the client is connected.
+     *
+     * @return is connected.
+     */
+    boolean isConnected();
+
+    /**
+     * Check if the client is closed.
+     *
+     * @return is closed.
+     */
+    boolean isClosed();
+
+    /**
+     * Give the client socket.
+     *
+     * @return the client socket.
+     */
+    Socket socket();
 
     /**
      * Subscribes the client to the server at a specific address.

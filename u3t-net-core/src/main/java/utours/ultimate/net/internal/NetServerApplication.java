@@ -6,16 +6,20 @@ import utours.ultimate.net.data.MessageData;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.SocketException;
 import java.util.*;
+import java.util.function.Consumer;
 
-public class NetServerNetApplication implements NetApplication {
+public class NetServerApplication implements NetApplication {
 
     private final Map<String, List<Handler<Context>>> handlers;
     private final Map<String, List<Client>> subscribers;
     private final NetServer server;
     private boolean stopped = true;
 
-    public NetServerNetApplication(NetServerConfiguration configuration) {
+    public NetServerApplication(NetServerConfiguration configuration) {
         this.handlers = new HashMap<>();
         this.server = new NetServerSocket(configuration);
         this.subscribers = new HashMap<>();
@@ -39,37 +43,51 @@ public class NetServerNetApplication implements NetApplication {
                 .computeIfAbsent(subAddress, s -> new ArrayList<>())
                 .add(context.client());
 
-        var message = new MessageData(context.address(), true, true);
+        Message message = Message.success(context.address(), true);
 
         context.writer().writeObject(message);
-        context.writer();
+        context.writer().flush();
     }
 
     private void processClient(Client client) {
         try {
 
-            var in = client.input();
-            var out = client.output();
+            var ois = client.ois();
+            var oos = client.oos();
 
-            var message = (Message) in.readObject();
-            while (message != null) {
-                var address = message.address();
+            while (client.isConnected()) {
+
+                Message message = (Message) ois.readObject();
+                String address = message.address();
+
                 if (hasAddress(address)) {
                     for (var contextHandler : handlers.get(address)) {
-                        var context = new ContextData(out, in, message, client, address);
+                        var context = new ContextData(oos, ois, message, client, address);
                         contextHandler.handle(context);
                     }
                 } else {
-                    var failedMessage = new MessageData(message.address(), null, false);
-                    out.writeObject(failedMessage);
-                    out.flush();
+                    var failedMessage = Message.error(message.address());
+                    oos.writeObject(failedMessage);
+                    oos.flush();
                 }
-                message = (Message) in.readObject();
             }
         } catch (EOFException ignored) {
+        } catch (SocketException e) {
+            client.close();
         } catch (Exception e) {
             Thread.currentThread().interrupt();
         }
+
+    }
+
+    private void disconnetClient(Client client) {
+
+        if (client == null) return;
+
+        for (var el : subscribers.entrySet()) {
+            el.getValue().remove(client);
+        }
+
     }
 
     @Override
@@ -90,6 +108,7 @@ public class NetServerNetApplication implements NetApplication {
 
     @Override
     public void sendMessage(String address, Object content) {
+
         try {
 
             if (!subscribers.containsKey(address)) {
@@ -97,8 +116,9 @@ public class NetServerNetApplication implements NetApplication {
             }
 
             for (Client client : subscribers.get(address)) {
-                client.output().writeObject(new MessageData(address, content, true));
-                client.output().flush();
+                var oos = client.oos();
+                oos.writeObject(Message.success(address, content));
+                oos.flush();
             }
 
         } catch (IOException e) {

@@ -15,7 +15,7 @@ public class NetServerApplicationTest {
     protected static final NetServerConfiguration configuration =
             NetServerConfiguration.of(HOST_ADDRESS, PORT);
 
-    protected static NetApplication netApplication;
+    protected static NetApplication application;
 
     // TODO: Find a better method to start only one time.
     private static boolean isSetup = false;
@@ -25,12 +25,12 @@ public class NetServerApplicationTest {
         if (isSetup) return;
 
         isSetup = true;
-        netApplication = NetApplication.serverOf(configuration);
+        application = NetApplication.serverOf(configuration);
 
-        netApplication.handler("an.address", NetServerApplicationTest::defaultTreatment);
-        netApplication.handler("foo.address", NetServerApplicationTest::fooTreatment);
+        application.handler("an.address", NetServerApplicationTest::defaultTreatment);
+        application.handler("foo.address", NetServerApplicationTest::fooTreatment);
 
-        Thread.ofPlatform().start(netApplication::start);
+        Thread.ofPlatform().start(application::start);
     }
 
     static void fooTreatment(Context context) {
@@ -46,7 +46,7 @@ public class NetServerApplicationTest {
     @AfterAll
     static void tearDown() {
         if (isSetup) return;
-        netApplication.stop();
+        application.stop();
     }
 
 }
