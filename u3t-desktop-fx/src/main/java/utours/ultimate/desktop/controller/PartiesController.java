@@ -1,6 +1,7 @@
 package utours.ultimate.desktop.controller;
 
 import javafx.application.Platform;
+import javafx.beans.binding.DoubleBinding;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -20,7 +21,6 @@ import utours.ultimate.game.model.PendingGame;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.UUID;
 
 public final class PartiesController implements Initializable {
 
@@ -33,6 +33,7 @@ public final class PartiesController implements Initializable {
 
     private @FXML DesktopPartiesView partiesView;
     private @FXML VBox container;
+    private Button addGameButton;
 
     public PartiesController(MainController mainController,
                              ClientService clientService,
@@ -50,12 +51,17 @@ public final class PartiesController implements Initializable {
         container.setSpacing(10);
         container.setPadding(new Insets(24));
 
-        Button button = createButton();
-        button.setText("Create a game");
-        button.setOnMouseClicked(this::onCreatePendingGame);
+        addGameButton = createButton();
+        addGameButton.setText("Create a game");
+        addGameButton.setOnMouseClicked(this::onCreatePendingGame);
+        container.getChildren().add(addGameButton);
 
-        container.getChildren().add(button);
+        asyncPendingGameInventory.findAll()
+                .thenAccept(this::addPendingGamesButtons)
+                .thenRun(this::setupObservableInventory);
+    }
 
+    private void setupObservableInventory() {
         clientService.onChangedPendingGames(this::addPendingGamesButtons);
     }
 
@@ -64,39 +70,53 @@ public final class PartiesController implements Initializable {
     }
 
     private void addPendingGamesButtons(List<PendingGame> pendingGames) {
-        pendingGames.forEach(pendingGame -> {
 
-            Button button = createButton();
-            button.setText("UTTT #%s".formatted(String.valueOf(pendingGame.gameID())));
-            button.setOnMouseClicked(mouseEvent -> {
-                clientService.joinGame(this::onJoinGame);
-            });
+        Platform.runLater(this::reset);
+        pendingGames.forEach(this::addPendingGameButton);
+    }
 
-            container.getChildren().add(button);
+    private void addPendingGameButton(PendingGame pendingGame) {
+
+        Button button = createButton();
+        button.setText("UTTT #%s".formatted(String.valueOf(pendingGame.gameID())));
+        button.setOnMouseClicked(mouseEvent -> {
+            clientService.joinGame(this::onJoinGame);
         });
+
+        Platform.runLater(() -> container.getChildren().add(button));
+    }
+
+    private void reset() {
+
+        container.getChildren().clear();
+        container.getChildren().add(addGameButton);
     }
 
     private Button createButton() {
 
         Button button = new Button();
 
-        button.prefWidthProperty().bind(container
+        DoubleBinding widthProperty = container
                 .widthProperty()
-                .subtract(BUTTON_PADDING_SIZE));
+                .subtract(BUTTON_PADDING_SIZE);
 
-        button.prefHeightProperty().bind(container
+        button.prefWidthProperty().bind(widthProperty);
+        button.minWidth(widthProperty.get());
+
+        DoubleBinding heightProperty = container
                 .heightProperty()
-                .divide(BUTTON_HEIGHT_FACTOR_SIZE));
+                .divide(BUTTON_HEIGHT_FACTOR_SIZE);
+
+        button.prefHeightProperty().bind(heightProperty);
+        button.minHeight(heightProperty.get());
 
         return button;
     }
 
     private void onJoinGame(Game game) {
-        Platform.runLater(() -> {
-            mainController
-                    .getMainRightPolymorphic()
-                    .replaceRegion(new U3TGameView());
-        });
+        Platform.runLater(() -> mainController
+                .getMainRightPolymorphic()
+                .replaceRegion(new U3TGameView()));
     }
 
 }
