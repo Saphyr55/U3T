@@ -10,7 +10,7 @@ group = 'utours.ultimate.server'
 version = '1.0'
 
 application {
-    mainClass = group + '.Main'
+    mainClass = 'utours.ultimate.server.MainServer'
 }
 
 repositories {

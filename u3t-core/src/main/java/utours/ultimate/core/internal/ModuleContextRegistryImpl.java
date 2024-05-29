@@ -17,7 +17,7 @@ public class ModuleContextRegistryImpl implements ModuleContextRegistry {
 
     @Override
     public void register(ModuleContext moduleContext) {
-        registry.put(moduleContext.identifier(), moduleContext);
+        registry.put(moduleContext.getIdentifier(), moduleContext);
     }
 
     @Override
@@ -27,7 +27,7 @@ public class ModuleContextRegistryImpl implements ModuleContextRegistry {
 
     @Override
     public void remove(ModuleContext moduleContext) {
-        remove(moduleContext.identifier());
+        remove(moduleContext.getIdentifier());
     }
 
 }

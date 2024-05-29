@@ -12,7 +12,7 @@ public class GameAlmostFinishActionsProvider implements GameActionsProvider {
     private final List<Action> actions;
 
     public GameAlmostFinishActionsProvider() {
-        this(Game.newDefaultGame());
+        this(Game.defaultGame());
     }
 
     public GameAlmostFinishActionsProvider(Game game) {

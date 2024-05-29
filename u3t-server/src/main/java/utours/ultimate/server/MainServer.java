@@ -1,25 +1,24 @@
 package utours.ultimate.server;
 
 import utours.ultimate.core.ModuleContext;
-import utours.ultimate.core.ComponentAnalyser;
-import utours.ultimate.core.provider.AnnotationComponentAnalyser;
 import utours.ultimate.core.steorotype.ModuleRegister;
 import utours.ultimate.net.NetApplication;
 
 
-public class Main {
+public final class MainServer {
 
-    private static final ModuleContext context = ModuleContext.of(Main.class);
+    private static final ModuleContext context =
+            ModuleContext.of(MainServer.class);
 
     public static void main(String[] args) {
 
         context.load();
 
-        NetApplication netApplication = getContext()
+        NetApplication application = getContext()
                 .getContainerReadOnly()
                 .getUniqueComponent(NetApplication.class);
 
-        netApplication.start();
+        application.start();
     }
 
     @ModuleRegister

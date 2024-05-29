@@ -81,8 +81,8 @@ public class NetServerSocket implements NetServer {
         } catch (Exception e) {
             Thread.currentThread().interrupt();
         } finally {
-            client.close();
             disconnetClient(client);
+            client.close();
         }
 
     }

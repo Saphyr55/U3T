@@ -1,5 +1,6 @@
 package utours.ultimate.desktop.factory.impl;
 
+import utours.ultimate.client.AsyncPendingGameInventory;
 import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.core.steorotype.Mapping;
 import utours.ultimate.desktop.controller.*;
@@ -20,13 +21,14 @@ public class ControllerProviderImpl implements ControllerProvider {
     private final ChatController chatController;
 
     public ControllerProviderImpl(GameService service,
+                                  AsyncPendingGameInventory pendingGameInventory,
                                   ClientService clientService,
                                   Client client) {
 
-        var game = Game.newDefaultGame();
+        Game game = Game.defaultGame();
 
         mainController = new MainController();
-        partiesController = new PartiesController(mainController, clientService, client);
+        partiesController = new PartiesController(mainController, clientService, pendingGameInventory);
         u3TGameController = new U3TGameController(service, game, new GameAlmostFinishActionsProvider(game), client);
         chatController = new ChatController();
     }

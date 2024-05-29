@@ -39,12 +39,12 @@ public final class ModuleContextImpl implements ModuleContext {
     }
 
     @Override
-    public String identifier() {
+    public String getIdentifier() {
         return identifier;
     }
 
     @Override
-    public Settings settings() {
+    public Settings getSettings() {
         return settings.getSettings();
     }
 

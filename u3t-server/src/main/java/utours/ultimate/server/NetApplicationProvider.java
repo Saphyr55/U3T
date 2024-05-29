@@ -1,27 +1,28 @@
 package utours.ultimate.server;
 
+import utours.ultimate.core.settings.Settings;
 import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.core.steorotype.Mapping;
 import utours.ultimate.net.NetApplication;
-import utours.ultimate.net.internal.NetServerConfigurationSettings;
+import utours.ultimate.net.NetServerConfiguration;
 
 @Component
 public class NetApplicationProvider {
 
-    private final NetApplication netApplication;
+    private final NetApplication application;
 
     public NetApplicationProvider() {
 
-        var settings = Main.getContext().settings();
-        var configuration = new NetServerConfigurationSettings(settings);
+        Settings settings = MainServer.getContext().getSettings();
+        NetServerConfiguration configuration = NetServerConfiguration.ofSettings(settings);
 
-        this.netApplication = NetApplication.serverOf(configuration);
+        application = NetApplication.serverOf(configuration);
     }
 
     @Mapping
     @Component
-    public NetApplication getNetApplication() {
-        return netApplication;
+    public NetApplication getApplication() {
+        return application;
     }
 
 }

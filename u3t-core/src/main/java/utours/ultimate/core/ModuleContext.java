@@ -14,12 +14,12 @@ public interface ModuleContext {
      *
      * @return The current module context id.
      */
-    String identifier();
+    String getIdentifier();
 
     /**
      *
      */
-    Settings settings();
+    Settings getSettings();
 
     /**
      * Load all components.

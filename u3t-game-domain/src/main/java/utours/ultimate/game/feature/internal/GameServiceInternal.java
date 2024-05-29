@@ -66,7 +66,7 @@ public class GameServiceInternal implements GameService {
     public Game oppositePlayer(Game game) {
         Player currentPlayer = oppositePlayer(game, game.currentPlayer());
         return Game.Builder.copyOf(game)
-                .currentPlayer(currentPlayer)
+                .withCurrentPlayer(currentPlayer)
                 .build();
     }
 
@@ -95,7 +95,7 @@ public class GameServiceInternal implements GameService {
         }
 
         return Game.Builder.copyOf(game)
-                .board(new Board(cellsOut))
+                .withBoard(new Board(cellsOut))
                 .build();
     }
 

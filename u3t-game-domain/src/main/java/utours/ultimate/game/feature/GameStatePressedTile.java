@@ -32,7 +32,7 @@ public class GameStatePressedTile implements GameStateHandler {
             }
         }
         game = Game.Builder.copyOf(game)
-                .state(state.nextState())
+                .withState(state.nextState())
                 .build();
     }
 }

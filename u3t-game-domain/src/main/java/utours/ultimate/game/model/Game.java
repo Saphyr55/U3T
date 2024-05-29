@@ -2,8 +2,9 @@ package utours.ultimate.game.model;
 
 import java.io.Serializable;
 import java.util.Optional;
+import java.util.UUID;
 
-public record Game(Long gameID,
+public record Game(String gameID,
                    Player crossPlayer,
                    Player roundPlayer,
                    Player currentPlayer,
@@ -12,14 +13,18 @@ public record Game(Long gameID,
                    Action lastAction,
                    int size
 ) implements Serializable {
-    
-    public static Game newDefaultGame() {
-        return Builder.newDefaultBuilder().build();
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static Game defaultGame() {
+        return Builder.defaultBuilder().build();
     }
     
     public Game lastAction(Action action) {
         return Game.Builder.copyOf(this)
-                .lastAction(action)
+                .withLastAction(action)
                 .build();
     }
 
@@ -31,7 +36,7 @@ public record Game(Long gameID,
 
     public static class Builder {
 
-        private long gameID;
+        private String gameID = UUID.randomUUID().toString();
         private Player crossPlayer;
         private Player roundPlayer;
         private Player currentPlayer;
@@ -44,63 +49,57 @@ public record Game(Long gameID,
             Builder builder = new Builder();
             builder.gameID = game.gameID;
             return builder
-                    .board(game.board)
-                    .state(game.state)
-                    .roundPlayer(game.roundPlayer)
-                    .crossPlayer(game.crossPlayer)
-                    .lastAction(game.lastAction)
-                    .currentPlayer(game.currentPlayer)
-                    .size(game.size);
+                    .withBoard(game.board)
+                    .withState(game.state)
+                    .withRoundPlayer(game.roundPlayer)
+                    .withCrossPlayer(game.crossPlayer)
+                    .withLastAction(game.lastAction)
+                    .withCurrentPlayer(game.currentPlayer)
+                    .withSize(game.size);
         }
 
-        public static Builder newDefaultBuilder() {
-            Builder builder = newBuilder()
-                    .roundPlayer(Player.Builder.newBuilder("1", "Player O").build())
-                    .crossPlayer(Player.Builder.newBuilder("2", "Player X").build());
-            builder.currentPlayer(builder.crossPlayer);
+        public static Builder defaultBuilder() {
+            Builder builder = builder()
+                    .withRoundPlayer(Player.Builder.newBuilder("1", "Player O").build())
+                    .withCrossPlayer(Player.Builder.newBuilder("2", "Player X").build());
+            builder.withCurrentPlayer(builder.crossPlayer);
             return builder;
 
-        }
-
-        public static Builder newBuilder() {
-            Builder builder = new Builder();
-            builder.gameID = lastGameID++;
-            return builder;
         }
 
         private Builder() { }
 
-        public Builder crossPlayer(Player crossPlayer) {
+        public Builder withCrossPlayer(Player crossPlayer) {
             this.crossPlayer = crossPlayer;
             return this;
         }
 
-        public Builder currentPlayer(Player currentPlayer) {
+        public Builder withCurrentPlayer(Player currentPlayer) {
             this.currentPlayer = currentPlayer;
             return this;
         }
 
-        public Builder roundPlayer(Player roundPlayer) {
+        public Builder withRoundPlayer(Player roundPlayer) {
             this.roundPlayer = roundPlayer;
             return this;
         }
 
-        public Builder lastAction(Action lastAction) {
+        public Builder withLastAction(Action lastAction) {
             this.lastAction = lastAction;
             return this;
         }
 
-        public Builder board(Board board) {
+        public Builder withBoard(Board board) {
             this.board = board;
             return this;
         }
 
-        public Builder state(GameState state) {
+        public Builder withState(GameState state) {
             this.state = state;
             return this;
         }
 
-        public Builder size(int size) {
+        public Builder withSize(int size) {
             this.size = size;
             return this;
         }

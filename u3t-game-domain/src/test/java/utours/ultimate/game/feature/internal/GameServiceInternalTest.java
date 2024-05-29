@@ -25,8 +25,8 @@ class GameServiceInternalTest {
         };
 
         gameService = new GameServiceInternal();
-        game = Game.Builder.newBuilder()
-                .board(new Board(cells))
+        game = Game.builder()
+                .withBoard(new Board(cells))
                 .build();
     }
 

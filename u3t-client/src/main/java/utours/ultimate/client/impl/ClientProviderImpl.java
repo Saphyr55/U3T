@@ -1,7 +1,6 @@
 package utours.ultimate.client.impl;
 
 import utours.ultimate.client.ClientContext;
-import utours.ultimate.core.settings.Settings;
 import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.core.steorotype.Mapping;
 import utours.ultimate.client.ClientProvider;
@@ -16,7 +15,7 @@ public class ClientProviderImpl implements ClientProvider {
     private final Client client;
 
     public ClientProviderImpl() {
-        NetServerConfiguration configuration = new NetServerConfigurationSettings(ClientContext.getContext().settings());
+        NetServerConfiguration configuration = new NetServerConfigurationSettings(ClientContext.getContext().getSettings());
         client = Client.of(configuration.hostAddress(), configuration.port());
     }
 
