@@ -20,6 +20,8 @@ public class FindAllGameHandler implements Handler<Context> {
     public FindAllGameHandler(NetApplication application, GameInventory gameInventory) {
         this.application = application;
         this.gameMemoryInventory = gameInventory;
+
+        handlingApplication();
     }
 
     @Override

@@ -23,6 +23,7 @@ public class FindAllPendingGameHandler implements Handler<Context> {
 
         this.application = application;
         this.pendingGameInventory = pendingGameInventory;
+        this.application.handler(ADDRESS, this);
     }
 
     @Override

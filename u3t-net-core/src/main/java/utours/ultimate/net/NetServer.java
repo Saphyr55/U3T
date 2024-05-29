@@ -1,5 +1,9 @@
 package utours.ultimate.net;
 
+import java.net.ServerSocket;
+import java.util.List;
+import java.util.Map;
+
 public interface NetServer {
 
     /**
@@ -14,4 +18,28 @@ public interface NetServer {
      */
     Client acceptClient();
 
+    /**
+     *
+     * @param address
+     * @return
+     */
+    boolean hasAddress(String address);
+
+    /**
+     *
+     * @return
+     */
+    Map<String, List<Handler<Context>>> handlers();
+
+    /**
+     *
+     * @return
+     */
+    Map<String, List<Client>> subscribers();
+
+    /**
+     *
+     * @return
+     */
+    ServerSocket serverSocket();
 }

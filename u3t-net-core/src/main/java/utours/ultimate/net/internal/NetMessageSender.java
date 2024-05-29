@@ -17,8 +17,7 @@ public class NetMessageSender implements MessageSender {
     public MessageSender send(String address, Object content, Handler<Message> onReceive) {
 
         CompletableFuture
-                .supplyAsync(() -> client.sendMessage(address, content))
-                .thenAccept(response -> acceptResponse(address, response, onReceive))
+                .runAsync(() -> client.sendMessage(address, content))
                 .exceptionally(throwable -> acceptError(address, throwable, onReceive));
 
         return this;
@@ -28,7 +27,7 @@ public class NetMessageSender implements MessageSender {
     public MessageSender send(String address, Object content) {
 
         CompletableFuture
-                .supplyAsync(() -> client.sendMessage(address, content))
+                .runAsync(() -> client.sendMessage(address, content))
                 .thenAccept(response -> { })
                 .exceptionally(throwable -> null);
 
@@ -43,14 +42,6 @@ public class NetMessageSender implements MessageSender {
             throw new RuntimeException(e);
         }
         return null;
-    }
-
-    private void acceptResponse(String address, Message response, Handler<Message> onReceive) {
-        try {
-            onReceive.handle(new MessageData(address, response.content(), response.isSuccess()));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
 }

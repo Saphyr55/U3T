@@ -18,7 +18,6 @@ public class ClientService {
 
         client.messageSender().send("server.game.add-game", Game.newDefaultGame());
 
-
     }
 
 }

@@ -11,7 +11,7 @@ import java.net.Socket;
 public interface Client {
 
     /**
-     * Instantiate a client.
+     * Instantiate a socket client and start the thread to process incoming messages.
      *
      * @param address Server address to connect.
      * @param port Server port to connect.
@@ -19,7 +19,9 @@ public interface Client {
      */
     static Client of(String address, int port) {
         try {
-            return new ClientSocket(address, port);
+            ClientSocket clientSocket = new ClientSocket(address, port);
+            clientSocket.startThread();
+            return clientSocket;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -56,7 +58,7 @@ public interface Client {
      * @param content An object corresponding to a message that will be sent to the server.
      * @return The response from the server.
      */
-    Message sendMessage(String address, Object content);
+    void sendMessage(String address, Object content);
 
     /**
      * Close the client.
