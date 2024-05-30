@@ -7,6 +7,7 @@ import utours.ultimate.game.port.GameInventory;
 import utours.ultimate.net.Context;
 import utours.ultimate.net.Handler;
 import utours.ultimate.net.NetApplication;
+import utours.ultimate.server.exception.NotGoodFormatClassException;
 
 import java.util.Objects;
 import java.util.logging.Level;
@@ -31,7 +32,7 @@ public class AddGameHandler implements Handler<Context> {
     }
 
     @Override
-    public void handle(Context context) {
+    public void handle(Context context) throws Exception {
 
         Object content = context.message().content();
 
@@ -43,8 +44,12 @@ public class AddGameHandler implements Handler<Context> {
             LOGGER.log(Level.INFO, "Game added");
         } else {
 
-            LOGGER.log(Level.SEVERE, () -> "At the address '%s', expected '%s' but receive %s"
-                    .formatted(ADDRESS, Game.class, content.getClass()));
+            String error = "At the address '%s', expected '%s' but receive %s"
+                    .formatted(ADDRESS, Game.class, content.getClass());
+
+            LOGGER.log(Level.SEVERE, error);
+
+            throw new NotGoodFormatClassException(error);
         }
     }
 

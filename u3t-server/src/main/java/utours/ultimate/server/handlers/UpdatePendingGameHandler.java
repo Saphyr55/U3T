@@ -13,19 +13,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Component
-public class AddPendingGameHandler implements Handler<Context> {
+public class UpdatePendingGameHandler implements Handler<Context> {
 
-    private final static String ADDRESS = "server.pending-game.add";
+    private final static String ADDRESS = "server.pending-game.update";
     private static final Logger LOGGER = Logger.getGlobal();
 
-    private final PendingGameInventory pendingGameInventory;
-    private final NetApplication application;
+    private final PendingGameInventory inventory;
 
-    public AddPendingGameHandler(NetApplication application,
-                                 PendingGameInventory gameInventory) {
+    public UpdatePendingGameHandler(NetApplication application,
+                                    PendingGameInventory inventory) {
 
-        this.application = application;
-        this.pendingGameInventory = gameInventory;
+        this.inventory = inventory;
 
         application.handler(ADDRESS, this);
     }
@@ -36,22 +34,19 @@ public class AddPendingGameHandler implements Handler<Context> {
         Object content = context.message().content();
 
         if (content instanceof PendingGame pendingGame) {
+            inventory.update(pendingGame);
 
-            pendingGameInventory.add(pendingGame);
-            application.sendMessage(ADDRESS, pendingGame);
-
-            LOGGER.log(Level.INFO, () -> "Pending game added");
-
+            LOGGER.log(Level.INFO, () -> "Pending game #%s updated".formatted(pendingGame.gameID()));
         } else {
 
             String error = "At the address '%s', expected '%s' but receive %s"
-                    .formatted(ADDRESS, PendingGame.class, content.getClass());
+                    .formatted(ADDRESS, Game.class, content.getClass());
 
             LOGGER.log(Level.SEVERE, error);
 
             throw new NotGoodFormatClassException(error);
         }
-    }
 
+    }
 
 }

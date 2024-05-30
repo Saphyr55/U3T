@@ -13,6 +13,7 @@ public class AsyncPendingGameInventory {
 
     private static final String PENDING_GAME_FIND_ALL_ADDRESS = "server.pending-game.find-all";
     private static final String PENDING_GAME_ADD_ADDRESS = "server.pending-game.add";
+    private static final String PENDING_GAME_UPDATE_ADDRESS = "server.pending-game.update";
 
     private final Client client;
 
@@ -37,6 +38,10 @@ public class AsyncPendingGameInventory {
 
     public void add(PendingGame pendingGame) {
         client.messageSender().send(PENDING_GAME_ADD_ADDRESS, pendingGame);
+    }
+
+    public void update(PendingGame pendingGame) {
+        client.messageSender().send(PENDING_GAME_UPDATE_ADDRESS, pendingGame);
     }
 
 }

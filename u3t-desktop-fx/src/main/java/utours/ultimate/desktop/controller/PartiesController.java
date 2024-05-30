@@ -64,19 +64,9 @@ public final class PartiesController implements Initializable {
     }
 
     private void onCreatePendingGame(MouseEvent mouseEvent) {
-        asyncPendingGameInventory.add(createPendingGame());
-    }
-
-    private PendingGame createPendingGame() {
-
-        Player player = Player.builder()
-                .withName("Player X")
-                .build();
-
-        return PendingGame.builder()
-                .withCurrentPlayer(player)
+        asyncPendingGameInventory.add(PendingGame.builder()
                 .withSize(PendingGame.DEFAULT_SIZE)
-                .build();
+                .build());
     }
 
     private void addPendingGamesButtons(List<PendingGame> pendingGames) {
@@ -87,15 +77,27 @@ public final class PartiesController implements Initializable {
 
     private void addPendingGameButton(PendingGame pendingGame) {
 
-        String text = "%d/2 UTTT #%s".formatted(
-                pendingGame.totalPlayer(),
-                pendingGame.gameID());
-
         Button button = createButton();
-        button.setText(text);
-        button.setOnMouseClicked(mouseEvent -> clientService.joinGame(this::onJoinGame));
+        button.setText(textOfPendingGame(pendingGame));
+        button.setOnMouseClicked(mouseEvent -> {
+
+            PendingGame.Builder builder = PendingGame.Builder.copyOf(pendingGame);
+            Player player = Player.builder().build();
+
+            PendingGame newPendingGame = pendingGame.currentPlayer() == null
+                    ? builder.withCurrentPlayer(player).build()
+                    : builder.withSecondPlayer(player).build();
+
+            asyncPendingGameInventory.update(newPendingGame);
+        });
 
         Platform.runLater(() -> container.getChildren().add(button));
+    }
+
+    private static String textOfPendingGame(PendingGame pendingGame) {
+        return "%d/2 UTTT #%s".formatted(
+                pendingGame.totalPlayer(),
+                pendingGame.gameID());
     }
 
     private void initContainer() {

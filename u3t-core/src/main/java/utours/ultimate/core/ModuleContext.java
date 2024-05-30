@@ -59,7 +59,7 @@ public interface ModuleContext {
      *
      * @return the module context.
      */
-    static ModuleContext of(Class<?> contextClass) {
+    static ModuleContext ofContextClass(Class<?> contextClass) {
         return new ModuleContextImpl(contextClass);
     }
 
@@ -69,7 +69,7 @@ public interface ModuleContext {
      * @param settingsLoader the settings loader.
      * @return the module context.
      */
-    static ModuleContext of(Class<?> contextClass, SettingsLoader settingsLoader) {
+    static ModuleContext ofContextClass(Class<?> contextClass, SettingsLoader settingsLoader) {
         return new ModuleContextImpl(contextClass, settingsLoader);
     }
 

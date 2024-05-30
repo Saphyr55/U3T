@@ -34,6 +34,14 @@ public record PendingGame(String gameID,
         private Player secondPlayer = null;
         private int size = DEFAULT_SIZE;
 
+        public static Builder copyOf(PendingGame pendingGame) {
+            return builder()
+                    .withSize(pendingGame.size)
+                    .withGameID(pendingGame.gameID)
+                    .withCurrentPlayer(pendingGame.currentPlayer)
+                    .withSecondPlayer(pendingGame.secondPlayer);
+        }
+
         public Builder withSecondPlayer(Player secondPlayer) {
             this.secondPlayer = secondPlayer;
             return this;

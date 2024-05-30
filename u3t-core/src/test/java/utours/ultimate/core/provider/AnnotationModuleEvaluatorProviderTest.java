@@ -17,7 +17,7 @@ class AnnotationModuleEvaluatorProviderTest {
     @BeforeAll
     static void beforeAll() {
         analyser = new AnnotationComponentAnalyser();
-        context = ModuleContext.of(ContextTest.class);
+        context = ModuleContext.ofContextClass(ContextTest.class);
         analyser.addModuleContext(context);
         evaluator = analyser.evaluator();
         evaluator.evaluate();
