@@ -11,8 +11,8 @@ import utours.ultimate.ui.ViewFactory;
 @Component
 public class DesktopViewFactory implements ViewFactory<DesktopNavButton> {
 
-    public DesktopViewFactory(Client client, ClientService service) {
-
+    public DesktopViewFactory() {
+        
     }
 
     @Override

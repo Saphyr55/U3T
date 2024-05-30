@@ -20,9 +20,8 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
-public class U3TGameController implements Initializable {
+public final class U3TGameController implements Initializable {
 
-    private final Client client;
     private final GameService gameService;
     private final GameActionsProvider gameActionsProvider;
     private Game game;
@@ -30,13 +29,11 @@ public class U3TGameController implements Initializable {
     private @FXML GameGridView gameGridView;
     private @FXML Pane root;
 
-    public U3TGameController(GameService gameService, Game game,
-                             GameActionsProvider gameActionsProvider,
-                             Client client) {
-        this.game = game;
+    public U3TGameController(GameService gameService, GameActionsProvider gameActionsProvider) {
+
         this.gameService = gameService;
         this.gameActionsProvider = gameActionsProvider;
-        this.client = client;
+        this.game = gameActionsProvider.game();
     }
 
     @Override
@@ -82,11 +79,13 @@ public class U3TGameController implements Initializable {
     }
 
     private void onPressedTile(PrimitiveTile tile) {
+
         Action action = Action.of(game.currentPlayer(), tile.getPosOut(), tile.getPosIn());
         performAction(action, tile::setCell);
     }
 
     private void onWinning(Action action, Cell cell, boolean isWin) {
+
         if (!isWin) return;
 
         int i = action.posOut().x();

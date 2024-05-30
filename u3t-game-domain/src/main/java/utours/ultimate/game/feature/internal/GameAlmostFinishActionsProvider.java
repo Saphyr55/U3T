@@ -10,12 +10,10 @@ import java.util.List;
 public class GameAlmostFinishActionsProvider implements GameActionsProvider {
 
     private final List<Action> actions;
-
-    public GameAlmostFinishActionsProvider() {
-        this(Game.defaultGame());
-    }
+    private final Game game;
 
     public GameAlmostFinishActionsProvider(Game game) {
+        this.game = game;
         this.actions = List.of(
                 Action.of(game.crossPlayer(), Cell.pos(0, 0), Cell.pos(0, 0)),
                 Action.of(game.roundPlayer(), Cell.pos(0, 0), Cell.pos(1, 1)),
@@ -58,6 +56,11 @@ public class GameAlmostFinishActionsProvider implements GameActionsProvider {
     @Override
     public List<Action> actions() {
         return actions;
+    }
+
+    @Override
+    public Game game() {
+        return game;
     }
 
 }

@@ -5,18 +5,39 @@ import java.util.UUID;
 
 public record PendingGame(String gameID,
                           Player currentPlayer,
-                          int size)
-        implements Serializable {
+                          Player secondPlayer,
+                          int size) implements Serializable {
+
+    public static final int DEFAULT_SIZE = 3;
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public int totalPlayer() {
+
+        int totalPlayer = 0;
+
+        if (currentPlayer != null)
+            totalPlayer++;
+
+        if (secondPlayer != null)
+            totalPlayer++;
+
+        return totalPlayer;
     }
 
     public static class Builder {
 
         private String gameID = UUID.randomUUID().toString();
         private Player currentPlayer;
-        private int size;
+        private Player secondPlayer = null;
+        private int size = DEFAULT_SIZE;
+
+        public Builder withSecondPlayer(Player secondPlayer) {
+            this.secondPlayer = secondPlayer;
+            return this;
+        }
 
         public Builder withGameID(String gameID) {
             this.gameID = gameID;
@@ -34,7 +55,12 @@ public record PendingGame(String gameID,
         }
 
         public PendingGame build() {
-            return new PendingGame(gameID, currentPlayer, size);
+            return new PendingGame(
+                    gameID,
+                    currentPlayer,
+                    secondPlayer,
+                    size
+            );
         }
 
     }

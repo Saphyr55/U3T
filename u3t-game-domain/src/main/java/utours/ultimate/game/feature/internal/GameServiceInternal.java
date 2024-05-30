@@ -17,11 +17,14 @@ public class GameServiceInternal implements GameService {
         Cell cellLastOut = cellAt(game, lastAction.posIn());
 
         if (cellOut instanceof Cell.Board(Cell[][] cellsIn)) {
+
             var isCellPlayable = isPlayableCell(cellsIn[action.posIn().x()][action.posIn().y()]);
             var isWonCell = cellLastOut instanceof Cell.Cross || cellLastOut instanceof Cell.Round;
+
             if (!action.posOut().equals(lastAction.posIn()) && isWonCell) {
                 return isCellPlayable;
             }
+
             return isCellPlayable && action.posOut().equals(lastAction.posIn());
         }
 
@@ -54,8 +57,7 @@ public class GameServiceInternal implements GameService {
 
         Cell cellOut = cellAt(game, posOut);
 
-        if (cellOut instanceof Cell.Board board) {
-            Cell[][] cellsIn = board.cells();
+        if (cellOut instanceof Cell.Board(Cell[][] cellsIn)) {
             return cellsIn[posIn.x()][posIn.y()];
         }
 

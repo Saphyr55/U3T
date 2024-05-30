@@ -22,14 +22,13 @@ public class ControllerProviderImpl implements ControllerProvider {
 
     public ControllerProviderImpl(GameService service,
                                   AsyncPendingGameInventory pendingGameInventory,
-                                  ClientService clientService,
-                                  Client client) {
+                                  ClientService clientService) {
 
         Game game = Game.defaultGame();
 
         mainController = new MainController();
         partiesController = new PartiesController(mainController, clientService, pendingGameInventory);
-        u3TGameController = new U3TGameController(service, game, new GameAlmostFinishActionsProvider(game), client);
+        u3TGameController = new U3TGameController(service, new GameAlmostFinishActionsProvider(game));
         chatController = new ChatController();
     }
 

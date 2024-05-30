@@ -8,8 +8,10 @@ import java.util.List;
 public class GameFinishActionsProvider implements GameActionsProvider {
 
     private final List<Action> actions;
+    private final Game game;
 
     public GameFinishActionsProvider(Game game) {
+        this.game = game;
         this.actions = List.of(
                 Action.of(game.crossPlayer(), Cell.pos(0, 0), Cell.pos(0, 0)),
                 Action.of(game.roundPlayer(), Cell.pos(0, 0), Cell.pos(1, 1)),
@@ -70,6 +72,11 @@ public class GameFinishActionsProvider implements GameActionsProvider {
     @Override
     public List<Action> actions() {
         return actions;
+    }
+
+    @Override
+    public Game game() {
+        return game;
     }
 
 }

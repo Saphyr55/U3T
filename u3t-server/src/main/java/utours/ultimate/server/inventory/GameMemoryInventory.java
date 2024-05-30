@@ -5,7 +5,6 @@ import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.core.steorotype.Mapping;
 import utours.ultimate.game.model.Game;
 import utours.ultimate.game.port.GameInventory;
-import utours.ultimate.net.NetApplication;
 import utours.ultimate.server.handlers.OnChangedGameInventory;
 
 import java.util.List;

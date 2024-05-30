@@ -2,12 +2,10 @@ package utours.ultimate.desktop.controller;
 
 import javafx.application.Platform;
 import javafx.beans.binding.DoubleBinding;
-import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
@@ -17,6 +15,7 @@ import utours.ultimate.desktop.view.DesktopPartiesView;
 import utours.ultimate.desktop.view.U3TGameView;
 import utours.ultimate.game.model.Game;
 import utours.ultimate.game.model.PendingGame;
+import utours.ultimate.game.model.Player;
 
 import java.net.URL;
 import java.util.List;
@@ -47,13 +46,12 @@ public final class PartiesController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
-        container.setAlignment(Pos.TOP_CENTER);
-        container.setSpacing(10);
-        container.setPadding(new Insets(24));
+        initContainer();
 
         addGameButton = createButton();
         addGameButton.setText("Create a game");
         addGameButton.setOnMouseClicked(this::onCreatePendingGame);
+
         container.getChildren().add(addGameButton);
 
         asyncPendingGameInventory.findAll()
@@ -66,7 +64,19 @@ public final class PartiesController implements Initializable {
     }
 
     private void onCreatePendingGame(MouseEvent mouseEvent) {
-        asyncPendingGameInventory.add(PendingGame.builder().build());
+        asyncPendingGameInventory.add(createPendingGame());
+    }
+
+    private PendingGame createPendingGame() {
+
+        Player player = Player.builder()
+                .withName("Player X")
+                .build();
+
+        return PendingGame.builder()
+                .withCurrentPlayer(player)
+                .withSize(PendingGame.DEFAULT_SIZE)
+                .build();
     }
 
     private void addPendingGamesButtons(List<PendingGame> pendingGames) {
@@ -77,13 +87,22 @@ public final class PartiesController implements Initializable {
 
     private void addPendingGameButton(PendingGame pendingGame) {
 
+        String text = "%d/2 UTTT #%s".formatted(
+                pendingGame.totalPlayer(),
+                pendingGame.gameID());
+
         Button button = createButton();
-        button.setText("UTTT #%s".formatted(String.valueOf(pendingGame.gameID())));
-        button.setOnMouseClicked(mouseEvent -> {
-            clientService.joinGame(this::onJoinGame);
-        });
+        button.setText(text);
+        button.setOnMouseClicked(mouseEvent -> clientService.joinGame(this::onJoinGame));
 
         Platform.runLater(() -> container.getChildren().add(button));
+    }
+
+    private void initContainer() {
+
+        container.setAlignment(Pos.TOP_CENTER);
+        container.setSpacing(10);
+        container.setPadding(new Insets(24));
     }
 
     private void reset() {
@@ -116,7 +135,11 @@ public final class PartiesController implements Initializable {
     private void onJoinGame(Game game) {
         Platform.runLater(() -> mainController
                 .getMainRightPolymorphic()
-                .replaceRegion(new U3TGameView()));
+                .replaceRegion(createU3TGameView()));
+    }
+
+    private U3TGameView createU3TGameView() {
+        return new U3TGameView();
     }
 
 }

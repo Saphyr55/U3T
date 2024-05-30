@@ -24,27 +24,31 @@ public class WinnerCheckerImpl implements WinnerChecker {
         }
 
         static MarkType fromGame(Game game, Cell.Pos posOut) {
+
             Cell[][] cellsOut = game.board().cells();
             Cell cell = cellsOut[posOut.x()][posOut.y()];
+
             return fromCell(cell);
         }
 
         static MarkType fromGame(Game game, Cell.Pos posOut, Cell.Pos posIn) {
+
             Cell[][] cellsOut = game.board().cells();
             Cell cell = cellsOut[posOut.x()][posOut.y()];
+
             if (cell instanceof Cell.Board(Cell[][] cells)) {
                 cell = cells[posIn.x()][posIn.y()];
                 return fromCell(cell);
             }
+
             return fromCell(cell);
         }
 
     }
 
     private final GameService gameService;
-    private Map<Integer, Set<Cell.Pos>> leftDiagonalCache = new HashMap<>();
-    private Map<Integer, Set<Cell.Pos>> rightDiagonalCache = new HashMap<>();
-
+    private final Map<Integer, Set<Cell.Pos>> leftDiagonalCache = new HashMap<>();
+    private final Map<Integer, Set<Cell.Pos>> rightDiagonalCache = new HashMap<>();
 
     public WinnerCheckerImpl(GameService gameService) {
         this.gameService = gameService;
@@ -150,33 +154,38 @@ public class WinnerCheckerImpl implements WinnerChecker {
     }
 
     private boolean checkDiagonal(Game game, Cell.Pos posOut, Cell.Pos posIn, MarkType m, Set<Cell.Pos> leftDiagonal) {
-        if (leftDiagonal.contains(posIn)) {
-            int i = 0;
-            for (Cell.Pos pos : leftDiagonal) {
-                MarkType mark = MarkType.fromGame(game, posOut, pos);
-                if (mark.equals(m)) {
-                    i++;
-                }
-            }
-            return i == game.size();
+
+        if (!leftDiagonal.contains(posIn)) {
+            return false;
         }
-        return false;
+
+        int i = 0;
+        for (Cell.Pos pos : leftDiagonal) {
+            MarkType mark = MarkType.fromGame(game, posOut, pos);
+            if (mark.equals(m)) {
+                i++;
+            }
+        }
+
+        return i == game.size();
     }
 
     private boolean checkDiagonal(Game game, Cell.Pos posOut, MarkType m, Set<Cell.Pos> leftDiagonal) {
-        if (leftDiagonal.contains(posOut)) {
-            int i = 0;
-            for (Cell.Pos pos : leftDiagonal) {
-                MarkType mark = MarkType.fromGame(game, pos);
-                if (mark.equals(m)) {
-                    i++;
-                }
-            }
-            return i == game.size();
-        }
-        return false;
-    }
 
+        if (!leftDiagonal.contains(posOut)) {
+            return false;
+        }
+
+        int i = 0;
+        for (Cell.Pos pos : leftDiagonal) {
+            MarkType mark = MarkType.fromGame(game, pos);
+            if (mark.equals(m)) {
+                i++;
+            }
+        }
+
+        return i == game.size();
+    }
 
     private Set<Cell.Pos> leftDiagonal(int n) {
 

@@ -8,16 +8,29 @@ public interface GameActionsProvider {
 
     List<Action> actions();
 
-    default Board board(Game game, GameService gameService) {
+    Game game();
+
+    default Board board(GameService gameService) {
 
         Board board = Board.newEmptyBoard();
 
         actions().forEach(action -> {
-            var cell = board.cells()[action.posOut().x()][action.posOut().y()];
+
+            int outX = action.posOut().x();
+            int outY = action.posOut().y();
+
+            Cell cell = board.cells()[outX][outY];
+
             if (cell instanceof Cell.Board(Cell[][] cells)) {
-                Cell newCell = gameService.cellOfPlayer(game, action.player());
-                cells[action.posIn().x()][action.posIn().y()] = newCell;
+
+                int inX = action.posIn().x();
+                int inY = action.posIn().y();
+
+                Cell newCell = gameService.cellOfPlayer(game(), action.player());
+
+                cells[inX][inY] = newCell;
             }
+
         });
 
         return board;

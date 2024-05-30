@@ -46,8 +46,10 @@ public record Game(String gameID,
         private int size = 3;
 
         public static Builder copyOf(Game game) {
+
             Builder builder = new Builder();
             builder.gameID = game.gameID;
+
             return builder
                     .withBoard(game.board)
                     .withState(game.state)
@@ -56,6 +58,7 @@ public record Game(String gameID,
                     .withLastAction(game.lastAction)
                     .withCurrentPlayer(game.currentPlayer)
                     .withSize(game.size);
+
         }
 
         public static Builder defaultBuilder() {

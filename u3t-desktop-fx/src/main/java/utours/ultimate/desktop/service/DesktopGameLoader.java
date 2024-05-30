@@ -1,5 +1,6 @@
 package utours.ultimate.desktop.service;
 
+import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 import utours.ultimate.desktop.view.GameGridView;
@@ -26,16 +27,28 @@ public final class DesktopGameLoader implements GameLoader {
 
     @Override
     public void loadGame(GameActionsProvider gameActionsProvider) {
+
         for (Action action : gameActionsProvider.actions()) {
-            Region region = gridView.getRegions()[action.posOut().x()][action.posOut().y()];
+
+            int outX = action.posOut().x();
+            int outY = action.posOut().y();
+
+            Region region = gridView.getRegions()[outX][outY];
+
             if (region instanceof GridPane gridPane) {
-                var tile = gridPane.getChildren().get(action.posIn().x() * GRID_SIZE + action.posIn().y());
+
+                int inX = action.posIn().x();
+                int inY = action.posIn().y();
+                int pos = inX * GRID_SIZE + inY;
+
+                Node tile = gridPane.getChildren().get(pos);
+
                 if (tile instanceof PrimitiveTile primitiveTile) {
                     onAcceptTile.accept(primitiveTile);
                 }
+
             }
         }
     }
-
 
 }
