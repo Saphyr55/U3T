@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class ClientSocket implements Client {
 
@@ -43,9 +44,11 @@ public class ClientSocket implements Client {
     @Override
     public void sendMessage(String address, Object content) {
         try {
-            Message messageWrapper = Message.success(address, content);
-            oos.writeObject(messageWrapper);
-            oos.flush();
+            synchronized (this) {
+                Message message = Message.success(address, content);
+                oos.writeObject(message);
+                oos.flush();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -124,8 +127,9 @@ public class ClientSocket implements Client {
     }
 
     private void defaultClientProcess() {
-        while (clientSocket.isConnected()) {
-            try {
+        try {
+
+            while (isConnected()) {
 
                 Message message = (Message) ois.readObject();
 
@@ -133,10 +137,15 @@ public class ClientSocket implements Client {
                     handler.handle(message);
                 }
 
-            } catch (Exception e) {
-                e.printStackTrace();
             }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            Thread.currentThread().interrupt();
+            startThread();
         }
+
     }
 
 }

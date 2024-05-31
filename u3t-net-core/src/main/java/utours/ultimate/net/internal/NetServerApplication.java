@@ -23,13 +23,20 @@ public class NetServerApplication implements NetApplication {
 
     @Override
     public void start() {
+
         stopped = false;
 
-        handler(Message.SUBSCRIBE_ADDRESS, this::onClientSubscribe);
+        handler(Message.SUBSCRIBE_ADDRESS,  this::onClientSubscribe);
+        handler(Message.ERROR_ADDRESS,      this::onError);
 
         while (!stopped) {
             server.acceptClient();
         }
+
+    }
+
+    private void onError(Context context) {
+        sendMessage(Message.ERROR_ADDRESS, context.message().content());
     }
 
     private void onClientSubscribe(Context context) {
@@ -59,20 +66,12 @@ public class NetServerApplication implements NetApplication {
     @Override
     public void sendMessage(String address, Object content) {
 
-        try {
+        if (!server.subscribers().containsKey(address)) {
+            return;
+        }
 
-            if (!server.subscribers().containsKey(address)) {
-                return;
-            }
-
-            for (Client client : server.subscribers().get(address)) {
-                var oos = client.oos();
-                oos.writeObject(Message.success(address, content));
-                oos.flush();
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
+        for (Client client : server.subscribers().get(address)) {
+            client.sendMessage(address, content);
         }
 
     }

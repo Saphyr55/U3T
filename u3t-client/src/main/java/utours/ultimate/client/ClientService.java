@@ -27,6 +27,8 @@ public class ClientService {
         client.messageReceiver().receive(address, message -> {
             if (message.isSuccess()) {
                 onChangedPendingGame.onChanged((PendingGame) message.content());
+            } else {
+                System.err.printf("Error at '%s', Message: %s%n", address, message);
             }
         });
     }

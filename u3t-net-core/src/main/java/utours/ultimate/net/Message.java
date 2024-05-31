@@ -7,6 +7,7 @@ import java.io.Serializable;
 
 public interface Message extends Serializable {
 
+
     /**
      *
      * @param address
@@ -47,8 +48,16 @@ public interface Message extends Serializable {
      * PRIVATE ADDRESS. <br/>
      *
      * Do not use this address. <br/>
-     * Address use to subscribe clients.
+     * Address used to subscribe clients.
      */
     String SUBSCRIBE_ADDRESS = "internal.server.subscribe";
+
+    /**
+     * PRIVATE ADDRESS. <br/>
+     *
+     * Do not use this address. <br/>
+     * Address used to handle error from clients.
+     */
+    String ERROR_ADDRESS = "internal.client.error";
 
 }

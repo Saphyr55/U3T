@@ -34,9 +34,11 @@ public class UpdatePendingGameHandler implements Handler<Context> {
         Object content = context.message().content();
 
         if (content instanceof PendingGame pendingGame) {
+
             inventory.update(pendingGame);
 
             LOGGER.log(Level.INFO, () -> "Pending game #%s updated".formatted(pendingGame.gameID()));
+
         } else {
 
             String error = "At the address '%s', expected '%s' but receive %s"

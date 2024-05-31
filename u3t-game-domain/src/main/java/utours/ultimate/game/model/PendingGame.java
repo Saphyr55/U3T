@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.UUID;
 
 public record PendingGame(String gameID,
-                          Player currentPlayer,
+                          Player firstPlayer,
                           Player secondPlayer,
                           int size) implements Serializable {
 
@@ -18,7 +18,7 @@ public record PendingGame(String gameID,
 
         int totalPlayer = 0;
 
-        if (currentPlayer != null)
+        if (firstPlayer != null)
             totalPlayer++;
 
         if (secondPlayer != null)
@@ -42,7 +42,7 @@ public record PendingGame(String gameID,
             return builder()
                     .withSize(pendingGame.size)
                     .withGameID(pendingGame.gameID)
-                    .withFirstPlayer(pendingGame.currentPlayer)
+                    .withFirstPlayer(pendingGame.firstPlayer)
                     .withSecondPlayer(pendingGame.secondPlayer);
         }
 

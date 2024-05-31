@@ -124,7 +124,7 @@ public final class U3TGameController implements Initializable {
     private void printActions(PrimitiveTile tile) {
 
         System.out.printf("Action.of(game.%s, Cell.pos(%d, %d), Cell.pos(%d, %d))\n",
-                game.currentPlayer().equals(game.crossPlayer()) ? "crossPlayer()" : "roundPlayer()",
+                game.firstPlayer().equals(game.crossPlayer()) ? "crossPlayer()" : "roundPlayer()",
                 tile.getPosOut().x(),
                 tile.getPosOut().y(),
                 tile.getPosIn().x(),

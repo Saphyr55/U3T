@@ -16,13 +16,10 @@ import utours.ultimate.desktop.view.U3TGameView;
 import utours.ultimate.game.model.Game;
 import utours.ultimate.game.model.PendingGame;
 import utours.ultimate.game.model.Player;
-import utours.ultimate.game.port.OnChangedPendingGame;
 
 import java.net.URL;
 import java.util.List;
-import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.function.Predicate;
 
 public final class PartiesController implements Initializable {
 
@@ -87,39 +84,31 @@ public final class PartiesController implements Initializable {
         button.setText(textOfPendingGame(pendingGame));
         button.setOnMouseClicked(mouseEvent -> {
 
-            if (Optional.ofNullable(currentPendingGame).isPresent()) return;
-
-            Predicate<PendingGame> isAlreadyInPendingGame = pg ->
-                    pg.currentPlayer().equals(currentPlayer) ||
-                    pg.secondPlayer().equals(currentPlayer);
-
-            if (pendingGame.isFull() && isAlreadyInPendingGame.test(pendingGame)) return;
-
-            clientService.onChangedPendingGame(pendingGame,
-                    getOnChangedPendingGame(isAlreadyInPendingGame));
+            if (pendingGame.isFull() || isInPendingGame()) return;
 
             PendingGame.Builder builder = PendingGame.Builder.copyOf(pendingGame);
             currentPlayer = Player.builder().build();
 
-            PendingGame newPendingGame = pendingGame.currentPlayer() == null
+            currentPendingGame = pendingGame.firstPlayer() == null
                     ? builder.withFirstPlayer(currentPlayer).build()
                     : builder.withSecondPlayer(currentPlayer).build();
 
-            currentPendingGame = newPendingGame;
+            clientService.onChangedPendingGame(currentPendingGame, pg -> {
 
-            asyncPendingGameInventory.update(newPendingGame);
+                if (!pg.isFull()) return;
+
+                currentPendingGame = pg;
+                clientService.joinGame(this::onJoinGame);
+            });
+
+            asyncPendingGameInventory.update(currentPendingGame);
         });
 
         Platform.runLater(() -> container.getChildren().add(button));
     }
 
-    private OnChangedPendingGame getOnChangedPendingGame(Predicate<PendingGame> isAlreadyInPendingGame) {
-        return pg -> {
-            if (pg.isFull() && !isAlreadyInPendingGame.test(pg)) {
-                currentPendingGame = pg;
-                clientService.joinGame(this::onJoinGame);
-            }
-        };
+    private boolean isInPendingGame() {
+        return currentPendingGame != null;
     }
 
     private static String textOfPendingGame(PendingGame pendingGame) {

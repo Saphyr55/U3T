@@ -35,11 +35,11 @@ public class NetServerSocket implements NetServer {
     public Client acceptClient() {
         try {
 
-            ClientSocket clientSocket = new ClientSocket(serverSocket.accept());
-            clientSocket.setOnProcess(() -> processClient(clientSocket));
-            clientSocket.startThread();
+            ClientSocket client = new ClientSocket(serverSocket.accept());
+            client.setOnProcess(() -> processClient(client));
+            client.startThread();
 
-            return clientSocket;
+            return client;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -56,10 +56,10 @@ public class NetServerSocket implements NetServer {
 
     private void processClient(Client client) {
         try {
+
             while (client.isConnected()) {
 
                 ObjectInputStream ois = client.ois();
-                ObjectOutputStream oos = client.oos();
 
                 Message message = (Message) ois.readObject();
                 String address = message.address();
@@ -71,11 +71,8 @@ public class NetServerSocket implements NetServer {
                         handler.handle(context);
                     }
 
-                } else {
-                    Message failedMessage = Message.error(message.address());
-                    oos.writeObject(failedMessage);
-                    oos.flush();
                 }
+
             }
 
         } catch (Exception e) {

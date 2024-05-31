@@ -39,6 +39,7 @@ public class AddGameHandler implements Handler<Context> {
         if (content instanceof Game game) {
 
             gameInventory.add(game);
+
             application.sendMessage(ADDRESS, game);
 
             LOGGER.log(Level.INFO, "Game added");
