@@ -15,7 +15,6 @@ import utours.ultimate.desktop.view.DesktopPartiesView;
 import utours.ultimate.desktop.view.U3TGameView;
 import utours.ultimate.game.model.Game;
 import utours.ultimate.game.model.PendingGame;
-import utours.ultimate.game.model.Player;
 
 import java.net.URL;
 import java.util.List;
@@ -33,9 +32,6 @@ public final class PartiesController implements Initializable {
     private @FXML DesktopPartiesView partiesView;
     private @FXML VBox container;
     private Button addGameButton;
-
-    private PendingGame currentPendingGame;
-    private Player currentPlayer;
 
     public PartiesController(MainController mainController,
                              ClientService clientService,
@@ -82,33 +78,9 @@ public final class PartiesController implements Initializable {
 
         Button button = createButton();
         button.setText(textOfPendingGame(pendingGame));
-        button.setOnMouseClicked(mouseEvent -> {
-
-            if (pendingGame.isFull() || isInPendingGame()) return;
-
-            PendingGame.Builder builder = PendingGame.Builder.copyOf(pendingGame);
-            currentPlayer = Player.builder().build();
-
-            currentPendingGame = pendingGame.firstPlayer() == null
-                    ? builder.withFirstPlayer(currentPlayer).build()
-                    : builder.withSecondPlayer(currentPlayer).build();
-
-            clientService.onChangedPendingGame(currentPendingGame, pg -> {
-
-                if (!pg.isFull()) return;
-
-                currentPendingGame = pg;
-                clientService.joinGame(this::onJoinGame);
-            });
-
-            asyncPendingGameInventory.update(currentPendingGame);
-        });
+        button.setOnMouseClicked(mouseEvent -> joinPendingGame(pendingGame));
 
         Platform.runLater(() -> container.getChildren().add(button));
-    }
-
-    private boolean isInPendingGame() {
-        return currentPendingGame != null;
     }
 
     private static String textOfPendingGame(PendingGame pendingGame) {
@@ -151,7 +123,11 @@ public final class PartiesController implements Initializable {
         return button;
     }
 
-    private void onJoinGame(Game game) {
+    private void joinPendingGame(PendingGame pendingGame) {
+        clientService.joinPendingGame(pendingGame, this::joinGame);
+    }
+
+    private void joinGame(Game game) {
         Platform.runLater(() -> mainController
                 .getMainRightPolymorphic()
                 .replaceRegion(createU3TGameView()));
