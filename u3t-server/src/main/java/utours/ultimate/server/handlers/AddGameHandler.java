@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 @Component
 public class AddGameHandler implements Handler<Context> {
 
-    private final static String ADDRESS = "server.game.add-game";
+    private final static String ADDRESS = "server.game-inventory.add";
     private static final Logger LOGGER = Logger.getGlobal();
 
     private final NetApplication application;

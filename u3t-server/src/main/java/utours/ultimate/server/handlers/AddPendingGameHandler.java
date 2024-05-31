@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 @Component
 public class AddPendingGameHandler implements Handler<Context> {
 
-    private final static String ADDRESS = "server.pending-game.add";
+    private final static String ADDRESS = "server.pending-game-inventory.add";
     private static final Logger LOGGER = Logger.getGlobal();
 
     private final PendingGameInventory pendingGameInventory;

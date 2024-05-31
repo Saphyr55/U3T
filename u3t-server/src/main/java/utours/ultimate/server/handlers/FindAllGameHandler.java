@@ -12,7 +12,7 @@ import java.util.List;
 @Component
 public class FindAllGameHandler implements Handler<Context> {
 
-    public static final String ADDRESS = "server.game.find-all";
+    public static final String ADDRESS = "server.game-inventory.find-all";
 
     private final NetApplication application;
     private final GameInventory gameMemoryInventory;

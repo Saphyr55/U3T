@@ -1,7 +1,8 @@
 package utours.ultimate.client;
 
 import utours.ultimate.core.steorotype.Component;
-import utours.ultimate.game.port.OnChangedPendingGames;
+import utours.ultimate.game.port.OnChangedPendingGame;
+import utours.ultimate.game.port.OnChangedPendingGameInventory;
 import utours.ultimate.game.model.Game;
 import utours.ultimate.game.model.PendingGame;
 import utours.ultimate.net.Client;
@@ -18,23 +19,33 @@ public class ClientService {
         this.client = client;
     }
 
-    public void onChangedPendingGames(OnChangedPendingGames onChangedPendingGames) {
+    public void onChangedPendingGame(PendingGame pendingGame, OnChangedPendingGame onChangedPendingGame) {
 
-        client.messageReceiver().receive("server.pending-game-inventory.changed", message -> {
+        String address = "server.pending-game.%s.changed".formatted(
+                pendingGame.gameID());
+
+        client.messageReceiver().receive(address, message -> {
             if (message.isSuccess()) {
-                onChangedPendingGames.onChanged((List<PendingGame>) message.content());
+                onChangedPendingGame.onChanged((PendingGame) message.content());
             }
         });
+    }
 
+    public void onChangedPendingGames(OnChangedPendingGameInventory onChangedPendingGameInventory) {
+        client.messageReceiver().receive("server.pending-game-inventory.changed", message -> {
+            if (message.isSuccess()) {
+                onChangedPendingGameInventory.onChanged((List<PendingGame>) message.content());
+            }
+        });
     }
 
     public void joinGame(Consumer<Game> onJoinGame) {
 
-        client.messageReceiver().receive("server.game.add-game", message -> {
+        client.messageReceiver().receive("server.game-inventory.add", message -> {
             onJoinGame.accept((Game) message.content());
         });
 
-        client.messageSender().send("server.game.add-game", Game.defaultGame());
+        client.messageSender().send("server.game-inventory.add", Game.defaultGame());
 
     }
 

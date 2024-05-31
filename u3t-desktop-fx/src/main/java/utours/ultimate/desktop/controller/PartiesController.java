@@ -16,10 +16,13 @@ import utours.ultimate.desktop.view.U3TGameView;
 import utours.ultimate.game.model.Game;
 import utours.ultimate.game.model.PendingGame;
 import utours.ultimate.game.model.Player;
+import utours.ultimate.game.port.OnChangedPendingGame;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.function.Predicate;
 
 public final class PartiesController implements Initializable {
 
@@ -33,6 +36,9 @@ public final class PartiesController implements Initializable {
     private @FXML DesktopPartiesView partiesView;
     private @FXML VBox container;
     private Button addGameButton;
+
+    private PendingGame currentPendingGame;
+    private Player currentPlayer;
 
     public PartiesController(MainController mainController,
                              ClientService clientService,
@@ -81,17 +87,39 @@ public final class PartiesController implements Initializable {
         button.setText(textOfPendingGame(pendingGame));
         button.setOnMouseClicked(mouseEvent -> {
 
+            if (Optional.ofNullable(currentPendingGame).isPresent()) return;
+
+            Predicate<PendingGame> isAlreadyInPendingGame = pg ->
+                    pg.currentPlayer().equals(currentPlayer) ||
+                    pg.secondPlayer().equals(currentPlayer);
+
+            if (pendingGame.isFull() && isAlreadyInPendingGame.test(pendingGame)) return;
+
+            clientService.onChangedPendingGame(pendingGame,
+                    getOnChangedPendingGame(isAlreadyInPendingGame));
+
             PendingGame.Builder builder = PendingGame.Builder.copyOf(pendingGame);
-            Player player = Player.builder().build();
+            currentPlayer = Player.builder().build();
 
             PendingGame newPendingGame = pendingGame.currentPlayer() == null
-                    ? builder.withCurrentPlayer(player).build()
-                    : builder.withSecondPlayer(player).build();
+                    ? builder.withFirstPlayer(currentPlayer).build()
+                    : builder.withSecondPlayer(currentPlayer).build();
+
+            currentPendingGame = newPendingGame;
 
             asyncPendingGameInventory.update(newPendingGame);
         });
 
         Platform.runLater(() -> container.getChildren().add(button));
+    }
+
+    private OnChangedPendingGame getOnChangedPendingGame(Predicate<PendingGame> isAlreadyInPendingGame) {
+        return pg -> {
+            if (pg.isFull() && !isAlreadyInPendingGame.test(pg)) {
+                currentPendingGame = pg;
+                clientService.joinGame(this::onJoinGame);
+            }
+        };
     }
 
     private static String textOfPendingGame(PendingGame pendingGame) {

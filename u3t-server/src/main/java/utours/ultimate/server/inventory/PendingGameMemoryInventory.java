@@ -5,7 +5,7 @@ import utours.ultimate.core.steorotype.Mapping;
 import utours.ultimate.game.model.PendingGame;
 import utours.ultimate.game.port.PendingGameInventory;
 import utours.ultimate.common.MapHelper;
-import utours.ultimate.server.handlers.OnChangedPendingGameInventory;
+import utours.ultimate.server.handlers.OnChangedPendingGameMemoryInventory;
 
 import java.util.List;
 import java.util.Map;
@@ -16,11 +16,11 @@ import java.util.Optional;
 public class PendingGameMemoryInventory implements PendingGameInventory  {
 
     private final Map<String, PendingGame> pendingGames = MapHelper.emptyMap();
-    private final OnChangedPendingGameInventory onChangedPendingGameInventory;
+    private final OnChangedPendingGameMemoryInventory onChangedInventory;
 
-    public PendingGameMemoryInventory(OnChangedPendingGameInventory onChangedPendingGameInventory) {
+    public PendingGameMemoryInventory(OnChangedPendingGameMemoryInventory onChangedInventory) {
 
-        this.onChangedPendingGameInventory = onChangedPendingGameInventory;
+        this.onChangedInventory = onChangedInventory;
     }
 
     @Override
@@ -35,20 +35,27 @@ public class PendingGameMemoryInventory implements PendingGameInventory  {
 
     @Override
     public void add(PendingGame game) {
+
         pendingGames.putIfAbsent(game.gameID(), game);
-        onChangedPendingGameInventory.update(findAll());
+
+        onChangedInventory.update(findAll());
     }
 
     @Override
-    public void update(PendingGame game) {
-        pendingGames.put(game.gameID(), game);
-        onChangedPendingGameInventory.update(findAll());
+    public void update(PendingGame pendingGame) {
+
+        pendingGames.put(pendingGame.gameID(), pendingGame);
+
+        onChangedInventory.update(pendingGame);
+        onChangedInventory.update(findAll());
     }
 
     @Override
     public void remove(PendingGame game) {
+
         pendingGames.remove(game.gameID());
-        onChangedPendingGameInventory.update(findAll());
+
+        onChangedInventory.update(findAll());
     }
     
 }

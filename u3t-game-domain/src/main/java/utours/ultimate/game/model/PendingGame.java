@@ -27,6 +27,10 @@ public record PendingGame(String gameID,
         return totalPlayer;
     }
 
+    public boolean isFull() {
+        return totalPlayer() == 2;
+    }
+
     public static class Builder {
 
         private String gameID = UUID.randomUUID().toString();
@@ -38,7 +42,7 @@ public record PendingGame(String gameID,
             return builder()
                     .withSize(pendingGame.size)
                     .withGameID(pendingGame.gameID)
-                    .withCurrentPlayer(pendingGame.currentPlayer)
+                    .withFirstPlayer(pendingGame.currentPlayer)
                     .withSecondPlayer(pendingGame.secondPlayer);
         }
 
@@ -52,7 +56,7 @@ public record PendingGame(String gameID,
             return this;
         }
 
-        public Builder withCurrentPlayer(Player currentPlayer) {
+        public Builder withFirstPlayer(Player currentPlayer) {
             this.currentPlayer = currentPlayer;
             return this;
         }

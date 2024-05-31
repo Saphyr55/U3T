@@ -4,7 +4,7 @@ import utours.ultimate.game.model.PendingGame;
 
 import java.util.List;
 
-public interface OnChangedPendingGames {
+public interface OnChangedPendingGameInventory {
 
     void onChanged(List<PendingGame> games);
 
