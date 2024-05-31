@@ -11,7 +11,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import utours.ultimate.client.AsyncPendingGameInventory;
 import utours.ultimate.client.ClientService;
-import utours.ultimate.desktop.view.DesktopPartiesView;
 import utours.ultimate.desktop.view.U3TGameView;
 import utours.ultimate.game.model.Game;
 import utours.ultimate.game.model.PendingGame;
@@ -27,19 +26,19 @@ public final class PartiesController implements Initializable {
 
     private final ClientService clientService;
     private final MainController mainController;
-    private final AsyncPendingGameInventory asyncPendingGameInventory;
+    private final AsyncPendingGameInventory pendingGameInventory;
 
-    private @FXML DesktopPartiesView partiesView;
     private @FXML VBox container;
+
     private Button addGameButton;
 
     public PartiesController(MainController mainController,
                              ClientService clientService,
-                             AsyncPendingGameInventory asyncPendingGameInventory) {
+                             AsyncPendingGameInventory pendingGameInventory) {
 
         this.clientService = clientService;
         this.mainController = mainController;
-        this.asyncPendingGameInventory = asyncPendingGameInventory;
+        this.pendingGameInventory = pendingGameInventory;
     }
 
     @Override
@@ -53,7 +52,7 @@ public final class PartiesController implements Initializable {
 
         container.getChildren().add(addGameButton);
 
-        asyncPendingGameInventory.findAll()
+        pendingGameInventory.findAll()
                 .thenAccept(this::addPendingGamesButtons)
                 .thenRun(this::setupObservableInventory);
     }
@@ -63,7 +62,7 @@ public final class PartiesController implements Initializable {
     }
 
     private void onCreatePendingGame(MouseEvent mouseEvent) {
-        asyncPendingGameInventory.add(PendingGame.builder()
+        pendingGameInventory.add(PendingGame.builder()
                 .withSize(PendingGame.DEFAULT_SIZE)
                 .build());
     }

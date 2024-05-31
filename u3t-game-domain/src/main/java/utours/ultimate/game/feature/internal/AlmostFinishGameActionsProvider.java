@@ -1,16 +1,18 @@
 package utours.ultimate.game.feature.internal;
 
 import utours.ultimate.game.feature.GameActionsProvider;
-import utours.ultimate.game.model.*;
+import utours.ultimate.game.model.Action;
+import utours.ultimate.game.model.Cell;
+import utours.ultimate.game.model.Game;
 
 import java.util.List;
 
-public class GameFinishActionsProvider implements GameActionsProvider {
+public class AlmostFinishGameActionsProvider implements GameActionsProvider {
 
     private final List<Action> actions;
     private final Game game;
 
-    public GameFinishActionsProvider(Game game) {
+    public AlmostFinishGameActionsProvider(Game game) {
         this.game = game;
         this.actions = List.of(
                 Action.of(game.crossPlayer(), Cell.pos(0, 0), Cell.pos(0, 0)),
@@ -47,26 +49,8 @@ public class GameFinishActionsProvider implements GameActionsProvider {
                 Action.of(game.roundPlayer(), Cell.pos(2, 2), Cell.pos(0, 1)),
                 Action.of(game.crossPlayer(), Cell.pos(0, 1), Cell.pos(2, 2)),
                 Action.of(game.roundPlayer(), Cell.pos(2, 2), Cell.pos(2, 2)),
-                Action.of(game.crossPlayer(), Cell.pos(2, 2), Cell.pos(1, 0)),
-                Action.of(game.roundPlayer(), Cell.pos(2, 2), Cell.pos(2, 1)),
-                Action.of(game.crossPlayer(), Cell.pos(2, 1), Cell.pos(1, 2)),
-                Action.of(game.roundPlayer(), Cell.pos(1, 2), Cell.pos(1, 2)),
-                Action.of(game.crossPlayer(), Cell.pos(0, 1), Cell.pos(2, 1)),
-                Action.of(game.roundPlayer(), Cell.pos(2, 1), Cell.pos(2, 2)),
-                Action.of(game.crossPlayer(), Cell.pos(2, 2), Cell.pos(1, 2)),
-                Action.of(game.roundPlayer(), Cell.pos(0, 0), Cell.pos(1, 2)),
-                Action.of(game.crossPlayer(), Cell.pos(0, 1), Cell.pos(2, 0)),
-                Action.of(game.roundPlayer(), Cell.pos(2, 0), Cell.pos(2, 0)),
-                Action.of(game.crossPlayer(), Cell.pos(2, 0), Cell.pos(0, 2)),
-                Action.of(game.roundPlayer(), Cell.pos(0, 2), Cell.pos(0, 2)),
-                Action.of(game.crossPlayer(), Cell.pos(2, 1), Cell.pos(0, 1)),
-                Action.of(game.roundPlayer(), Cell.pos(2, 1), Cell.pos(0, 2)),
-                Action.of(game.crossPlayer(), Cell.pos(2, 1), Cell.pos(2, 1)),
-                Action.of(game.roundPlayer(), Cell.pos(2, 1), Cell.pos(2, 0)),
-                Action.of(game.crossPlayer(), Cell.pos(2, 0), Cell.pos(0, 0)),
-                Action.of(game.roundPlayer(), Cell.pos(2, 0), Cell.pos(2, 1))
+                Action.of(game.crossPlayer(), Cell.pos(2, 2), Cell.pos(1, 0))
         );
-
     }
 
     @Override
