@@ -11,14 +11,20 @@ import java.io.ObjectOutputStream;
 import java.net.SocketException;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class NetServerApplication implements NetApplication {
+
+    private static final Logger LOGGER = Logger.getLogger(ClientSocket.class.getName());
 
     private final NetServer server;
     private boolean stopped = true;
 
     public NetServerApplication(NetServerConfiguration configuration) {
         this.server = new NetServerSocket(configuration);
+
+        addShutdownHook();
     }
 
     @Override
@@ -36,10 +42,11 @@ public class NetServerApplication implements NetApplication {
     }
 
     private void onError(Context context) {
-        sendMessage(Message.ERROR_ADDRESS, context.message().content());
+
     }
 
     private void onClientSubscribe(Context context) {
+
         String subAddress = (String) context.message().content();
 
         server.subscribers()
@@ -49,13 +56,13 @@ public class NetServerApplication implements NetApplication {
 
     @Override
     public void stop() {
-        if (stopped) return;
-        try {
-            stopped = true;
-            server.stop();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+
+        if (stopped) {
+            return;
         }
+
+        stopped = true;
+        server.stop();
     }
 
     @Override
@@ -71,9 +78,23 @@ public class NetServerApplication implements NetApplication {
         }
 
         for (Client client : server.subscribers().get(address)) {
-            client.sendMessage(address, content);
+            if (client.isConnected()) {
+                client.sendMessage(address, content);
+            }
         }
 
+    }
+
+    private void addShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(defaultThread(() -> {
+            LOGGER.log(Level.INFO, () -> "Application is shutting down...");
+            stop();
+            LOGGER.log(Level.INFO, () -> "Cleanup complete.");
+        }));
+    }
+
+    private static Thread defaultThread(Runnable onStart) {
+        return Thread.ofVirtual().factory().newThread(onStart);
     }
 
 }

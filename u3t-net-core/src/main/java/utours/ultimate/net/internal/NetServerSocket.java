@@ -1,7 +1,6 @@
 package utours.ultimate.net.internal;
 
 import utours.ultimate.net.*;
-import utours.ultimate.net.data.ContextData;
 
 import javax.net.ServerSocketFactory;
 import java.io.*;
@@ -25,6 +24,11 @@ public class NetServerSocket implements NetServer {
     @Override
     public void stop() {
         try {
+            for (List<Client> value : subscribers.values()) {
+                for (Client client : value) {
+                    client.close();
+                }
+            }
             serverSocket.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -36,7 +40,7 @@ public class NetServerSocket implements NetServer {
         try {
 
             ClientSocket client = new ClientSocket(serverSocket.accept());
-            client.setOnProcess(() -> processClient(client));
+            client.setTask(() -> processClient(client));
             client.startThread();
 
             return client;
@@ -55,11 +59,10 @@ public class NetServerSocket implements NetServer {
     }
 
     private void processClient(Client client) {
-        try {
+
+        try (ObjectInputStream ois = client.ois()) {
 
             while (client.isConnected()) {
-
-                ObjectInputStream ois = client.ois();
 
                 Message message = (Message) ois.readObject();
                 String address = message.address();
@@ -84,7 +87,7 @@ public class NetServerSocket implements NetServer {
 
     }
 
-    private void disconnetClient(Client client) {
+    public void disconnetClient(Client client) {
 
         if (client == null) return;
 

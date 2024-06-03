@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.layout.*;
+import utours.ultimate.client.ClientGameService;
 import utours.ultimate.client.ClientService;
 import utours.ultimate.desktop.service.DesktopGameLoader;
 import utours.ultimate.desktop.view.GameGridView;
@@ -23,7 +24,7 @@ import java.util.function.Consumer;
 public final class U3TGameController implements Initializable {
 
     private final ClientService clientService;
-    private final GameService gameService;
+    private final ClientGameService gameService;
 
     private Game game;
     private GameLoader gameLoader;
@@ -31,14 +32,17 @@ public final class U3TGameController implements Initializable {
     private @FXML GameGridView gameGridView;
     private @FXML Pane root;
 
-    public U3TGameController(ClientService clientService, GameService gameService) {
+    public U3TGameController(ClientService clientService, ClientGameService gameService) {
 
         this.clientService = clientService;
         this.gameService = gameService;
+
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+
+        gameService.setClientPlayer(clientService.getCurrentPlayer());
 
         game = clientService.currentGame();
 
@@ -102,17 +106,14 @@ public final class U3TGameController implements Initializable {
 
         if (!isWin) return;
 
-        int i = action.posOut().x();
-        int j = action.posOut().y();
+        int x = action.posOut().x();
+        int y = action.posOut().y();
 
-        var linearPos = i * GameGridView.GRID_SIZE + j;
-        var child = gameGridView.getChildren().get(linearPos);
-
-        if (child instanceof GridPane) {
+        if (gameGridView.nodeAt(x, y) instanceof GridPane) {
 
             Cell.Pos posOut = action.posOut();
             Tile tileOut = Tile.newTile(gameGridView, cell, posOut);
-            gameGridView.add(tileOut, i, j);
+            gameGridView.add(tileOut, x, y);
         }
 
     }

@@ -1,30 +1,30 @@
 package utours.ultimate.desktop.factory.impl;
 
 import utours.ultimate.client.AsyncPendingGameInventory;
+import utours.ultimate.client.ClientGameService;
 import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.core.steorotype.Mapping;
 import utours.ultimate.desktop.controller.*;
 import utours.ultimate.desktop.factory.ControllerProvider;
 import utours.ultimate.client.ClientService;
-import utours.ultimate.game.feature.GameService;
 
 @Component
 @Mapping
 public class ControllerProviderImpl implements ControllerProvider {
 
-    private final MainController mainController;
+    private final MainController    mainController;
     private final PartiesController partiesController;
     private final U3TGameController u3TGameController;
-    private final ChatController chatController;
+    private final ChatController    chatController;
 
-    public ControllerProviderImpl(GameService service,
-                                  AsyncPendingGameInventory pendingGameInventory,
+    public ControllerProviderImpl(AsyncPendingGameInventory pendingGameInventory,
+                                  ClientGameService gameService,
                                   ClientService clientService) {
 
-        mainController = new MainController();
+        mainController    = new MainController();
         partiesController = new PartiesController(mainController, clientService, pendingGameInventory);
-        u3TGameController = new U3TGameController(clientService, service);
-        chatController = new ChatController();
+        u3TGameController = new U3TGameController(clientService, gameService);
+        chatController    = new ChatController();
     }
 
     @Override

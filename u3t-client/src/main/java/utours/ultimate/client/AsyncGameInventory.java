@@ -25,7 +25,7 @@ public class AsyncGameInventory {
 
         CompletableFuture<List<Game>> future = new CompletableFuture<>();
 
-        client.messageReceiver().receive(GAME_FIND_ALL_ADDRESS, message -> {
+        client.messageReceiver().onReceive(GAME_FIND_ALL_ADDRESS, message -> {
 
             if (message.isSuccess()) {
                 future.complete((List<Game>) message.content());
@@ -43,7 +43,7 @@ public class AsyncGameInventory {
     }
 
     public void update(Game game) {
-        client.messageSender().send(GAME_UPDATE_ADDRESS, game);
+        client.messageSender().send(GAME_UPDATE_ADDRESS.formatted(game.gameID()), game);
     }
 
 

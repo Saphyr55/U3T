@@ -12,7 +12,7 @@ public sealed interface Cell extends Serializable {
 
     record Round() implements Cell { }
 
-    record Pos(int x, int y) { }
+    record Pos(int x, int y) implements Serializable { }
 
     static Pos pos(int x, int y) {
         return new Pos(x, y);

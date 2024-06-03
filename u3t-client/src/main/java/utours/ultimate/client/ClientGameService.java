@@ -1,16 +1,17 @@
 package utours.ultimate.client;
 
+import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.game.feature.GameService;
 import utours.ultimate.game.feature.internal.GameServiceBase;
 import utours.ultimate.game.model.*;
 
-
-public class ClientGameService implements GameService {
+@Component
+public final class ClientGameService implements GameService {
 
     private final AsyncGameInventory asyncGameInventory;
     private final GameService gameService;
 
-    private Player firstPlayer;
+    private Player clientPlayer;
 
     public ClientGameService(AsyncGameInventory asyncGameInventory) {
 
@@ -18,15 +19,18 @@ public class ClientGameService implements GameService {
         this.gameService = new GameServiceBase();
     }
 
+    public Player getClientPlayer() {
+        return clientPlayer;
+    }
+
+    public void setClientPlayer(Player clientPlayer) {
+        this.clientPlayer = clientPlayer;
+    }
+
     @Override
     public boolean isPlayableAction(Game game, Action action) {
-
-        if (firstPlayer == null) {
-            firstPlayer = game.currentPlayer();
-        }
-
         return gameService.isPlayableAction(game, action) &&
-                firstPlayer.equals(game.currentPlayer());
+                clientPlayer.equals(game.currentPlayer());
     }
 
     @Override

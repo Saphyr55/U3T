@@ -35,7 +35,7 @@ public final class PartiesController implements Initializable {
     public PartiesController(MainController mainController,
                              ClientService clientService,
                              AsyncPendingGameInventory pendingGameInventory) {
-
+        
         this.clientService = clientService;
         this.mainController = mainController;
         this.pendingGameInventory = pendingGameInventory;

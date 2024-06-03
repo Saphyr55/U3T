@@ -32,7 +32,7 @@ public record Player(String id,
     public static class Builder {
 
         private String id = UUID.randomUUID().toString();
-        private String name;
+        private String name = "Player";
         private Integer score = 0;
 
         public static Builder copyOf(Player player) {

@@ -1,5 +1,6 @@
 package utours.ultimate.desktop.view;
 
+import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 import utours.ultimate.desktop.view.u3t.PrimitiveTile;
@@ -20,6 +21,11 @@ public class GameGridView extends GridPane {
         this.gridSize = GRID_SIZE;
         this.onPressedTile = ignored -> { };
         this.regions = new Region[gridSize][gridSize];
+    }
+    
+    public Node nodeAt(int i, int j) {
+        int linearPos = i * getGridSize() + j;
+        return getChildren().get(linearPos);
     }
 
     public void fillGridPanes() {

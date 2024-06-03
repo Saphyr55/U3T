@@ -8,6 +8,6 @@ public interface MessageReceiver {
         return new NetClientMessageReceiver(client);
     }
 
-    MessageReceiver receive(String address, Handler<Message> handler);
+    MessageReceiver onReceive(String address, Handler<Message> handler);
 
 }

@@ -22,8 +22,10 @@ public class ClientService {
     private final AsyncPendingGameInventory inventory;
 
     private PendingGame currentPendingGame;
+    private Player currentPlayer;
 
     public ClientService(Client client, AsyncPendingGameInventory inventory) {
+
         this.client = client;
         this.inventory = inventory;
     }
@@ -32,7 +34,7 @@ public class ClientService {
 
         String address = GAME_CHANGED.formatted(game.gameID());
 
-        client.onReceiveMessage(address, message -> {
+        client.messageReceiver().onReceive(address, message -> {
             if (message.isSuccess()) {
                 onChangedGame.onChanged((Game) message.content());
             } else {
@@ -40,13 +42,14 @@ public class ClientService {
             }
         });
 
+        client.messageSender().send(address, game);
     }
 
     public void onChangedPendingGame(PendingGame pendingGame, OnChanged<PendingGame> onChangedPendingGame) {
 
         String address = PENDING_GAME_CHANGED.formatted(pendingGame.gameID());
 
-        client.messageReceiver().receive(address, message -> {
+        client.messageReceiver().onReceive(address, message -> {
             if (message.isSuccess()) {
                 onChangedPendingGame.onChanged((PendingGame) message.content());
             } else {
@@ -56,7 +59,7 @@ public class ClientService {
     }
 
     public void onChangedPendingGames(OnChanged<List<PendingGame>> onChangedInventory) {
-        client.messageReceiver().receive(PENDING_GAME_INVENTORY_CHANGED, message -> {
+        client.messageReceiver().onReceive(PENDING_GAME_INVENTORY_CHANGED, message -> {
             if (message.isSuccess()) {
                 onChangedInventory.onChanged((List<PendingGame>) message.content());
             } else {
@@ -71,9 +74,11 @@ public class ClientService {
 
         PendingGame.Builder builder = PendingGame.Builder.copyOf(pendingGame);
 
+        currentPlayer = Player.ofDefault();
+
         currentPendingGame = pendingGame.firstPlayer() == null
-                ? builder.withFirstPlayer(Player.ofDefault()).build()
-                : builder.withSecondPlayer(Player.ofDefault()).build();
+                ? builder.withFirstPlayer(currentPlayer).build()
+                : builder.withSecondPlayer(currentPlayer).build();
 
         onChangedPendingGame(currentPendingGame, pg -> {
 
@@ -93,7 +98,7 @@ public class ClientService {
 
     public void joinGame(OnJoinGame onJoinGame, Game game) {
 
-        client.messageReceiver().receive("server.game-inventory.add", message -> {
+        client.messageReceiver().onReceive("server.game-inventory.add", message -> {
             onJoinGame.joinGame((Game) message.content());
         });
 
@@ -102,11 +107,15 @@ public class ClientService {
     }
 
     public Game gameOf(PendingGame pendingGame) {
-        return Game.Builder.defaultBuilder()
+        return Game.builder()
                 .withGameID(pendingGame.gameID())
                 .withCrossPlayer(pendingGame.firstPlayer())
                 .withRoundPlayer(pendingGame.secondPlayer())
                 .build();
+    }
+
+    public Player getCurrentPlayer() {
+        return currentPlayer;
     }
 
     public Game currentGame() {

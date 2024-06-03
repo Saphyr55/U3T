@@ -19,10 +19,6 @@ public record Game(String gameID,
         return new Builder();
     }
 
-    public static Game defaultGame() {
-        return Builder.defaultBuilder().build();
-    }
-
     public Game addAction(Action action) {
         return Game.Builder.copyOf(this)
                 .withActions(ListHelper.append(actions, action))
@@ -59,14 +55,6 @@ public record Game(String gameID,
                     .withActions(game.actions)
                     .withCurrentPlayer(game.currentPlayer)
                     .withSize(game.size);
-        }
-
-        public static Builder defaultBuilder() {
-            Builder builder = builder()
-                    .withRoundPlayer(Player.Builder.newBuilder("1", "Player O").build())
-                    .withCrossPlayer(Player.Builder.newBuilder("2", "Player X").build());
-            builder.withCurrentPlayer(builder.crossPlayer);
-            return builder;
         }
 
         private Builder() { }
