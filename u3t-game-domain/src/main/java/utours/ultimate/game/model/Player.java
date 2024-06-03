@@ -1,6 +1,8 @@
 package utours.ultimate.game.model;
 
 import java.io.Serializable;
+import java.util.Objects;
+import java.util.UUID;
 
 public record Player(String id,
                      String name,
@@ -11,14 +13,25 @@ public record Player(String id,
         return Builder.newBuilder();
     }
 
+    public static Player ofDefault() {
+        return Player.builder().build();
+    }
+
     @Override
-    public boolean equals(Object obj) {
-        return id != null && id.equals(((Player) obj).id());
+    public boolean equals(Object o) {
+
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Player player = (Player) o;
+
+        return Objects.equals(id, player.id);
     }
 
     public static class Builder {
 
-        private String id;
+        private String id = UUID.randomUUID().toString();
         private String name;
         private Integer score = 0;
 

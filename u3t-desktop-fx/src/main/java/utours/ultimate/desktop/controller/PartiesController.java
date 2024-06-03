@@ -62,9 +62,7 @@ public final class PartiesController implements Initializable {
     }
 
     private void onCreatePendingGame(MouseEvent mouseEvent) {
-        pendingGameInventory.add(PendingGame.builder()
-                .withSize(PendingGame.DEFAULT_SIZE)
-                .build());
+        pendingGameInventory.add(PendingGame.ofDefault());
     }
 
     private void addPendingGamesButtons(List<PendingGame> pendingGames) {

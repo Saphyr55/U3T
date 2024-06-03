@@ -14,7 +14,7 @@ public interface GameService {
 
     Cell cellAt(Game game, Cell.Pos posOut, Cell.Pos posIn);
 
-    Game oppositePlayer(Game game);
+    Game turnPlayer(Game game);
 
     Player oppositePlayer(Game game, Player player);
 

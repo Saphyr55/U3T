@@ -1,8 +1,9 @@
 package utours.ultimate.game.model;
 
+import utours.ultimate.common.ListHelper;
+
 import java.io.Serializable;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public record Game(String gameID,
                    Player crossPlayer,
@@ -10,7 +11,7 @@ public record Game(String gameID,
                    Player currentPlayer,
                    Board board,
                    GameState state,
-                   Action lastAction,
+                   List<Action> actions,
                    int size
 ) implements Serializable {
 
@@ -21,18 +22,21 @@ public record Game(String gameID,
     public static Game defaultGame() {
         return Builder.defaultBuilder().build();
     }
-    
-    public Game lastAction(Action action) {
+
+    public Game addAction(Action action) {
         return Game.Builder.copyOf(this)
-                .withLastAction(action)
+                .withActions(ListHelper.append(actions, action))
                 .build();
     }
 
-    public Optional<Action> lastActionOpt() {
-        return Optional.ofNullable(lastAction);
+    public Action lastAction() {
+        return actions.getLast();
     }
 
-    private static long lastGameID = 0;
+    public Optional<Action> lastActionOpt() {
+        if (actions.isEmpty()) return Optional.empty();
+        return Optional.of(lastAction());
+    }
 
     public static class Builder {
 
@@ -40,25 +44,21 @@ public record Game(String gameID,
         private Player crossPlayer;
         private Player roundPlayer;
         private Player currentPlayer;
-        private Action lastAction;
+        private List<Action> actions = new ArrayList<>();
         private Board board = Board.newEmptyBoard();
         private GameState state = GameState.Ready;
         private int size = 3;
 
         public static Builder copyOf(Game game) {
-
-            Builder builder = new Builder();
-            builder.gameID = game.gameID;
-
-            return builder
+            return builder()
+                    .withGameID(game.gameID)
                     .withBoard(game.board)
                     .withState(game.state)
                     .withRoundPlayer(game.roundPlayer)
                     .withCrossPlayer(game.crossPlayer)
-                    .withLastAction(game.lastAction)
+                    .withActions(game.actions)
                     .withCurrentPlayer(game.currentPlayer)
                     .withSize(game.size);
-
         }
 
         public static Builder defaultBuilder() {
@@ -67,10 +67,14 @@ public record Game(String gameID,
                     .withCrossPlayer(Player.Builder.newBuilder("2", "Player X").build());
             builder.withCurrentPlayer(builder.crossPlayer);
             return builder;
-
         }
 
         private Builder() { }
+
+        public Builder withGameID(String gameID) {
+            this.gameID = gameID;
+            return this;
+        }
 
         public Builder withCrossPlayer(Player crossPlayer) {
             this.crossPlayer = crossPlayer;
@@ -87,8 +91,8 @@ public record Game(String gameID,
             return this;
         }
 
-        public Builder withLastAction(Action lastAction) {
-            this.lastAction = lastAction;
+        public Builder withActions(List<Action> actions) {
+            this.actions = actions;
             return this;
         }
 
@@ -112,7 +116,7 @@ public record Game(String gameID,
             if (currentPlayer == null)
                 currentPlayer = crossPlayer;
 
-            return new Game(gameID, crossPlayer, roundPlayer, currentPlayer, board, state, lastAction, size);
+            return new Game(gameID, crossPlayer, roundPlayer, currentPlayer, board, state, actions, size);
         }
 
     }

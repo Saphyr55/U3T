@@ -33,20 +33,29 @@ public class GameMemoryInventory implements GameInventory {
     }
 
     @Override
-    public void add(Game party) {
-        games.putIfAbsent(party.gameID(), party);
+    public void add(Game game) {
+
+        games.putIfAbsent(game.gameID(), game);
+
+        onChangedGameInventory.update(game);
         onChangedGameInventory.update(findAll());
     }
     
     @Override
-    public void update(Game party) {
-        games.put(party.gameID(), party);
+    public void update(Game game) {
+
+        games.put(game.gameID(), game);
+
+        onChangedGameInventory.update(game);
         onChangedGameInventory.update(findAll());
     }
 
     @Override
-    public void remove(Game party) {
-        games.remove(party.gameID());
+    public void remove(Game game) {
+
+        games.remove(game.gameID());
+
+        onChangedGameInventory.update(game);
         onChangedGameInventory.update(findAll());
     }
 

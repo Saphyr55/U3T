@@ -2,11 +2,7 @@ package utours.ultimate.game.feature;
 
 import utours.ultimate.game.model.*;
 
-import java.util.List;
-
-public interface GameActionsProvider {
-
-    List<Action> actions();
+public interface GameProvider {
 
     Game game();
 
@@ -14,7 +10,7 @@ public interface GameActionsProvider {
 
         Board board = Board.newEmptyBoard();
 
-        actions().forEach(action -> {
+        game().actions().forEach(action -> {
 
             int outX = action.posOut().x();
             int outY = action.posOut().y();

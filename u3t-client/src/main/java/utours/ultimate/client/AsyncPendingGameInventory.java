@@ -28,9 +28,11 @@ public class AsyncPendingGameInventory {
         CompletableFuture<List<PendingGame>> future = new CompletableFuture<>();
 
         client.messageReceiver().receive(PENDING_GAME_FIND_ALL_ADDRESS, message -> {
+            
             if (message.isSuccess()) {
                 future.complete((List<PendingGame>) message.content());
             }
+
         });
 
         client.messageSender().send(PENDING_GAME_FIND_ALL_ADDRESS, new ArrayList<PendingGame>());

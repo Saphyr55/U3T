@@ -27,7 +27,7 @@ public class ClientSocket implements Client {
         setOnProcess(this::defaultClientProcess);
     }
 
-    public ClientSocket(Socket clientSocket, Runnable onThread) throws IOException {
+    public ClientSocket(Socket clientSocket, Thread onThread) throws IOException {
         this.clientSocket = clientSocket;
         this.out = clientSocket.getOutputStream();
         this.in = clientSocket.getInputStream();
@@ -123,7 +123,7 @@ public class ClientSocket implements Client {
     }
 
     public void startThread() {
-        Thread.ofPlatform().start(onProcess);
+        Thread.ofVirtual().start(onProcess);
     }
 
     private void defaultClientProcess() {
@@ -134,7 +134,11 @@ public class ClientSocket implements Client {
                 Message message = (Message) ois.readObject();
 
                 for (Handler<Message> handler : addresses.get(message.address())) {
-                    handler.handle(message);
+                    try {
+                        handler.handle(message);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
 
             }
@@ -142,8 +146,8 @@ public class ClientSocket implements Client {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
+            close();
             Thread.currentThread().interrupt();
-            startThread();
         }
 
     }

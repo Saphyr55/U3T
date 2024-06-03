@@ -5,15 +5,15 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.layout.*;
+import utours.ultimate.client.ClientService;
 import utours.ultimate.desktop.service.DesktopGameLoader;
 import utours.ultimate.desktop.view.GameGridView;
 import utours.ultimate.desktop.view.u3t.PrimitiveTile;
 import utours.ultimate.desktop.view.u3t.Tile;
-import utours.ultimate.game.feature.GameActionsProvider;
+import utours.ultimate.game.feature.GameProvider;
 import utours.ultimate.game.feature.GameLoader;
 import utours.ultimate.game.feature.GameService;
 import utours.ultimate.game.model.*;
-import utours.ultimate.net.Client;
 
 import java.io.IOException;
 import java.net.URL;
@@ -22,24 +22,27 @@ import java.util.function.Consumer;
 
 public final class U3TGameController implements Initializable {
 
+    private final ClientService clientService;
     private final GameService gameService;
-    private final GameActionsProvider gameActionsProvider;
+
     private Game game;
+    private GameLoader gameLoader;
 
     private @FXML GameGridView gameGridView;
     private @FXML Pane root;
 
-    public U3TGameController(GameService gameService, GameActionsProvider gameActionsProvider) {
+    public U3TGameController(ClientService clientService, GameService gameService) {
 
+        this.clientService = clientService;
         this.gameService = gameService;
-        this.gameActionsProvider = gameActionsProvider;
-        this.game = gameActionsProvider.game();
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
-        GameLoader gameLoader = new DesktopGameLoader(gameGridView, this::onPressedTile);
+        game = clientService.currentGame();
+
+        gameLoader = new DesktopGameLoader(gameGridView, this::onPressedTile);
 
         gameGridView.prefWidthProperty().bind(root.heightProperty());
         gameGridView.prefHeightProperty().bind(root.heightProperty());
@@ -50,9 +53,17 @@ public final class U3TGameController implements Initializable {
         gameGridView.setOnPressedTile(this::onPressedTile);
         gameGridView.initBoard();
 
-        gameLoader.loadGame(gameActionsProvider);
+        gameLoader.loadGame(game);
+
+        setOnChangedGame();
     }
 
+    private void setOnChangedGame() {
+        clientService.onChangedGame(game, g -> {
+            game = g;
+            gameLoader.loadGame(game);
+        });
+    }
 
     private void performAction(Action action, Consumer<Cell> acceptNewCell) {
 
@@ -63,9 +74,9 @@ public final class U3TGameController implements Initializable {
         game = gameService.placeMark(game, action);
         IsWinGame isWinGameInner = gameService.checkInnerWinner(game, action);
         game = isWinGameInner.game();
-        game = game.lastAction(action);
+        game = game.addAction(action);
 
-        game = gameService.oppositePlayer(game);
+        game = gameService.turnPlayer(game);
 
         Cell cell = gameService.cellAt(game, action.posOut(), action.posIn());
         acceptNewCell.accept(cell);
@@ -80,7 +91,10 @@ public final class U3TGameController implements Initializable {
 
     private void onPressedTile(PrimitiveTile tile) {
 
-        Action action = Action.of(game.currentPlayer(), tile.getPosOut(), tile.getPosIn());
+        Cell.Pos posOut = tile.getPosOut();
+        Cell.Pos posIn = tile.getPosIn();
+
+        Action action = Action.of(game.currentPlayer(), posOut, posIn);
         performAction(action, tile::setCell);
     }
 
@@ -91,13 +105,17 @@ public final class U3TGameController implements Initializable {
         int i = action.posOut().x();
         int j = action.posOut().y();
 
-        var child = gameGridView.getChildren().get(i * GameGridView.GRID_SIZE + j);
+        var linearPos = i * GameGridView.GRID_SIZE + j;
+        var child = gameGridView.getChildren().get(linearPos);
+
         if (child instanceof GridPane) {
-            Tile tileOut = Tile.newTile(gameGridView, cell, action.posOut());
+
+            Cell.Pos posOut = action.posOut();
+            Tile tileOut = Tile.newTile(gameGridView, cell, posOut);
             gameGridView.add(tileOut, i, j);
         }
-    }
 
+    }
 
     private void finishGame() {
         try {
@@ -118,18 +136,4 @@ public final class U3TGameController implements Initializable {
         }
     }
 
-    /*
-
-    // Just a trace to debug each action.
-    private void printActions(PrimitiveTile tile) {
-
-        System.out.printf("Action.of(game.%s, Cell.pos(%d, %d), Cell.pos(%d, %d))\n",
-                game.firstPlayer().equals(game.crossPlayer()) ? "crossPlayer()" : "roundPlayer()",
-                tile.getPosOut().x(),
-                tile.getPosOut().y(),
-                tile.getPosIn().x(),
-                tile.getPosIn().y()
-        );
-    }
-    */
 }

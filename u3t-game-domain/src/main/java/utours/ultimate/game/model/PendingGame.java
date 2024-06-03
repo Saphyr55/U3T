@@ -10,6 +10,10 @@ public record PendingGame(String gameID,
 
     public static final int DEFAULT_SIZE = 3;
 
+    public static PendingGame ofDefault() {
+        return PendingGame.builder().build();
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -34,7 +38,7 @@ public record PendingGame(String gameID,
     public static class Builder {
 
         private String gameID = UUID.randomUUID().toString();
-        private Player currentPlayer;
+        private Player firstPlayer = null;
         private Player secondPlayer = null;
         private int size = DEFAULT_SIZE;
 
@@ -56,8 +60,8 @@ public record PendingGame(String gameID,
             return this;
         }
 
-        public Builder withFirstPlayer(Player currentPlayer) {
-            this.currentPlayer = currentPlayer;
+        public Builder withFirstPlayer(Player firstPlayer) {
+            this.firstPlayer = firstPlayer;
             return this;
         }
 
@@ -69,7 +73,7 @@ public record PendingGame(String gameID,
         public PendingGame build() {
             return new PendingGame(
                     gameID,
-                    currentPlayer,
+                    firstPlayer,
                     secondPlayer,
                     size
             );

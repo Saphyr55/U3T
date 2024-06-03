@@ -5,7 +5,7 @@ import utours.ultimate.core.steorotype.Mapping;
 import utours.ultimate.game.model.PendingGame;
 import utours.ultimate.game.port.PendingGameInventory;
 import utours.ultimate.common.MapHelper;
-import utours.ultimate.server.handlers.OnChangedPendingGameMemoryInventory;
+import utours.ultimate.server.handlers.OnChangedPendingGameInventory;
 
 import java.util.List;
 import java.util.Map;
@@ -16,9 +16,9 @@ import java.util.Optional;
 public class PendingGameMemoryInventory implements PendingGameInventory  {
 
     private final Map<String, PendingGame> pendingGames = MapHelper.emptyMap();
-    private final OnChangedPendingGameMemoryInventory onChangedInventory;
+    private final OnChangedPendingGameInventory onChangedInventory;
 
-    public PendingGameMemoryInventory(OnChangedPendingGameMemoryInventory onChangedInventory) {
+    public PendingGameMemoryInventory(OnChangedPendingGameInventory onChangedInventory) {
 
         this.onChangedInventory = onChangedInventory;
     }
@@ -34,10 +34,11 @@ public class PendingGameMemoryInventory implements PendingGameInventory  {
     }
 
     @Override
-    public void add(PendingGame game) {
+    public void add(PendingGame pendingGame) {
 
-        pendingGames.putIfAbsent(game.gameID(), game);
+        pendingGames.putIfAbsent(pendingGame.gameID(), pendingGame);
 
+        onChangedInventory.update(pendingGame);
         onChangedInventory.update(findAll());
     }
 
@@ -51,10 +52,11 @@ public class PendingGameMemoryInventory implements PendingGameInventory  {
     }
 
     @Override
-    public void remove(PendingGame game) {
+    public void remove(PendingGame pendingGame) {
 
-        pendingGames.remove(game.gameID());
+        pendingGames.remove(pendingGame.gameID());
 
+        onChangedInventory.update(pendingGame);
         onChangedInventory.update(findAll());
     }
     

@@ -6,8 +6,9 @@ import javafx.scene.layout.Region;
 import utours.ultimate.desktop.view.GameGridView;
 import utours.ultimate.desktop.view.u3t.PrimitiveTile;
 import utours.ultimate.game.feature.GameLoader;
-import utours.ultimate.game.feature.GameActionsProvider;
+import utours.ultimate.game.feature.GameProvider;
 import utours.ultimate.game.model.Action;
+import utours.ultimate.game.model.Game;
 
 import java.util.function.Consumer;
 
@@ -26,9 +27,9 @@ public final class DesktopGameLoader implements GameLoader {
     }
 
     @Override
-    public void loadGame(GameActionsProvider gameActionsProvider) {
+    public void loadGame(Game game) {
 
-        for (Action action : gameActionsProvider.actions()) {
+        for (Action action : game.actions()) {
 
             int outX = action.posOut().x();
             int outY = action.posOut().y();
