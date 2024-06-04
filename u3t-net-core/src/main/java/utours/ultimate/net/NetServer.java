@@ -9,7 +9,7 @@ public interface NetServer {
     /**
      * Stop the network server.
      */
-    void stop();
+    void close();
 
     /**
      * Accept a client.

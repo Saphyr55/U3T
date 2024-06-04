@@ -9,8 +9,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 public record ContextData(
-        ObjectOutputStream writer,
-        ObjectInputStream reader,
+        ObjectOutputStream oos,
+        ObjectInputStream ois,
         Message message,
         Client client,
         String address
@@ -20,10 +20,9 @@ public record ContextData(
     public void respond(Object... content) {
         try {
             for (Object o : content) {
-                writer.writeObject(o);
+                oos.writeObject(o);
             }
-            writer.flush();
-            writer.close();
+            oos.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }

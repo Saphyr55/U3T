@@ -1,16 +1,8 @@
 package utours.ultimate.net.internal;
 
 import utours.ultimate.net.*;
-import utours.ultimate.net.data.ContextData;
-import utours.ultimate.net.data.MessageData;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.SocketException;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,6 +14,7 @@ public class NetServerApplication implements NetApplication {
     private boolean stopped = true;
 
     public NetServerApplication(NetServerConfiguration configuration) {
+
         this.server = new NetServerSocket(configuration);
 
         addShutdownHook();
@@ -42,7 +35,7 @@ public class NetServerApplication implements NetApplication {
     }
 
     private void onError(Context context) {
-
+        context.respond(context.message().content());
     }
 
     private void onClientSubscribe(Context context) {
@@ -62,12 +55,14 @@ public class NetServerApplication implements NetApplication {
         }
 
         stopped = true;
-        server.stop();
+        server.close();
     }
 
     @Override
     public void handler(String address, Handler<Context> handler) {
-        server.handlers().computeIfAbsent(address, a -> new LinkedList<>()).add(handler);
+        server.handlers()
+                .computeIfAbsent(address, a -> new LinkedList<>())
+                .add(handler);
     }
 
     @Override
@@ -79,7 +74,7 @@ public class NetServerApplication implements NetApplication {
 
         for (Client client : server.subscribers().get(address)) {
             if (client.isConnected()) {
-                client.sendMessage(address, content);
+                client.messageSender().send(address, content);
             }
         }
 

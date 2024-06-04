@@ -30,19 +30,21 @@ public class Tile extends StackPane {
     public void setCell(Cell cell) {
         this.cell = cell;
         switch (cell) {
-            case Cell.Round ignored -> {
-                getChildren().add(circle);
-                getChildren().remove(cross);
-            }
             case Cell.Empty ignored -> {
                 getChildren().remove(cross);
                 getChildren().remove(circle);
+            }
+            case Cell.Round ignored -> {
+                getChildren().add(circle);
+                getChildren().remove(cross);
             }
             case Cell.Cross ignored -> {
                 getChildren().add(cross);
                 getChildren().remove(circle);
             }
-            default -> throw new IllegalStateException("Unexpected value: " + cell);
+            case Cell.Board ignored -> {
+                throw new IllegalStateException("Unexpected value: " + cell);
+            }
         }
     }
 

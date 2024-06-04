@@ -3,24 +3,22 @@ package utours.ultimate.desktop.service;
 import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
+import utours.ultimate.desktop.action.OnPressedPrimitiveTile;
 import utours.ultimate.desktop.view.GameGridView;
 import utours.ultimate.desktop.view.u3t.PrimitiveTile;
 import utours.ultimate.game.feature.GameLoader;
-import utours.ultimate.game.feature.GameProvider;
 import utours.ultimate.game.model.Action;
 import utours.ultimate.game.model.Game;
-
-import java.util.function.Consumer;
 
 import static utours.ultimate.desktop.view.GameGridView.GRID_SIZE;
 
 public final class DesktopGameLoader implements GameLoader {
 
     private final GameGridView gridView;
-    private final Consumer<PrimitiveTile> onAcceptTile;
+    private final OnPressedPrimitiveTile onAcceptTile;
 
     public DesktopGameLoader(GameGridView gridView,
-                             Consumer<PrimitiveTile> onAcceptTile) {
+                             OnPressedPrimitiveTile onAcceptTile) {
 
         this.gridView = gridView;
         this.onAcceptTile = onAcceptTile;
@@ -40,12 +38,13 @@ public final class DesktopGameLoader implements GameLoader {
 
                 int inX = action.posIn().x();
                 int inY = action.posIn().y();
-                int pos = inX * GRID_SIZE + inY;
 
-                Node tile = gridPane.getChildren().get(pos);
+                int linearPos = inX * GRID_SIZE + inY;
+
+                Node tile = gridPane.getChildren().get(linearPos);
 
                 if (tile instanceof PrimitiveTile primitiveTile) {
-                    onAcceptTile.accept(primitiveTile);
+                    onAcceptTile.onPressed(action, primitiveTile);
                 }
 
             }

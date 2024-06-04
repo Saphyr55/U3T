@@ -45,12 +45,12 @@ public class AddGameHandler implements Handler<Context> {
             LOGGER.log(Level.INFO, "Game added");
         } else {
 
-            String error = "At the address '%s', expected '%s' but receive %s"
+            String errorMsg = "At the address '%s', expected '%s' but receive '%s'"
                     .formatted(ADDRESS, Game.class, content.getClass());
 
-            LOGGER.log(Level.SEVERE, error);
+            LOGGER.log(Level.SEVERE, errorMsg);
 
-            throw new NotGoodFormatClassException(error);
+            throw new NotGoodFormatClassException(errorMsg);
         }
     }
 

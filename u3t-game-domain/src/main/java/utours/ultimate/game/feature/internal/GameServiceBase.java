@@ -71,10 +71,10 @@ public class GameServiceBase implements GameService {
     @Override
     public Game turnPlayer(Game game) {
 
-        Player currentPlayer = oppositePlayer(game, game.currentPlayer());
+        Player oppositePlayer = oppositePlayer(game, game.currentPlayer());
 
         return Game.Builder.copyOf(game)
-                .withCurrentPlayer(currentPlayer)
+                .withCurrentPlayer(oppositePlayer)
                 .build();
     }
 

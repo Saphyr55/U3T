@@ -16,22 +16,25 @@ public class NetServerSocket implements NetServer {
     private final Map<String, List<Client>> subscribers;
 
     public NetServerSocket(NetServerConfiguration configuration) {
+
         this.serverSocket = createServerSocket(configuration);
         this.handlers = new HashMap<>();
         this.subscribers = new HashMap<>();
     }
 
     @Override
-    public void stop() {
+    public void close() {
         try {
             for (List<Client> value : subscribers.values()) {
                 for (Client client : value) {
+                    if (client.isClosed())
+                        continue;
                     client.close();
                 }
             }
             serverSocket.close();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 

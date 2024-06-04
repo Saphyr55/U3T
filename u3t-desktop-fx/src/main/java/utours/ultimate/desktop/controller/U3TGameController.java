@@ -1,5 +1,6 @@
 package utours.ultimate.desktop.controller;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -11,9 +12,7 @@ import utours.ultimate.desktop.service.DesktopGameLoader;
 import utours.ultimate.desktop.view.GameGridView;
 import utours.ultimate.desktop.view.u3t.PrimitiveTile;
 import utours.ultimate.desktop.view.u3t.Tile;
-import utours.ultimate.game.feature.GameProvider;
 import utours.ultimate.game.feature.GameLoader;
-import utours.ultimate.game.feature.GameService;
 import utours.ultimate.game.model.*;
 
 import java.io.IOException;
@@ -36,7 +35,6 @@ public final class U3TGameController implements Initializable {
 
         this.clientService = clientService;
         this.gameService = gameService;
-
     }
 
     @Override
@@ -46,7 +44,9 @@ public final class U3TGameController implements Initializable {
 
         game = clientService.currentGame();
 
-        gameLoader = new DesktopGameLoader(gameGridView, this::onPressedTile);
+        gameLoader = new DesktopGameLoader(gameGridView, (action, primitive) -> {
+            updateTile(action, primitive::setCell);
+        });
 
         gameGridView.prefWidthProperty().bind(root.heightProperty());
         gameGridView.prefHeightProperty().bind(root.heightProperty());
@@ -55,9 +55,7 @@ public final class U3TGameController implements Initializable {
         gameGridView.setVgap(10);
 
         gameGridView.setOnPressedTile(this::onPressedTile);
-        gameGridView.initBoard();
-
-        gameLoader.loadGame(game);
+        gameGridView.initBoard(gameService.getClientPlayer());
 
         setOnChangedGame();
     }
@@ -65,8 +63,18 @@ public final class U3TGameController implements Initializable {
     private void setOnChangedGame() {
         clientService.onChangedGame(game, g -> {
             game = g;
-            gameLoader.loadGame(game);
+            Platform.runLater(this::updateUIGame);
         });
+    }
+
+    private void updateUIGame() {
+        gameLoader.loadGame(game);
+    }
+
+    private void updateTile(Action action, Consumer<Cell> acceptCell) {
+
+        Cell cell = gameService.cellAt(game, action.posOut(), action.posIn());
+        acceptCell.accept(cell);
     }
 
     private void performAction(Action action, Consumer<Cell> acceptNewCell) {
@@ -93,12 +101,7 @@ public final class U3TGameController implements Initializable {
 
     }
 
-    private void onPressedTile(PrimitiveTile tile) {
-
-        Cell.Pos posOut = tile.getPosOut();
-        Cell.Pos posIn = tile.getPosIn();
-
-        Action action = Action.of(game.currentPlayer(), posOut, posIn);
+    private void onPressedTile(Action action, PrimitiveTile tile) {
         performAction(action, tile::setCell);
     }
 
@@ -119,7 +122,9 @@ public final class U3TGameController implements Initializable {
     }
 
     private void finishGame() {
+
         try {
+
             root.getChildren().remove(gameGridView);
 
             Player wonPlayer = gameService.oppositePlayer(game, game.currentPlayer());
@@ -132,9 +137,11 @@ public final class U3TGameController implements Initializable {
             Parent parent = loader.load();
 
             root.getChildren().add(parent);
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
     }
 
 }

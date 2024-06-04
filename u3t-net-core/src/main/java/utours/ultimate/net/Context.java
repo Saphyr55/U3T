@@ -11,9 +11,9 @@ public interface Context {
         return new ContextData(client.oos(), client.ois(), message, client, address);
     }
 
-    ObjectOutputStream writer();
+    ObjectOutputStream oos();
 
-    ObjectInputStream reader();
+    ObjectInputStream ois();
 
     Message message();
 

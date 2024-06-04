@@ -38,7 +38,6 @@ public class PendingGameMemoryInventory implements PendingGameInventory  {
 
         pendingGames.putIfAbsent(pendingGame.gameID(), pendingGame);
 
-        onChangedInventory.update(pendingGame);
         onChangedInventory.update(findAll());
     }
 

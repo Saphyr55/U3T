@@ -18,8 +18,6 @@ public class ClientSocket implements Client {
     private static final Logger LOGGER = Logger.getLogger(ClientSocket.class.getName());
 
     private final Socket clientSocket;
-    private final OutputStream out;
-    private final InputStream in;
     private final ObjectOutputStream oos;
     private final ObjectInputStream ois;
     private final Map<String, List<Handler<Message>>> addresses;
@@ -34,18 +32,12 @@ public class ClientSocket implements Client {
     public ClientSocket(Socket clientSocket, Thread onThread) throws IOException {
 
         this.clientSocket = clientSocket;
-        this.out = clientSocket.getOutputStream();
-        this.in = clientSocket.getInputStream();
-        this.oos = new ObjectOutputStream(out);
-        this.ois = new ObjectInputStream(in);
+        this.oos = new ObjectOutputStream(clientSocket.getOutputStream());
+        this.ois = new ObjectInputStream(clientSocket.getInputStream());
         this.addresses = new HashMap<>();
         this.task = onThread;
 
-        Runtime.getRuntime().addShutdownHook(defaultThread(() -> {
-            LOGGER.log(Level.INFO, () -> "Client is shutting down...");
-            close();
-            LOGGER.log(Level.INFO, () -> "Cleanup complete.");
-        }));
+        addShutdownHook();
     }
 
     public ClientSocket(String address, int port) throws IOException {
@@ -69,12 +61,12 @@ public class ClientSocket implements Client {
     public void close() {
         try {
 
-            if (out != null) {
-                out.close();
+            if (oos != null) {
+                oos.close();
             }
 
-            if (in != null) {
-                in.close();
+            if (ois != null) {
+                ois.close();
             }
 
             if (clientSocket != null && !clientSocket.isClosed()) {
@@ -121,16 +113,6 @@ public class ClientSocket implements Client {
     }
 
     @Override
-    public OutputStream output() {
-        return out;
-    }
-
-    @Override
-    public InputStream input() {
-        return in;
-    }
-
-    @Override
     public ObjectOutputStream oos() {
         return oos;
     }
@@ -152,7 +134,7 @@ public class ClientSocket implements Client {
 
         try {
 
-            while (isConnected() && !Thread.currentThread().isInterrupted()) {
+            while (isProcessing()) {
 
                 Message message = (Message) ois.readObject();
 
@@ -173,6 +155,18 @@ public class ClientSocket implements Client {
             Thread.currentThread().interrupt();
         }
 
+    }
+
+    private boolean isProcessing() {
+        return isConnected() && !Thread.currentThread().isInterrupted();
+    }
+
+    private void addShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(defaultThread(() -> {
+            LOGGER.log(Level.INFO, () -> "Client is shutting down...");
+            close();
+            LOGGER.log(Level.INFO, () -> "Client is down.");
+        }));
     }
 
     private static Thread defaultThread(Runnable task) {

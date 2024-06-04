@@ -37,7 +37,6 @@ public class GameMemoryInventory implements GameInventory {
 
         games.putIfAbsent(game.gameID(), game);
 
-        onChangedGameInventory.update(game);
         onChangedGameInventory.update(findAll());
     }
     

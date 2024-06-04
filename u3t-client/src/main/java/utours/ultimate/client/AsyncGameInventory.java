@@ -43,7 +43,7 @@ public class AsyncGameInventory {
     }
 
     public void update(Game game) {
-        client.messageSender().send(GAME_UPDATE_ADDRESS.formatted(game.gameID()), game);
+        client.messageSender().send(GAME_UPDATE_ADDRESS, game);
     }
 
 
