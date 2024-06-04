@@ -39,7 +39,7 @@ public final class DesktopGameLoader implements GameLoader {
                 int inX = action.posIn().x();
                 int inY = action.posIn().y();
 
-                int linearPos = inX * GRID_SIZE + inY;
+                int linearPos = inX * gridView.getGridSize() + inY;
 
                 Node tile = gridPane.getChildren().get(linearPos);
 
@@ -48,6 +48,7 @@ public final class DesktopGameLoader implements GameLoader {
                 }
 
             }
+
         }
     }
 

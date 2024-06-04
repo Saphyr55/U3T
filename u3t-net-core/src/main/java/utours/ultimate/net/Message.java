@@ -60,4 +60,11 @@ public interface Message extends Serializable {
      */
     String ERROR_ADDRESS = "internal.client.error";
 
+    /**
+     * PRIVATE ADDRESS. <br/>
+     *
+     * Do not use this address. <br/>
+     */
+    String EMPTY_ADDRESS = "internal.server.empty";
+
 }

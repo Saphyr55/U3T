@@ -42,7 +42,6 @@ public class ClientService {
             }
         });
 
-        client.messageSender().send(address, game);
     }
 
     public void onChangedPendingGame(PendingGame pendingGame, OnChanged<PendingGame> onChangedPendingGame) {
@@ -56,6 +55,7 @@ public class ClientService {
                 System.err.printf("Error at '%s', Message: %s%n", address, message);
             }
         });
+
     }
 
     public void onChangedPendingGames(OnChanged<List<PendingGame>> onChangedInventory) {

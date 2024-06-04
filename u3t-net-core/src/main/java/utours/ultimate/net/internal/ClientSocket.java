@@ -46,15 +46,19 @@ public class ClientSocket implements Client {
 
     @Override
     public void sendMessage(String address, Object content) {
+
         try {
+
             synchronized (this) {
                 Message message = Message.success(address, content);
                 oos.writeObject(message);
                 oos.flush();
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 
     @Override
@@ -74,6 +78,7 @@ public class ClientSocket implements Client {
             }
 
         } catch (IOException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -85,7 +90,11 @@ public class ClientSocket implements Client {
 
     @Override
     public String hostAddress() {
-        if (!isConnected()) return null;
+
+        if (!isConnected()) {
+            return null;
+        }
+
         return clientSocket.getInetAddress().getHostAddress();
     }
 

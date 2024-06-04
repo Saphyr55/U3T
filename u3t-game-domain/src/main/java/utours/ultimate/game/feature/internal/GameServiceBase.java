@@ -98,11 +98,14 @@ public class GameServiceBase implements GameService {
 
         if (cellOut instanceof Cell.Board board) {
 
+            int inX = action.posIn().x();
+            int inY = action.posIn().y();
+
             Cell[][] cellsIn = board.cells();
-            Cell cellIn = cellsIn[action.posIn().x()][action.posIn().y()];
+            Cell cellIn = cellsIn[inX][inY];
 
             if (isPlayableCell(cellIn)) {
-                cellsIn[action.posIn().x()][action.posIn().y()] = cellOfPlayer(game, action.player());
+                cellsIn[inX][inY] = cellOfPlayer(game, action.player());
             }
 
         }
