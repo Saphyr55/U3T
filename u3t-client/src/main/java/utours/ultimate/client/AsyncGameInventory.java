@@ -14,6 +14,7 @@ public class AsyncGameInventory {
     private static final String GAME_FIND_ALL_ADDRESS = "server.game-inventory.find-all";
     private static final String GAME_ADD_ADDRESS = "server.game-inventory.add";
     private static final String GAME_UPDATE_ADDRESS = "server.game-inventory.update";
+    private static final String GAME_REMOVE_ADDRESS = "server.game-inventory.remove";
 
     private final Client client;
 
@@ -46,5 +47,8 @@ public class AsyncGameInventory {
         client.messageSender().send(GAME_UPDATE_ADDRESS, game);
     }
 
+    public void remove(Game game) {
+        client.messageSender().send(GAME_REMOVE_ADDRESS, game);
+    }
 
 }

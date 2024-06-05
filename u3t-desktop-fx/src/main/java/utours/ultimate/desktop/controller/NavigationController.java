@@ -2,7 +2,6 @@ package utours.ultimate.desktop.controller;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import utours.ultimate.core.ReadOnlyContainer;
 import utours.ultimate.core.steorotype.Component;
 import utours.ultimate.desktop.MainApplication;
 import utours.ultimate.desktop.view.DesktopNavButton;
@@ -12,7 +11,6 @@ import utours.ultimate.ui.NavButton;
 
 import java.net.URL;
 import java.util.Comparator;
-import java.util.List;
 import java.util.ResourceBundle;
 
 @Component

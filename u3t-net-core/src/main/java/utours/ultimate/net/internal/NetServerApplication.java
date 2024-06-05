@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 
 public class NetServerApplication implements NetApplication {
 
-    private static final Logger LOGGER = Logger.getLogger(ClientSocket.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(NetServerApplication.class.getName());
 
     private final NetServer server;
     private boolean stopped = true;

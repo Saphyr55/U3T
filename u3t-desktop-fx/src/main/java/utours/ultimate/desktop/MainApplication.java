@@ -20,7 +20,6 @@ public final class MainApplication extends Application {
     @Override
     public void start(Stage stage) {
 
-
         String version = Runtime.version().toString();
         String title = "%s %s".formatted(TITLE, version);
 

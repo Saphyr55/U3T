@@ -13,20 +13,34 @@ import java.util.logging.Logger;
 
 public class NetServerSocket implements NetServer {
 
+    private static final Logger LOGGER = Logger.getLogger(NetServerSocket.class.getName());
+
     private final ServerSocket serverSocket;
     private final Map<String, List<Handler<Context>>> handlers;
     private final Map<String, List<Client>> subscribers;
+    private final NetServerConfiguration configuration;
 
     public NetServerSocket(NetServerConfiguration configuration) {
 
+        this.configuration = configuration;
         this.serverSocket = createServerSocket(configuration);
         this.handlers = new HashMap<>();
         this.subscribers = new HashMap<>();
+
+        LOGGER.log(Level.INFO, "Server started at {0}/{1}.", new Object[]{
+                configuration.hostAddress(), configuration.port()
+        });
+
     }
 
     @Override
     public void close() {
         try {
+
+            LOGGER.log(Level.INFO, "Server close at {0}/{1}.", new Object[]{
+                    configuration.hostAddress(), configuration.port()
+            });
+
             for (List<Client> value : subscribers.values()) {
                 for (Client client : value) {
                     if (client.isClosed())
@@ -42,16 +56,23 @@ public class NetServerSocket implements NetServer {
 
     @Override
     public Client acceptClient() {
+
         try {
 
             ClientSocket client = new ClientSocket(serverSocket.accept());
             client.setTask(() -> processClient(client));
             client.startThread();
 
+            LOGGER.log(Level.INFO, "Client accepted from {0}/{1}.", new Object[]{
+                    configuration.hostAddress(), configuration.port()
+            });
+
             return client;
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
     }
 
     private ServerSocket createServerSocket(NetServerConfiguration configuration) {

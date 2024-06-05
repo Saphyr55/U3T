@@ -27,6 +27,10 @@ public final class ClientGameService implements GameService {
         this.clientPlayer = clientPlayer;
     }
 
+    public void closeGame(Game game) {
+        asyncGameInventory.remove(game);
+    }
+
     @Override
     public boolean isPlayableAction(Game game, Action action) {
         return gameService.isPlayableAction(game, action) &&

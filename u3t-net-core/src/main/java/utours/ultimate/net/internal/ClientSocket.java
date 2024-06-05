@@ -29,15 +29,14 @@ public class ClientSocket implements Client {
         setTask(this::defaultClientProcess);
     }
 
-    public ClientSocket(Socket clientSocket, Thread onThread) throws IOException {
+    public ClientSocket(Socket clientSocket, Runnable task) throws IOException {
 
         this.clientSocket = clientSocket;
         this.oos = new ObjectOutputStream(clientSocket.getOutputStream());
         this.ois = new ObjectInputStream(clientSocket.getInputStream());
         this.addresses = new HashMap<>();
-        this.task = onThread;
+        this.task = task;
 
-        addShutdownHook();
     }
 
     public ClientSocket(String address, int port) throws IOException {
@@ -79,7 +78,6 @@ public class ClientSocket implements Client {
 
         } catch (IOException e) {
             e.printStackTrace();
-            throw new RuntimeException(e);
         }
     }
 
@@ -167,7 +165,7 @@ public class ClientSocket implements Client {
     }
 
     private boolean isProcessing() {
-        return isConnected() && !Thread.currentThread().isInterrupted();
+        return !isClosed() && !Thread.currentThread().isInterrupted();
     }
 
     private void addShutdownHook() {
