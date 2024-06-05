@@ -30,7 +30,7 @@ public class ClientService {
         this.inventory = inventory;
     }
 
-    public void onChangedGame(Game game, OnChanged<Game> onChangedGame) {
+    public void setOnChangedGame(Game game, OnChanged<Game> onChangedGame) {
 
         String address = GAME_CHANGED.formatted(game.gameID());
 

@@ -12,7 +12,6 @@ import utours.ultimate.client.ClientService;
 import utours.ultimate.desktop.view.GameGridView;
 import utours.ultimate.desktop.view.u3t.PrimitiveTile;
 import utours.ultimate.desktop.view.u3t.Tile;
-import utours.ultimate.game.feature.GameLoader;
 import utours.ultimate.game.model.*;
 
 import java.io.IOException;
@@ -25,12 +24,12 @@ public final class U3TGameController implements Initializable {
     private final ClientGameService gameService;
 
     private Game game;
-    private GameLoader gameLoader;
 
     private @FXML GameGridView gameGridView;
     private @FXML Pane root;
 
-    public U3TGameController(ClientService clientService, ClientGameService gameService) {
+    public U3TGameController(ClientService clientService,
+                             ClientGameService gameService) {
 
         this.clientService = clientService;
         this.gameService = gameService;
@@ -52,11 +51,11 @@ public final class U3TGameController implements Initializable {
         gameGridView.setOnPressedTile(this::onPressedTile);
         gameGridView.initBoard(gameService.getClientPlayer());
 
-        clientService.onChangedGame(game, this::onChangedGame);
+        clientService.setOnChangedGame(game, this::onChangedGame);
     }
 
-    private void onChangedGame(Game g) {
-        game = g;
+    private void onChangedGame(Game game) {
+        this.game = game;
         Platform.runLater(this::onLastAction);
     }
 
@@ -64,6 +63,7 @@ public final class U3TGameController implements Initializable {
 
         Action action = game.lastAction();
 
+        Cell cellOut = gameService.cellAt(game, action.posOut());
         Cell cell = gameService.cellAt(game, action.posOut(), action.posIn());
 
         IsWinGame isWinGameInner = gameService.checkInnerWinner(game, action);
@@ -87,7 +87,14 @@ public final class U3TGameController implements Initializable {
                 primitiveTile.setCell(cell);
             }
 
-            onWinning(action, cell, isWinGameInner.isWin());
+            if (isWinGameInner.isWin()) {
+                System.out.println("Is Inner Win");
+            }
+
+            boolean isWin = cellOut instanceof Cell.Round ||
+                            cellOut instanceof Cell.Cross;
+
+            onWinning(action, cell, isWin);
 
             if (gameService.checkOuterWinner(game, action.posOut())) {
                 finishGame();
@@ -97,22 +104,8 @@ public final class U3TGameController implements Initializable {
 
     }
 
-    private void performAction(Action action) {
-
-        if (!gameService.isPlayableAction(game, action)) {
-            return;
-        }
-
-        game = gameService.placeMark(game, action);
-        IsWinGame isWinGameInner = gameService.checkInnerWinner(game, action);
-        game = isWinGameInner.game();
-        game = game.addAction(action);
-
-        game = gameService.turnPlayer(game);
-    }
-
     private void onPressedTile(Action action, PrimitiveTile tile) {
-        performAction(action);
+        game = gameService.performAction(game, action);
     }
 
     private void onWinning(Action action, Cell cell, boolean isWin) {

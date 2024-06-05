@@ -70,10 +70,7 @@ public final class ClientGameService implements GameService {
 
     @Override
     public Game placeMark(Game game, Action action) {
-
-        game = gameService.placeMark(game, action);
-
-        return game;
+        return  gameService.placeMark(game, action);
     }
 
     @Override

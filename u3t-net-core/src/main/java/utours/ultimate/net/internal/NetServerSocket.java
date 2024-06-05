@@ -8,6 +8,8 @@ import java.net.ServerSocket;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class NetServerSocket implements NetServer {
 
@@ -70,27 +72,28 @@ public class NetServerSocket implements NetServer {
                 Message message = (Message) ois.readObject();
                 String address = message.address();
 
-                if (hasAddress(address)) {
+                if (!hasAddress(address)) {
+                    continue;
+                }
 
-                    for (Handler<Context> handler : handlers.get(address)) {
-                        Context context = Context.dataOf(message, client, address);
-                        handler.handle(context);
-                    }
-
+                for (Handler<Context> handler : handlers.get(address)) {
+                    Context context = Context.dataOf(message, client, address);
+                    handler.handle(context);
                 }
 
             }
-
+            
         } catch (Exception e) {
-            Thread.currentThread().interrupt();
+            Logger.getGlobal().log(Level.WARNING, e::getMessage);
         } finally {
-            disconnetClient(client);
+            disconnectClient(client);
             client.close();
+            Thread.currentThread().interrupt();
         }
 
     }
 
-    public void disconnetClient(Client client) {
+    public void disconnectClient(Client client) {
 
         if (client == null) return;
 

@@ -20,9 +20,13 @@ public final class MainApplication extends Application {
     @Override
     public void start(Stage stage) {
 
+
+        String version = Runtime.version().toString();
+        String title = "%s %s".formatted(TITLE, version);
+
         Parent root = new DesktopMainView();
         Scene scene = new Scene(root, WIDTH, HEIGHT);
-        stage.setTitle(TITLE);
+        stage.setTitle(title);
         stage.setScene(scene);
         stage.show();
     }
