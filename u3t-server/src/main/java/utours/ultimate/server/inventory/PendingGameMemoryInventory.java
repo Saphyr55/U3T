@@ -16,11 +16,11 @@ import java.util.Optional;
 public class PendingGameMemoryInventory implements PendingGameInventory  {
 
     private final Map<String, PendingGame> pendingGames = MapHelper.emptyMap();
-    private final OnChangedPendingGameInventory onChangedPendingGameInventory;
+    private final OnChangedPendingGameInventory onChangedInventory;
 
-    public PendingGameMemoryInventory(OnChangedPendingGameInventory onChangedPendingGameInventory) {
+    public PendingGameMemoryInventory(OnChangedPendingGameInventory onChangedInventory) {
 
-        this.onChangedPendingGameInventory = onChangedPendingGameInventory;
+        this.onChangedInventory = onChangedInventory;
     }
 
     @Override
@@ -34,21 +34,29 @@ public class PendingGameMemoryInventory implements PendingGameInventory  {
     }
 
     @Override
-    public void add(PendingGame game) {
-        pendingGames.putIfAbsent(game.gameID(), game);
-        onChangedPendingGameInventory.update(findAll());
+    public void add(PendingGame pendingGame) {
+
+        pendingGames.putIfAbsent(pendingGame.gameID(), pendingGame);
+
+        onChangedInventory.update(findAll());
     }
 
     @Override
-    public void update(PendingGame game) {
-        pendingGames.put(game.gameID(), game);
-        onChangedPendingGameInventory.update(findAll());
+    public void update(PendingGame pendingGame) {
+
+        pendingGames.put(pendingGame.gameID(), pendingGame);
+
+        onChangedInventory.update(pendingGame);
+        onChangedInventory.update(findAll());
     }
 
     @Override
-    public void remove(PendingGame game) {
-        pendingGames.remove(game.gameID());
-        onChangedPendingGameInventory.update(findAll());
+    public void remove(PendingGame pendingGame) {
+
+        pendingGames.remove(pendingGame.gameID());
+
+        onChangedInventory.update(pendingGame);
+        onChangedInventory.update(findAll());
     }
     
 }

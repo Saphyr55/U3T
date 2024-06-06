@@ -10,7 +10,7 @@ import utours.ultimate.game.model.Game;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class GameServiceInternalTest {
+class GameServiceBaseTest {
 
     GameService gameService;
     Game game;
@@ -24,7 +24,7 @@ class GameServiceInternalTest {
                 { new Cell.Cross(), new Cell.Empty(), new Cell.Empty() },
         };
 
-        gameService = new GameServiceInternal();
+        gameService = new GameServiceBase();
         game = Game.builder()
                 .withBoard(new Board(cells))
                 .build();

@@ -4,7 +4,7 @@ import utours.ultimate.game.feature.GameService;
 import utours.ultimate.game.feature.WinnerChecker;
 import utours.ultimate.game.model.*;
 
-public class GameServiceInternal implements GameService {
+public class GameServiceBase implements GameService {
 
     @Override
     public boolean isPlayableAction(Game game, Action action) {
@@ -17,11 +17,14 @@ public class GameServiceInternal implements GameService {
         Cell cellLastOut = cellAt(game, lastAction.posIn());
 
         if (cellOut instanceof Cell.Board(Cell[][] cellsIn)) {
+
             var isCellPlayable = isPlayableCell(cellsIn[action.posIn().x()][action.posIn().y()]);
             var isWonCell = cellLastOut instanceof Cell.Cross || cellLastOut instanceof Cell.Round;
+
             if (!action.posOut().equals(lastAction.posIn()) && isWonCell) {
                 return isCellPlayable;
             }
+
             return isCellPlayable && action.posOut().equals(lastAction.posIn());
         }
 
@@ -35,17 +38,21 @@ public class GameServiceInternal implements GameService {
 
     @Override
     public Cell cellOfPlayer(Game game, Player currentPlayer) {
+
         if (game.crossPlayer().equals(currentPlayer)) {
             return new Cell.Cross();
         } else if (game.roundPlayer().equals(currentPlayer)) {
             return new Cell.Round();
         }
+
         return new Cell.Empty();
     }
 
     @Override
     public Cell cellAt(Game game, Cell.Pos posOut) {
+
         Cell[][] cellsOut = game.board().cells();
+
         return cellsOut[posOut.x()][posOut.y()];
     }
 
@@ -54,8 +61,7 @@ public class GameServiceInternal implements GameService {
 
         Cell cellOut = cellAt(game, posOut);
 
-        if (cellOut instanceof Cell.Board board) {
-            Cell[][] cellsIn = board.cells();
+        if (cellOut instanceof Cell.Board(Cell[][] cellsIn)) {
             return cellsIn[posIn.x()][posIn.y()];
         }
 
@@ -63,20 +69,24 @@ public class GameServiceInternal implements GameService {
     }
 
     @Override
-    public Game oppositePlayer(Game game) {
-        Player currentPlayer = oppositePlayer(game, game.currentPlayer());
+    public Game turnPlayer(Game game) {
+
+        Player oppositePlayer = oppositePlayer(game, game.currentPlayer());
+
         return Game.Builder.copyOf(game)
-                .withCurrentPlayer(currentPlayer)
+                .withCurrentPlayer(oppositePlayer)
                 .build();
     }
 
     @Override
     public Player oppositePlayer(Game game, Player player) {
+
         if (game.crossPlayer().equals(player)) {
             return game.roundPlayer();
         } else if (game.roundPlayer().equals(player)) {
             return game.crossPlayer();
         }
+
         throw new IllegalStateException();
     }
 
@@ -87,11 +97,17 @@ public class GameServiceInternal implements GameService {
         Cell cellOut = cellAt(game, action.posOut());
 
         if (cellOut instanceof Cell.Board board) {
+
+            int inX = action.posIn().x();
+            int inY = action.posIn().y();
+
             Cell[][] cellsIn = board.cells();
-            Cell cellIn = cellsIn[action.posIn().x()][action.posIn().y()];
+            Cell cellIn = cellsIn[inX][inY];
+
             if (isPlayableCell(cellIn)) {
-                cellsIn[action.posIn().x()][action.posIn().y()] = cellOfPlayer(game, action.player());
+                cellsIn[inX][inY] = cellOfPlayer(game, action.player());
             }
+
         }
 
         return Game.Builder.copyOf(game)
@@ -101,18 +117,25 @@ public class GameServiceInternal implements GameService {
 
     @Override
     public IsWinGame checkInnerWinner(Game game, Action action) {
+
         WinnerChecker checker = new WinnerCheckerImpl(this);
+
         boolean isWin = checker.checkInnerWinner(game, action.posOut(), action.posIn());
+
         if (isWin) {
+
             Cell[][] cellsOut = game.board().cells();
             cellsOut[action.posOut().x()][action.posOut().y()] = cellOfPlayer(game, action.player());
         }
+
         return new IsWinGame(game, isWin);
     }
 
     @Override
     public boolean checkOuterWinner(Game game, Cell.Pos lastPos) {
+
         WinnerChecker checker = new WinnerCheckerImpl(this);
+
         return checker.checkWinner(game, lastPos);
     }
 

@@ -4,7 +4,7 @@ plugins {
   id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
-group 'utours.ultimate'
+group 'utours.ultimate.desktop'
 version '1.0'
 
 repositories {
@@ -12,18 +12,24 @@ repositories {
 }
 
 ext {
+
+
   junitVersion = '5.10.0'
 }
 
 sourceCompatibility = '21'
 targetCompatibility = '21'
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
   options.encoding = 'UTF-8'
 }
 
 application {
-  mainClass = 'utours.ultimate.desktop.MainApplication'
+  mainClass =  'utours.ultimate.desktop.MainApplication'
+}
+
+startScripts {
+  defaultJvmOpts += '--module-path ../lib/ --add-modules javafx.controls,javafx.fxml'
 }
 
 javafx {

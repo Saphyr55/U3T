@@ -9,15 +9,21 @@ import java.util.List;
 @Component
 public class OnChangedGameInventory {
 
-    public static final String SERVER_GAME_INVENTORY_CHANGED_ADDRESS = "server.game-inventory.changed";
+    public static final String GAME_CHANGED_ADDRESS = "server.game.%s.changed";
+    public static final String GAME_INVENTORY_CHANGED_ADDRESS = "server.game-inventory.changed";
+
     private final NetApplication application;
 
     public OnChangedGameInventory(NetApplication application) {
         this.application = application;
     }
 
+    public void update(Game game) {
+        application.sendMessage(GAME_CHANGED_ADDRESS.formatted(game.gameID()), game);
+    }
+
     public void update(List<Game> games) {
-        application.sendMessage(SERVER_GAME_INVENTORY_CHANGED_ADDRESS, games);
+        application.sendMessage(GAME_INVENTORY_CHANGED_ADDRESS, games);
     }
 
 }

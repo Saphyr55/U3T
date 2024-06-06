@@ -28,27 +28,16 @@ public interface Client {
     }
 
     /**
-     * Give the writer from the client.
+     * Give the oos from the client.
      *
-     * @return A writer from the client.
-     */
-    OutputStream output();
-
-    /**
-     * Give the reader from the client.
-     *
-     * @return A reader from the client.
-     */
-    InputStream input();
-
-    /**
-     *
-     * @return
+     * @return A oos from the client.
      */
     ObjectOutputStream oos();
 
     /**
+     * Give the ois from the client.
      *
+     * @return A ois from the client.
      */
     ObjectInputStream ois();
 

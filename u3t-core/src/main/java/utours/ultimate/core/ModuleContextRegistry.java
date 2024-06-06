@@ -2,6 +2,8 @@ package utours.ultimate.core;
 
 import utours.ultimate.core.internal.ModuleContextRegistryImpl;
 
+import java.util.List;
+
 public interface ModuleContextRegistry {
 
     ModuleContextRegistry defaultInstance = newInstance();
@@ -13,6 +15,8 @@ public interface ModuleContextRegistry {
     static ModuleContextRegistry getDefault() {
         return defaultInstance;
     }
+
+    List<ModuleContext> moduleContexts();
 
     ModuleContext get(String identifier);
 

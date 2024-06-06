@@ -50,13 +50,13 @@ public class ClassProviderManager {
     }
 
     /**
-     * Return classes from the current module context.
+     * Return classes from a context class.
      *
-     * @param context the current module context.
+     * @param contextClass the context class.
      * @return
      */
-    public static Set<Class<?>> classesOfContext(ModuleContext context) {
-        return ClassProviderManagerInternal.classesOf(context);
+    public static Set<Class<?>> classesOfContext(Class<?> contextClass) {
+        return ClassProviderManagerInternal.classesOf(contextClass);
     }
 
     /**

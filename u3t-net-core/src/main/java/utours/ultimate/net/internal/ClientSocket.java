@@ -10,30 +10,33 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ClientSocket implements Client {
 
+    private static final Logger LOGGER = Logger.getLogger(ClientSocket.class.getName());
+
     private final Socket clientSocket;
-    private final OutputStream out;
-    private final InputStream in;
     private final ObjectOutputStream oos;
     private final ObjectInputStream ois;
     private final Map<String, List<Handler<Message>>> addresses;
-    private Runnable onProcess;
+    private Runnable task;
 
     public ClientSocket(Socket clientSocket) throws IOException {
         this(clientSocket, null);
-        setOnProcess(this::defaultClientProcess);
+
+        setTask(this::defaultClientProcess);
     }
 
-    public ClientSocket(Socket clientSocket, Runnable onThread) throws IOException {
+    public ClientSocket(Socket clientSocket, Runnable task) throws IOException {
+
         this.clientSocket = clientSocket;
-        this.out = clientSocket.getOutputStream();
-        this.in = clientSocket.getInputStream();
-        this.oos = new ObjectOutputStream(out);
-        this.ois = new ObjectInputStream(in);
+        this.oos = new ObjectOutputStream(clientSocket.getOutputStream());
+        this.ois = new ObjectInputStream(clientSocket.getInputStream());
         this.addresses = new HashMap<>();
-        this.onProcess = onThread;
+        this.task = task;
+
     }
 
     public ClientSocket(String address, int port) throws IOException {
@@ -42,23 +45,39 @@ public class ClientSocket implements Client {
 
     @Override
     public void sendMessage(String address, Object content) {
+
         try {
-            Message messageWrapper = Message.success(address, content);
-            oos.writeObject(messageWrapper);
-            oos.flush();
+
+            synchronized (this) {
+                Message message = Message.success(address, content);
+                oos.writeObject(message);
+                oos.flush();
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 
     @Override
     public void close() {
         try {
-            out.close();
-            in.close();
-            clientSocket.close();
+
+            if (oos != null) {
+                oos.close();
+            }
+
+            if (ois != null) {
+                ois.close();
+            }
+
+            if (clientSocket != null && !clientSocket.isClosed()) {
+                clientSocket.close();
+            }
+
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 
@@ -69,6 +88,11 @@ public class ClientSocket implements Client {
 
     @Override
     public String hostAddress() {
+
+        if (!isConnected()) {
+            return null;
+        }
+
         return clientSocket.getInetAddress().getHostAddress();
     }
 
@@ -96,16 +120,6 @@ public class ClientSocket implements Client {
     }
 
     @Override
-    public OutputStream output() {
-        return out;
-    }
-
-    @Override
-    public InputStream input() {
-        return in;
-    }
-
-    @Override
     public ObjectOutputStream oos() {
         return oos;
     }
@@ -115,28 +129,55 @@ public class ClientSocket implements Client {
         return ois;
     }
 
-    public void setOnProcess(Runnable onProcess) {
-        this.onProcess = onProcess;
+    public void setTask(Runnable task) {
+        this.task = task;
     }
 
     public void startThread() {
-        Thread.ofPlatform().start(onProcess);
+        Thread.ofVirtual().start(task);
     }
 
     private void defaultClientProcess() {
-        while (clientSocket.isConnected()) {
-            try {
+
+        try {
+
+            while (isProcessing()) {
 
                 Message message = (Message) ois.readObject();
 
                 for (Handler<Message> handler : addresses.get(message.address())) {
-                    handler.handle(message);
+                    try {
+                        handler.handle(message);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
 
-            } catch (Exception e) {
-                e.printStackTrace();
             }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            close();
+            Thread.currentThread().interrupt();
         }
+
+    }
+
+    private boolean isProcessing() {
+        return !isClosed() && !Thread.currentThread().isInterrupted();
+    }
+
+    private void addShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(defaultThread(() -> {
+            LOGGER.log(Level.INFO, () -> "Client is shutting down...");
+            close();
+            LOGGER.log(Level.INFO, () -> "Client is down.");
+        }));
+    }
+
+    private static Thread defaultThread(Runnable task) {
+        return Thread.ofVirtual().factory().newThread(task);
     }
 
 }

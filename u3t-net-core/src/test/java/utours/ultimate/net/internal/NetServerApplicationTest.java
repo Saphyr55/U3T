@@ -38,7 +38,7 @@ public class NetServerApplicationTest {
     }
 
     static void defaultTreatment(Context context) throws IOException {
-        var out = context.writer();
+        var out = context.oos();
         out.writeObject(context.message());
         out.flush();
     }

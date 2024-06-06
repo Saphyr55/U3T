@@ -8,7 +8,7 @@
 
 
     <component class="utours.ultimate.game.feature.GameService"
-               derived="utours.ultimate.game.feature.internal.GameServiceInternal"
+               derived="utours.ultimate.game.feature.internal.GameServiceBase"
                id="U3T.GameService" />
 
     <!-- Client -->

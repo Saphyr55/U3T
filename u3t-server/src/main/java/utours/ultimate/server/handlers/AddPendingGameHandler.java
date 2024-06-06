@@ -7,6 +7,7 @@ import utours.ultimate.game.port.PendingGameInventory;
 import utours.ultimate.net.Context;
 import utours.ultimate.net.Handler;
 import utours.ultimate.net.NetApplication;
+import utours.ultimate.server.exception.NotGoodFormatClassException;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,7 +15,7 @@ import java.util.logging.Logger;
 @Component
 public class AddPendingGameHandler implements Handler<Context> {
 
-    private final static String ADDRESS = "server.pending-game.add";
+    private final static String ADDRESS = "server.pending-game-inventory.add";
     private static final Logger LOGGER = Logger.getGlobal();
 
     private final PendingGameInventory pendingGameInventory;
@@ -30,7 +31,7 @@ public class AddPendingGameHandler implements Handler<Context> {
     }
 
     @Override
-    public void handle(Context context) {
+    public void handle(Context context) throws Exception {
 
         Object content = context.message().content();
 
@@ -39,11 +40,16 @@ public class AddPendingGameHandler implements Handler<Context> {
             pendingGameInventory.add(pendingGame);
             application.sendMessage(ADDRESS, pendingGame);
 
-            LOGGER.log(Level.INFO, "Pending game added");
+            LOGGER.log(Level.INFO, () -> "Pending game added");
+
         } else {
 
-            LOGGER.log(Level.SEVERE, () -> "At the address '%s', expected '%s' but receive %s"
-                    .formatted(ADDRESS, PendingGame.class, content.getClass()));
+            String error = "At the address '%s', expected '%s' but receive %s"
+                    .formatted(ADDRESS, PendingGame.class, content.getClass());
+
+            LOGGER.log(Level.SEVERE, error);
+
+            throw new NotGoodFormatClassException(error);
         }
     }
 

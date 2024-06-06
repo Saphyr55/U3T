@@ -22,6 +22,7 @@ public final class DesktopNavButtonFactory implements NavButtonFactory {
     private DesktopChatView chatView;
 
     public DesktopNavButtonFactory(MainController mainController) {
+
         this.mainController = mainController;
         this.chatViewFactory = () -> chatView = Optional
                 .ofNullable(chatView)
@@ -32,8 +33,10 @@ public final class DesktopNavButtonFactory implements NavButtonFactory {
     @Component
     @Mapping(type = Mapping.Type.Additional)
     public NavButton createPartiesNavButton() {
+
         DesktopNavButton button = new DesktopNavButton("Parties", 0);
         button.setOnClick(new OnClickPartiesNavButton(mainController::getMainLeftPolymorphic));
+
         return button;
     }
 
@@ -41,8 +44,10 @@ public final class DesktopNavButtonFactory implements NavButtonFactory {
     @Component
     @Mapping(type = Mapping.Type.Additional)
     public NavButton createChatNavButton() {
+
         DesktopNavButton button = new DesktopNavButton("Chat", 1);
         button.setOnClick(new OnClickChatNavButton(chatViewFactory, mainController::getMainLeftPolymorphic));
+
         return button;
     }
 

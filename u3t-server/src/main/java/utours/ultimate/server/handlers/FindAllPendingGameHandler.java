@@ -13,7 +13,7 @@ import java.util.List;
 @Component
 public class FindAllPendingGameHandler implements Handler<Context> {
 
-    public static final String ADDRESS = "server.pending-game.find-all";
+    public static final String ADDRESS = "server.pending-game-inventory.find-all";
 
     private final NetApplication application;
     private final PendingGameInventory pendingGameInventory;

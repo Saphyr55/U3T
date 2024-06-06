@@ -31,7 +31,7 @@ public class AnnotationComponentAnalyser implements ComponentAnalyser {
 
     @Override
     public void addModuleContext(ModuleContext moduleContext) {
-        addNodes(ClassProviderManager.classesOfContext(moduleContext));
+        addNodes(ClassProviderManager.classesOfContext(moduleContext.getContextClass()));
     }
 
     @Override

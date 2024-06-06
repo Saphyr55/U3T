@@ -7,7 +7,7 @@ import utours.ultimate.desktop.view.PolymorphicView;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class MainController implements Initializable {
+public final class MainController implements Initializable {
 
     private @FXML PolymorphicView mainLeftPolymorphic;
     private @FXML PolymorphicView mainRightPolymorphic;

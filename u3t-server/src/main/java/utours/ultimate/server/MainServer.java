@@ -8,7 +8,7 @@ import utours.ultimate.net.NetApplication;
 public final class MainServer {
 
     private static final ModuleContext context =
-            ModuleContext.of(MainServer.class);
+            ModuleContext.ofContextClass(MainServer.class);
 
     public static void main(String[] args) {
 

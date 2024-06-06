@@ -2,18 +2,15 @@ package utours.ultimate.desktop.controller;
 
 import javafx.application.Platform;
 import javafx.beans.binding.DoubleBinding;
-import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import utours.ultimate.client.AsyncPendingGameInventory;
 import utours.ultimate.client.ClientService;
-import utours.ultimate.desktop.view.DesktopPartiesView;
 import utours.ultimate.desktop.view.U3TGameView;
 import utours.ultimate.game.model.Game;
 import utours.ultimate.game.model.PendingGame;
@@ -29,34 +26,33 @@ public final class PartiesController implements Initializable {
 
     private final ClientService clientService;
     private final MainController mainController;
-    private final AsyncPendingGameInventory asyncPendingGameInventory;
+    private final AsyncPendingGameInventory pendingGameInventory;
 
-    private @FXML DesktopPartiesView partiesView;
     private @FXML VBox container;
+
     private Button addGameButton;
 
     public PartiesController(MainController mainController,
                              ClientService clientService,
-                             AsyncPendingGameInventory asyncPendingGameInventory) {
-
+                             AsyncPendingGameInventory pendingGameInventory) {
+        
         this.clientService = clientService;
         this.mainController = mainController;
-        this.asyncPendingGameInventory = asyncPendingGameInventory;
+        this.pendingGameInventory = pendingGameInventory;
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
-        container.setAlignment(Pos.TOP_CENTER);
-        container.setSpacing(10);
-        container.setPadding(new Insets(24));
+        initContainer();
 
         addGameButton = createButton();
         addGameButton.setText("Create a game");
         addGameButton.setOnMouseClicked(this::onCreatePendingGame);
+
         container.getChildren().add(addGameButton);
 
-        asyncPendingGameInventory.findAll()
+        pendingGameInventory.findAll()
                 .thenAccept(this::addPendingGamesButtons)
                 .thenRun(this::setupObservableInventory);
     }
@@ -66,7 +62,7 @@ public final class PartiesController implements Initializable {
     }
 
     private void onCreatePendingGame(MouseEvent mouseEvent) {
-        asyncPendingGameInventory.add(PendingGame.builder().build());
+        pendingGameInventory.add(PendingGame.ofDefault());
     }
 
     private void addPendingGamesButtons(List<PendingGame> pendingGames) {
@@ -78,12 +74,23 @@ public final class PartiesController implements Initializable {
     private void addPendingGameButton(PendingGame pendingGame) {
 
         Button button = createButton();
-        button.setText("UTTT #%s".formatted(String.valueOf(pendingGame.gameID())));
-        button.setOnMouseClicked(mouseEvent -> {
-            clientService.joinGame(this::onJoinGame);
-        });
+        button.setText(textOfPendingGame(pendingGame));
+        button.setOnMouseClicked(mouseEvent -> joinPendingGame(pendingGame));
 
         Platform.runLater(() -> container.getChildren().add(button));
+    }
+
+    private static String textOfPendingGame(PendingGame pendingGame) {
+        return "%d/2 UTTT #%s".formatted(
+                pendingGame.totalPlayer(),
+                pendingGame.gameID());
+    }
+
+    private void initContainer() {
+
+        container.setAlignment(Pos.TOP_CENTER);
+        container.setSpacing(10);
+        container.setPadding(new Insets(24));
     }
 
     private void reset() {
@@ -113,10 +120,18 @@ public final class PartiesController implements Initializable {
         return button;
     }
 
-    private void onJoinGame(Game game) {
+    private void joinPendingGame(PendingGame pendingGame) {
+        clientService.joinPendingGame(pendingGame, this::joinGame);
+    }
+
+    private void joinGame(Game game) {
         Platform.runLater(() -> mainController
                 .getMainRightPolymorphic()
-                .replaceRegion(new U3TGameView()));
+                .replaceRegion(createU3TGameView()));
+    }
+
+    private U3TGameView createU3TGameView() {
+        return new U3TGameView();
     }
 
 }

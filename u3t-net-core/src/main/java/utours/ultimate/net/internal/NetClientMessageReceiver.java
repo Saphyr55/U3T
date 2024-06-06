@@ -14,7 +14,7 @@ public class NetClientMessageReceiver implements MessageReceiver {
     }
 
     @Override
-    public MessageReceiver receive(String address, Handler<Message> handler) {
+    public MessageReceiver onReceive(String address, Handler<Message> handler) {
         client.onReceiveMessage(address, handler);
         return this;
     }

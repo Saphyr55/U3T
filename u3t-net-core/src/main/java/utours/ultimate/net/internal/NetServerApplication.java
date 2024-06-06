@@ -1,38 +1,45 @@
 package utours.ultimate.net.internal;
 
 import utours.ultimate.net.*;
-import utours.ultimate.net.data.ContextData;
-import utours.ultimate.net.data.MessageData;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.SocketException;
 import java.util.*;
-import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class NetServerApplication implements NetApplication {
+
+    private static final Logger LOGGER = Logger.getLogger(NetServerApplication.class.getName());
 
     private final NetServer server;
     private boolean stopped = true;
 
     public NetServerApplication(NetServerConfiguration configuration) {
+
         this.server = new NetServerSocket(configuration);
+
+        addShutdownHook();
     }
 
     @Override
     public void start() {
+
         stopped = false;
 
-        handler(Message.SUBSCRIBE_ADDRESS, this::onClientSubscribe);
+        handler(Message.SUBSCRIBE_ADDRESS,  this::onClientSubscribe);
+        handler(Message.ERROR_ADDRESS,      this::onError);
 
         while (!stopped) {
             server.acceptClient();
         }
+
+    }
+
+    private void onError(Context context) {
+        context.respond(context.message().content());
     }
 
     private void onClientSubscribe(Context context) {
+
         String subAddress = (String) context.message().content();
 
         server.subscribers()
@@ -42,39 +49,47 @@ public class NetServerApplication implements NetApplication {
 
     @Override
     public void stop() {
-        if (stopped) return;
-        try {
-            stopped = true;
-            server.stop();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+
+        if (stopped) {
+            return;
         }
+
+        stopped = true;
+        server.close();
     }
 
     @Override
     public void handler(String address, Handler<Context> handler) {
-        server.handlers().computeIfAbsent(address, a -> new LinkedList<>()).add(handler);
+        server.handlers()
+                .computeIfAbsent(address, a -> new LinkedList<>())
+                .add(handler);
     }
 
     @Override
     public void sendMessage(String address, Object content) {
 
-        try {
-
-            if (!server.subscribers().containsKey(address)) {
-                return;
-            }
-
-            for (Client client : server.subscribers().get(address)) {
-                var oos = client.oos();
-                oos.writeObject(Message.success(address, content));
-                oos.flush();
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (!server.subscribers().containsKey(address)) {
+            return;
         }
 
+        for (Client client : server.subscribers().get(address)) {
+            if (client.isConnected()) {
+                client.messageSender().send(address, content);
+            }
+        }
+
+    }
+
+    private void addShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(defaultThread(() -> {
+            LOGGER.log(Level.INFO, () -> "Application is shutting down...");
+            stop();
+            LOGGER.log(Level.INFO, () -> "Cleanup complete.");
+        }));
+    }
+
+    private static Thread defaultThread(Runnable onStart) {
+        return Thread.ofVirtual().factory().newThread(onStart);
     }
 
 }
