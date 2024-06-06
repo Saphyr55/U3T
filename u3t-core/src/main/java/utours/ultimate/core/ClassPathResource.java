@@ -6,8 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-
 public final class ClassPathResource {
+
+
 
     /**
      * Get url resource from the class path.

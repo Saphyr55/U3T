@@ -9,4 +9,6 @@ include 'u3t-desktop-fx'
 include 'u3t-ui-core'
 include 'u3t-client'
 include 'u3t-common'
+include 'u3t-ia'
+include 'u3t-ai'
 

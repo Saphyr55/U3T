@@ -24,7 +24,7 @@ public class ClassProviderManagerInternal {
     public static String denormalizePackageName(String packageName) {
         return packageName.replaceAll("[.]", "/");
     }
-
+    
     public static Set<Class<?>> classesOf(ClassLoader classLoader, String packageName) {
 
         String packagePath = denormalizePackageName(packageName);
@@ -52,10 +52,11 @@ public class ClassProviderManagerInternal {
         }
     }
 
-    public static Set<Class<?>> classesOf(ModuleContext context) {
+
+    public static Set<Class<?>> classesOf(Class<?> contextClass) {
         try {
 
-            URL moduleURL = context.getContextClass().getResource("");
+            URL moduleURL = contextClass.getResource("");
             assert moduleURL != null;
             URI moduleURI = moduleURL.toURI();
 
@@ -63,6 +64,7 @@ public class ClassProviderManagerInternal {
             Set<String> classNames;
 
             if (!moduleURL.getProtocol().equals("jar")) {
+
                 Path moduleContextPath = Paths.get(moduleURI);
                 var urlClassesFile = Files.find(moduleContextPath, MAX_DEPTH, ClassProviderManagerInternal::isClassFile).toList();
 
@@ -75,7 +77,7 @@ public class ClassProviderManagerInternal {
                 }).collect(Collectors.toSet());
 
                 Path modulePath = Path.of(moduleURI);
-                String packageName = context.getContextClass().getPackageName();
+                String packageName = contextClass.getPackageName();
                 classNames = urlClassesFile.stream()
                         .map(modulePath::relativize)
                         .map(path -> String.format("%s.%s", packageName, toClassName(path)))
@@ -160,6 +162,7 @@ public class ClassProviderManagerInternal {
     }
 
     private static String toClassName(Path path) {
+
         String file = path.toString();
         String fileNoExt = file.replaceFirst("[.][^.]+$", "");
         return fileNoExt.replace(FileSystems.getDefault().getSeparator(), ".");

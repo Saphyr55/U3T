@@ -4,11 +4,17 @@ import utours.ultimate.common.MapHelper;
 import utours.ultimate.core.ModuleContext;
 import utours.ultimate.core.ModuleContextRegistry;
 
+import java.util.List;
 import java.util.Map;
 
 public class ModuleContextRegistryImpl implements ModuleContextRegistry {
 
     private final Map<String, ModuleContext> registry = MapHelper.emptyMap();
+
+    @Override
+    public List<ModuleContext> moduleContexts() {
+        return registry.values().stream().toList();
+    }
 
     @Override
     public ModuleContext get(String identifier) {
@@ -17,7 +23,7 @@ public class ModuleContextRegistryImpl implements ModuleContextRegistry {
 
     @Override
     public void register(ModuleContext moduleContext) {
-        registry.put(moduleContext.getIdentifier(), moduleContext);
+        registry.putIfAbsent(moduleContext.getIdentifier(), moduleContext);
     }
 
     @Override
