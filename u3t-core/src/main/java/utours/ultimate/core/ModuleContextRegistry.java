@@ -18,7 +18,7 @@ public interface ModuleContextRegistry {
 
     List<ModuleContext> moduleContexts();
 
-    ModuleContext get(String identifier);
+    ModuleContext getContext(String identifier);
 
     void register(ModuleContext moduleContext);
 

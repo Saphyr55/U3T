@@ -1,14 +1,18 @@
 package utours.ultimate.ai;
 
 import utours.ultimate.core.ModuleContext;
-import utours.ultimate.core.steorotype.ModuleRegister;
+import utours.ultimate.core.steorotype.RegisterModule;
 
-public final class AIContext {
-
-    private static final ModuleContext context =
+@RegisterModule
+public class AIContext {
+    
+    public static final ModuleContext context =
             ModuleContext.ofContextClass(AIContext.class);
 
-    @ModuleRegister
+    static {
+        System.out.println("Initializing AI Context");
+    }
+
     public static ModuleContext getContext() {
         return context;
     }

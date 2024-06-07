@@ -6,12 +6,22 @@ import utours.ultimate.core.settings.ClassPathSettingsLoader;
 import utours.ultimate.core.settings.ModuleContextSettings;
 import utours.ultimate.core.settings.Settings;
 import utours.ultimate.core.settings.SettingsLoader;
+import utours.ultimate.core.steorotype.RegisterModule;
 
+import java.io.Closeable;
 import java.io.File;
-import java.net.MalformedURLException;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -79,19 +89,78 @@ public final class ModuleContextImpl implements ModuleContext {
 
         if (mods == null) return;
 
-        URL[] urls = Arrays.stream(mods)
+        Arrays.stream(mods)
                 .filter(file -> file.getName().endsWith(".jar"))
-                .map(JarLoader::urlOfFile)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toArray(URL[]::new);
+                .forEach(file -> loadClassesWithAnnotation(file.getAbsolutePath(), RegisterModule.class, clazz -> {
 
-        try (URLClassLoader classLoader = URLClassLoader.newInstance(urls)) {
+                    try {
 
-            Arrays.stream(classLoader.getURLs()).forEach(System.out::println);
+                        var lookup = MethodHandles.lookup();
+
+                        MethodHandle mh = lookup.findStaticGetter(clazz, "context", ModuleContext.class);
+
+                        System.out.println();
+
+                        ModuleContext context = (ModuleContext) mh.invokeExact();
+
+                        // mergeModule(context);
+
+                    } catch (Throwable throwable) {
+                        throw new RuntimeException(throwable);
+                    }
+
+                }));
+
+    }
+
+    public void loadClassesWithAnnotation(String jarPath,
+                                          Class<? extends Annotation> annotationClass,
+                                          Consumer<Class<?>> onFoundClass) {
+
+        try {
+
+            File jarFile = new File(jarPath);
+            URL jarUrl = jarFile.toURI().toURL();
+
+            /*
+            // Obtenir le classloader du système
+            URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+            Class<?> sysClass = URLClassLoader.class;
+
+            // Utiliser la réflexion pour accéder à la méthode addURL
+            Method method = sysClass.getDeclaredMethod("addURL", URL.class);
+            method.setAccessible(true);
+
+            // Ajouter le JAR au classpath
+            method.invoke(sysLoader, jarUrl);
+            */
+
+            URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{ jarUrl }, ClassLoader.getSystemClassLoader());
+            JarFile jar = new JarFile(jarFile);
+
+            Thread.currentThread().setContextClassLoader(classLoader);
+
+            processJar(annotationClass, onFoundClass, jar, classLoader);
+
+            Thread.currentThread().setContextClassLoader(contextClass.getClassLoader());
 
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Failed to load module context", e);
+            e.printStackTrace();
+        }
+
+    }
+
+    private static void processJar(Class<? extends Annotation> annotationClass, Consumer<Class<?>> onFoundClass, JarFile jar, URLClassLoader classLoader) throws ClassNotFoundException {
+
+        for (String className : JarLoader.classNamesOfJarFile(jar)) {
+
+            Class<?> clazz = Class.forName(className, false, classLoader);
+
+            if (clazz.isAnnotationPresent(annotationClass)) {
+                clazz = Class.forName(className, true, classLoader);
+                onFoundClass.accept(clazz);
+            }
+
         }
 
     }

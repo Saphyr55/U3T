@@ -1,8 +1,9 @@
 package utours.ultimate.client;
 
 import utours.ultimate.core.ModuleContext;
-import utours.ultimate.core.steorotype.ModuleRegister;
+import utours.ultimate.core.steorotype.RegisterModule;
 
+@RegisterModule
 public enum ClientContext {
 
     DEFAULT(ModuleContext.ofContextClass(ClientContext.class));
@@ -13,7 +14,6 @@ public enum ClientContext {
         this.moduleContext = moduleContext;
     }
 
-    @ModuleRegister
     public static ModuleContext getContext() {
         return DEFAULT.moduleContext;
     }

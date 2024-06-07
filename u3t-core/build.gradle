@@ -2,9 +2,6 @@ plugins {
     id 'java'
 }
 
-sourceCompatibility = '21'
-targetCompatibility = '21'
-
 group = 'utours.ultimate'
 version = '1.0'
 
@@ -15,6 +12,10 @@ repositories {
 dependencies {
 
     implementation project(':u3t-common')
+
+    implementation 'com.google.auto.service:auto-service:1.1.1'
+
+    annotationProcessor 'com.google.auto.service:auto-service:1.1.1'
 
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
