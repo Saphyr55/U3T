@@ -12,7 +12,7 @@ public class AINavButton implements NavButton {
     public static final int POSITION = 4;
 
     private String name = "AI";
-    private OnClickButton onClickButton;
+    private OnClickButton onClickButton = event -> { };
 
     @Override
     public String getName() {
