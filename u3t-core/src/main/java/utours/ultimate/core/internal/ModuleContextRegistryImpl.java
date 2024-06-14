@@ -17,7 +17,7 @@ public class ModuleContextRegistryImpl implements ModuleContextRegistry {
     }
 
     @Override
-    public ModuleContext get(String identifier) {
+    public ModuleContext getContext(String identifier) {
         return registry.get(identifier);
     }
 

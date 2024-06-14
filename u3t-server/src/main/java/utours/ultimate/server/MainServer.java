@@ -1,10 +1,10 @@
 package utours.ultimate.server;
 
 import utours.ultimate.core.ModuleContext;
-import utours.ultimate.core.steorotype.ModuleRegister;
+import utours.ultimate.core.steorotype.RegisterModule;
 import utours.ultimate.net.NetApplication;
 
-
+@RegisterModule
 public final class MainServer {
 
     private static final ModuleContext context =
@@ -21,7 +21,6 @@ public final class MainServer {
         application.start();
     }
 
-    @ModuleRegister
     public static ModuleContext getContext() {
         return context;
     }

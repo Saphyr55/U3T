@@ -1,5 +1,6 @@
 package utours.ultimate.core.internal;
 
+import utours.ultimate.common.JarLoader;
 import utours.ultimate.core.ModuleContext;
 
 import java.io.*;
@@ -24,25 +25,6 @@ public class ClassProviderManagerInternal {
     public static String denormalizePackageName(String packageName) {
         return packageName.replaceAll("[.]", "/");
     }
-    
-    public static Set<Class<?>> classesOf(ClassLoader classLoader, String packageName) {
-
-        String packagePath = denormalizePackageName(packageName);
-
-        InputStream stream = classLoader.getResourceAsStream(packagePath);
-
-        assert stream != null;
-
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-
-        return reader.lines()
-                .filter(line -> line.endsWith(".class"))
-                .map(line -> {
-                    var clazz = classOf(line, packageName);
-                    return clazz;
-                })
-                .collect(Collectors.toSet());
-    }
 
     public static Class<?> classOf(String className, String packageName) {
         try {
@@ -66,7 +48,8 @@ public class ClassProviderManagerInternal {
             if (!moduleURL.getProtocol().equals("jar")) {
 
                 Path moduleContextPath = Paths.get(moduleURI);
-                var urlClassesFile = Files.find(moduleContextPath, MAX_DEPTH, ClassProviderManagerInternal::isClassFile).toList();
+                List<Path> urlClassesFile = Files.find(moduleContextPath, MAX_DEPTH,
+                        ClassProviderManagerInternal::isClassFile).toList();
 
                 urlClasses = urlClassesFile.stream().map(path -> {
                     try {
@@ -84,28 +67,13 @@ public class ClassProviderManagerInternal {
                         .collect(Collectors.toSet());
 
             } else {
-
                 JarURLConnection connection = (JarURLConnection) moduleURL.openConnection();
                 JarFile jarFile = connection.getJarFile();
-
                 urlClasses = Set.of(moduleURL);
-                Set<String> cns = new HashSet<>();
-
-                Enumeration<JarEntry> e = jarFile.entries();
-                while (e.hasMoreElements()) {
-                    JarEntry jarEntry = e.nextElement();
-                    if (jarEntry.getName().endsWith(".class")) {
-                        String className = jarEntry.getName()
-                                .replace("/", ".")
-                                .replace(".class", "");
-                        cns.add(className);
-                    }
-                }
-
-                classNames = cns;
+                classNames = JarLoader.classNamesOfJarFile(jarFile);
             }
 
-            try (URLClassLoader classLoader = URLClassLoader.newInstance(urlClasses.toArray(new URL[]{ }))) {
+            try (URLClassLoader classLoader = URLClassLoader.newInstance(urlClasses.toArray(URL[]::new))) {
                 return classNames.stream().map(name -> {
                     try {
                         return classLoader.loadClass(name);
@@ -120,41 +88,6 @@ public class ClassProviderManagerInternal {
         }
 
 
-    }
-
-    private static void logDetails(JarURLConnection connection) throws Exception {
-        // getJarFileURL() method
-        System.out.println("Jar file URL : " + connection.getJarFileURL());
-
-        // getEntryName() method
-        System.out.println("Entry Name : " + connection.getEntryName());
-
-        // getJarFile() method
-        JarFile jarFile = connection.getJarFile();
-        System.out.println("Jar Entry: " + connection.getJarEntry());
-
-        // getManifest() method
-        Manifest manifest = jarFile.getManifest();
-        System.out.println("Manifest :" + manifest.toString());
-
-        // getJarEntry() method
-        JarEntry jentry = connection.getJarEntry();
-        System.out.println("Jar Entry : " + jentry.toString());
-
-        // getAttributes() method
-        Attributes attr = connection.getAttributes();
-        System.out.println("Attributes : " + attr);
-
-        // getMainAttributes() method
-        Attributes attrmain = connection.getMainAttributes();
-
-        System.out.println("\nMain Attributes details: " + Arrays.toString(
-                attrmain.entrySet().stream()
-                    .map(e -> e.getKey() + " " + e.getValue()).toArray()));
-
-        // getCertificates() method
-        Certificate[] cert = connection.getCertificates();
-        System.out.println("\nCertificates Info : " + Arrays.toString(cert));
     }
 
     private static boolean isClassFile(Path p, BasicFileAttributes bfa) {

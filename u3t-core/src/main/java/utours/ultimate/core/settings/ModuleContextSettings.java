@@ -1,7 +1,6 @@
 package utours.ultimate.core.settings;
 
 import utours.ultimate.core.ComponentAnalyser;
-import utours.ultimate.core.internal.AnnotationComponentEvaluator;
 import utours.ultimate.core.provider.AnnotationComponentAnalyser;
 
 import java.lang.invoke.MethodHandle;
@@ -12,7 +11,7 @@ import java.util.UUID;
 public class ModuleContextSettings {
 
     private static final String KEY_MODULE_CONTEXT_ID = "module.context.identifier";
-    private static final String KEY_MODULE_COMPONENT_EVALUTOR = "module.context.component-evaluator";
+    private static final String KEY_MODULE_COMPONENT_EVALUATOR = "module.context.component-evaluator";
 
     private final Settings settings = new Settings();
 
@@ -32,7 +31,7 @@ public class ModuleContextSettings {
         try {
 
             String className = settings.getValue(
-                    KEY_MODULE_COMPONENT_EVALUTOR,
+                    KEY_MODULE_COMPONENT_EVALUATOR,
                     AnnotationComponentAnalyser.class.getName()
             );
 

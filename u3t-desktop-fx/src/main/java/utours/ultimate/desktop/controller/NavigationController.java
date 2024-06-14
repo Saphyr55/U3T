@@ -42,14 +42,11 @@ public final class NavigationController implements Initializable {
     }
 
     private void addContainer(NavButton navButton) {
-        switch (navButton) {
-            case DesktopNavButton desktopNavButton -> processDesktopNavButton(desktopNavButton);
-            default -> throw new IllegalStateException("Unexpected value: " + navButton);
-        }
+        processDesktopNavButton(navButton);
     }
 
-    private void processDesktopNavButton(DesktopNavButton desktopNavButton) {
-        navButtonContainer.add(desktopNavButton);
+    private void processDesktopNavButton(NavButton button) {
+        navButtonContainer.add(button);
     }
 
 }

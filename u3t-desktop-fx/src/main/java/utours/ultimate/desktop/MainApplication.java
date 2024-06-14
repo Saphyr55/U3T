@@ -6,9 +6,10 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import utours.ultimate.client.ClientContext;
 import utours.ultimate.core.ModuleContext;
-import utours.ultimate.core.steorotype.ModuleRegister;
+import utours.ultimate.core.steorotype.RegisterModule;
 import utours.ultimate.desktop.view.DesktopMainView;
 
+@RegisterModule
 public final class MainApplication extends Application {
 
     private static ModuleContext context;
@@ -39,7 +40,6 @@ public final class MainApplication extends Application {
         launch(args);
     }
 
-    @ModuleRegister
     public static ModuleContext getContext() {
         return context;
     }

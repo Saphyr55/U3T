@@ -9,14 +9,14 @@ import utours.ultimate.ui.NavButtonContainer;
 import utours.ultimate.ui.ViewFactory;
 
 @Component
-public class DesktopViewFactory implements ViewFactory<DesktopNavButton> {
+public class DesktopViewFactory implements ViewFactory {
 
     public DesktopViewFactory() {
         
     }
 
     @Override
-    public NavButtonContainer<DesktopNavButton> createNavButtonContainer() {
+    public NavButtonContainer createNavButtonContainer() {
         return new DesktopNavButtonContainer();
     }
 
