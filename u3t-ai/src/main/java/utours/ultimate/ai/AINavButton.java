@@ -9,7 +9,7 @@ import utours.ultimate.ui.OnClickButton;
 @Mapping(type = Mapping.Type.Additional)
 public class AINavButton implements NavButton {
 
-    public static final int POSITION = 5;
+    public static final int POSITION = 4;
 
     private String name = "AI";
     private OnClickButton onClickButton;
