@@ -1,7 +1,7 @@
 package utours.ultimate.ui;
 
-public interface ViewFactory<T extends NavButton> {
+public interface ViewFactory {
 
-    NavButtonContainer<T> createNavButtonContainer();
+    NavButtonContainer createNavButtonContainer();
 
 }

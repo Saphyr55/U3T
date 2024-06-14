@@ -12,6 +12,7 @@ repositories {
 dependencies {
 
     implementation project(':u3t-core')
+    implementation project(':u3t-ui-core')
 
     annotationProcessor project(':u3t-core')
 

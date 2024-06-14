@@ -1,10 +1,10 @@
 package utours.ultimate.ui;
 
-public interface NavButtonContainer<T extends NavButton> {
+public interface NavButtonContainer {
 
-    void add(T navButton);
+    void add(NavButton button);
 
-    void remove(T navButton);
+    void remove(NavButton button);
 
     void remove(int index);
 

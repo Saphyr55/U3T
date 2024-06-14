@@ -8,22 +8,15 @@ import utours.ultimate.core.settings.Settings;
 import utours.ultimate.core.settings.SettingsLoader;
 import utours.ultimate.core.steorotype.RegisterModule;
 
-import java.io.Closeable;
 import java.io.File;
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class ModuleContextImpl implements ModuleContext {
@@ -91,26 +84,23 @@ public final class ModuleContextImpl implements ModuleContext {
 
         Arrays.stream(mods)
                 .filter(file -> file.getName().endsWith(".jar"))
-                .forEach(file -> loadClassesWithAnnotation(file.getAbsolutePath(), RegisterModule.class, clazz -> {
+                .forEach(file -> loadClassesWithAnnotation(
+                        file.getAbsolutePath(),
+                        RegisterModule.class,
+                        this::mergeContextWithGetter)
+                );
 
-                    try {
+    }
 
-                        var lookup = MethodHandles.lookup();
-
-                        MethodHandle mh = lookup.findStaticGetter(clazz, "context", ModuleContext.class);
-
-                        System.out.println();
-
-                        ModuleContext context = (ModuleContext) mh.invokeExact();
-
-                        // mergeModule(context);
-
-                    } catch (Throwable throwable) {
-                        throw new RuntimeException(throwable);
-                    }
-
-                }));
-
+    private void mergeContextWithGetter(Class<?> clazz) {
+        try {
+            var lookup = MethodHandles.lookup();
+            MethodHandle mh = lookup.findStaticGetter(clazz, "context", ModuleContext.class);
+            ModuleContext context = (ModuleContext) mh.invokeExact();
+            mergeModule(context);
+        } catch (Throwable throwable) {
+            throw new RuntimeException(throwable);
+        }
     }
 
     public void loadClassesWithAnnotation(String jarPath,
@@ -118,22 +108,8 @@ public final class ModuleContextImpl implements ModuleContext {
                                           Consumer<Class<?>> onFoundClass) {
 
         try {
-
             File jarFile = new File(jarPath);
             URL jarUrl = jarFile.toURI().toURL();
-
-            /*
-            // Obtenir le classloader du système
-            URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-            Class<?> sysClass = URLClassLoader.class;
-
-            // Utiliser la réflexion pour accéder à la méthode addURL
-            Method method = sysClass.getDeclaredMethod("addURL", URL.class);
-            method.setAccessible(true);
-
-            // Ajouter le JAR au classpath
-            method.invoke(sysLoader, jarUrl);
-            */
 
             URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{ jarUrl }, ClassLoader.getSystemClassLoader());
             JarFile jar = new JarFile(jarFile);
@@ -150,7 +126,9 @@ public final class ModuleContextImpl implements ModuleContext {
 
     }
 
-    private static void processJar(Class<? extends Annotation> annotationClass, Consumer<Class<?>> onFoundClass, JarFile jar, URLClassLoader classLoader) throws ClassNotFoundException {
+    private static void processJar(Class<? extends Annotation> annotationClass,
+                                   Consumer<Class<?>> onFoundClass,
+                                   JarFile jar, URLClassLoader classLoader) throws ClassNotFoundException {
 
         for (String className : JarLoader.classNamesOfJarFile(jar)) {
 

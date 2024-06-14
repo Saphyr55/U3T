@@ -12,8 +12,6 @@ repositories {
 }
 
 ext {
-
-
   junitVersion = '5.10.0'
 }
 
